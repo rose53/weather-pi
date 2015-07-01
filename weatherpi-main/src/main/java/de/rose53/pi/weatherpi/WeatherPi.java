@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.rose53.pi.weatherpi;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,6 +13,8 @@ import javax.inject.Singleton;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
+
+import de.rose53.pi.weatherpi.display.EBase;
 
 
 
@@ -33,7 +31,8 @@ public class WeatherPi implements Runnable {
     private boolean running;
 
 
-
+    @Inject
+    Display display;
 
 //    @Inject
 //    Webserver webServer;
@@ -92,6 +91,14 @@ public class WeatherPi implements Runnable {
     }
 
     public void show() {
+
+        try {
+        	display.print(0xBEEF, EBase.HEX);
+			display.writeDisplay();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 
