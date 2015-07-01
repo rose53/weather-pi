@@ -1,0 +1,14 @@
+.project
+.settings/org.eclipse.core.resources.prefs
+weatherpi-core/.classpath
+weatherpi-core/.project
+weatherpi-core/.settings/org.eclipse.core.resources.prefs
+weatherpi-core/.settings/org.eclipse.m2e.core.prefs
+weatherpi-main/.classpath
+weatherpi-main/.project
+.settings/org.eclipse.m2e.core.prefs
+weatherpi-main/.settings/org.eclipse.jdt.core.prefs
+weatherpi-main/weatherpi.log
+weatherpi-main/.settings/org.eclipse.core.resources.prefs
+weatherpi-main/.settings/org.eclipse.m2e.core.prefs
+weatherpi-core/.settings/org.eclipse.jdt.core.prefs
