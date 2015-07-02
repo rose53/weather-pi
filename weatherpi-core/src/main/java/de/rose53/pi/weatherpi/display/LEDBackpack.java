@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -76,6 +77,7 @@ public class LEDBackpack implements AutoCloseable, Display {
 
     }
 
+    @PreDestroy
     @Override
     public void close() throws IOException {
         if (device != null) {

@@ -1,8 +1,9 @@
 package de.rose53.pi.weatherpi;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -14,6 +15,7 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.componets.Displayable;
 import de.rose53.pi.weatherpi.display.EBase;
 
 
@@ -36,7 +38,9 @@ public class WeatherPi implements Runnable {
 
 //    @Inject
 //    Webserver webServer;
-
+    @Inject
+    @Any
+    Instance<Displayable> displayables;
 
     public WeatherPi() {
 
@@ -49,10 +53,6 @@ public class WeatherPi implements Runnable {
  //           webServer.start();
             System.out.println("\b\b\bdone.");
 
-            System.out.print("Starting JoystickServer ...");
- //           joystickServer.start();
-            System.out.println("\b\b\bdone.");
-
         } catch (Exception e) {
             logger.error("start:",e);
         }
@@ -61,8 +61,7 @@ public class WeatherPi implements Runnable {
         System.out.println("\n\n ####################################################### ");
         System.out.println(" ####              WEATHER PI IS ALIVE !!!           ### ");
         System.out.println(" ####################################################### ");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yy hh:mm:ss");
-        System.out.println(" ### Date: " + dateFormat.format(new Date()));
+        //System.out.println(" ### Date: " + LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL)));
         running = true;
     }
 
@@ -83,8 +82,15 @@ public class WeatherPi implements Runnable {
 
         while (running) {
             try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
+
+        	for (Displayable displayable : displayables) {
+        		display.clear();
+        		displayable.display(display);
+        		display.writeDisplay();
+        		Thread.sleep(5000);
+        	}
+
+            } catch (InterruptedException | IOException e) {
                 logger.warn("run:",e);
             }
         }
