@@ -2,6 +2,7 @@ package de.rose53.pi.weatherpi.display;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -138,28 +139,9 @@ public class LEDBackpack implements AutoCloseable, Display {
         position = EDisplay.ONE;
     }
 
-    void println(char c, EBase base)
-    {
-      print(c, base);
-      println();
-    }
-
-    void println(int n, EBase base)
-    {
-      print(n, base);
-      println();
-    }
-
     public void println(int n) {
         print(n,EBase.DEC);
         println();
-    }
-
-
-    void println(double n, int digits)
-    {
-      print(n, digits);
-      println();
     }
 
     public void println(double n) {
@@ -184,8 +166,8 @@ public class LEDBackpack implements AutoCloseable, Display {
       }
 
       if ((c >= '0') && (c <= '9')) {
-        writeDigitNum(position, c-'0');
-        r = 1;
+    	  writeDigitNum(position, c-'0');
+    	  r = 1;
       }
 
       position = position.getNext();
@@ -206,12 +188,12 @@ public class LEDBackpack implements AutoCloseable, Display {
         displaybuffer[display.getPosition()] = bitmask;
     }
 
-    // TODO handle all dots
-    public void drawColon(boolean state) {
-      if (state)
-        displaybuffer[COLON_POSITION] = 0xFF;
-      else
-        displaybuffer[COLON_POSITION] = 0;
+    public void drawColon(List<EColon> colonList) {
+    	if (colonList == null || colonList.isEmpty()) {
+    		displaybuffer[COLON_POSITION] = 0;
+    		return;
+    	}
+    	colonList.forEach(colon -> displaybuffer[COLON_POSITION] |= colon.getBit());
     }
 
     public void writeDigitNum(EDisplay display, int num, boolean dot) {
@@ -225,7 +207,7 @@ public class LEDBackpack implements AutoCloseable, Display {
             logger.error("writeDigitNum: num must be between 0 and 15.");
         }
 
-        writeDigitRaw(display, numbertable[num] | ((dot?1:0) << 7));
+        writeDigitRaw(display, numbertable[num]);
     }
 
     public void writeDigitNum(EDisplay display, int num) {
@@ -275,19 +257,19 @@ public class LEDBackpack implements AutoCloseable, Display {
             printError();
         } else {
             // otherwise, display the number
-            drawColon(false);
+            drawColon(null);
             EDisplay displayPos = EDisplay.FOUR;
 
             if (displayNumber != 0) // if displayNumber is not 0
             {
-                int i = 0;
                 while (displayNumber > 0 && displayPos != null) {
-                    boolean displayDecimal = (fracDigits != 0 && i == fracDigits);
-                    writeDigitNum(displayPos,displayNumber % base.getBase(), displayDecimal);
+                    writeDigitNum(displayPos,displayNumber % base.getBase());
 
                     displayNumber /= base.getBase();
                     displayPos = displayPos.getPrevious();
-                    i++;
+                }
+                if (fracDigits == 1) {
+                	drawColon(EColon.DECIMAL.asList());
                 }
             } else {
                 writeDigitNum(displayPos, 0, false);
@@ -309,7 +291,7 @@ public class LEDBackpack implements AutoCloseable, Display {
     }
 
     public void printError() {
-        drawColon(false);
+        drawColon(null);
 
         for (EDisplay display : EDisplay.values()) {
             writeDigitRaw(display, 0x40);

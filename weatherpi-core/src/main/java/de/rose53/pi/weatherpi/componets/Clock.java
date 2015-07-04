@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import de.rose53.pi.weatherpi.Display;
+import de.rose53.pi.weatherpi.display.EColon;
 import de.rose53.pi.weatherpi.display.EDisplay;
 
 public class Clock implements Displayable {
@@ -19,7 +20,7 @@ public class Clock implements Displayable {
 			display.writeDigitNum(actDisplay,Integer.valueOf(s.substring(i, i+1)));
 			actDisplay = actDisplay.getNext();
 		}
-		display.drawColon(true);
+		display.drawColon(EColon.CENTER.asList());
 	}
 
 }

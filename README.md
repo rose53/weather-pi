@@ -5,8 +5,9 @@ Java 8 program to display various sensors or components on a [7-segment display]
 ## Sensors
 The list of actually implemented sensors.
 
+*   BMP085: Temperature and Pressure
 
 ## Components
 The list of actually implemented components.
 
-*   Clock
+*   Clock: Shows the actual time
