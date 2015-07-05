@@ -1,9 +1,10 @@
 package de.rose53.pi.weatherpi;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -17,6 +18,9 @@ import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.componets.Displayable;
 import de.rose53.pi.weatherpi.display.EBase;
+import de.rose53.pi.weatherpi.events.PressureEvent;
+import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
 
 
@@ -27,11 +31,16 @@ import de.rose53.pi.weatherpi.display.EBase;
 @Singleton
 public class WeatherPi implements Runnable {
 
+	static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE) values (SYSDATE(),?,?)";
+
     @Inject
     Logger logger;
 
     private boolean running;
 
+    @Inject
+    @StringConfiguration(key="host.name",defaultValue="localhost")
+    String hostName;
 
     @Inject
     Display display;
@@ -42,9 +51,11 @@ public class WeatherPi implements Runnable {
     @Any
     Instance<Displayable> displayables;
 
-    public WeatherPi() {
+    @Inject
+    Connection connection;
 
-    }
+    private float  temperature = 0;
+    private double pressure = 0;
 
     public void start() {
 
@@ -80,20 +91,39 @@ public class WeatherPi implements Runnable {
     public void run() {
         start();
 
-        while (running) {
-            try {
+        int lastMinute = -1;
+        int actMinute;
+        try (PreparedStatement statement = connection.prepareStatement(SENSOR_DATA_INSERT)) {
+	        while (running) {
 
-        	for (Displayable displayable : displayables) {
-        		display.clear();
-        		displayable.display(display);
-        		display.writeDisplay();
-        		Thread.sleep(5000);
-        	}
+	        	actMinute =LocalDateTime.now().getMinute();
+	        	if (actMinute > lastMinute) {
+	        		lastMinute = actMinute;
+	        		// read sensor and add to database
+	        		statement.setFloat(1, temperature);
+	        		statement.setDouble(2, pressure);
 
-            } catch (InterruptedException | IOException e) {
-                logger.warn("run:",e);
-            }
-        }
+	        		statement.executeUpdate();
+	        	}
+
+	            try {
+
+	            	// update display
+		        	for (Displayable displayable : displayables) {
+		        		display.clear();
+		        		displayable.display(display);
+		        		display.writeDisplay();
+		        		Thread.sleep(5000);
+		        	}
+
+	            } catch (InterruptedException | IOException e) {
+	                logger.warn("run:",e);
+	            }
+	        }
+        } catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
     public void show() {
@@ -107,7 +137,15 @@ public class WeatherPi implements Runnable {
 		}
     }
 
+    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
+        logger.debug("onReadTemperatureEvent: ");
+        temperature = event.getTemperature();
+    }
 
+    public void onReadPressureEvent(@Observes PressureEvent event) {
+        logger.debug("onReadPressureEvent: ");
+        pressure = event.getPressure();
+    }
 
     public static void main(String[] args) {
         System.out.println("Starting ...");

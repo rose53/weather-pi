@@ -62,5 +62,9 @@
             <groupId>de.rose53.pi</groupId>
             <artifactId>weatherpi-core</artifactId>
         </dependency>
+        <dependency>
+        	<groupId>mysql</groupId>
+        	<artifactId>mysql-connector-java</artifactId>
+        </dependency>
     </dependencies>
 </project>

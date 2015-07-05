@@ -1,5 +1,7 @@
 package de.rose53.pi.weatherpi.display;
 
+import static java.lang.Math.*;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,7 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 
 import de.rose53.pi.weatherpi.Display;
+import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
 public class LEDBackpack implements AutoCloseable, Display {
@@ -23,7 +26,10 @@ public class LEDBackpack implements AutoCloseable, Display {
 	@Inject
     Logger logger;
 
-	private I2CBus bus;
+    @Inject
+    @IntegerConfiguration(key = "i2c.bus", defaultValue = 1)
+    private int i2cBusNumber;
+
     private I2CDevice device;
 
     static private final int[] numbertable = {
@@ -65,7 +71,7 @@ public class LEDBackpack implements AutoCloseable, Display {
     @PostConstruct
     public void open()  {
     	try {
-			bus = I2CFactory.getInstance(I2CBus.BUS_1);
+    		I2CBus bus = I2CFactory.getInstance(i2cBusNumber);
 	        device = bus.getDevice(HT16K33_I2C_ADDRESS);
 
 	        device.write((byte)0x21);  // turn on oscillator
@@ -87,14 +93,7 @@ public class LEDBackpack implements AutoCloseable, Display {
     }
 
     public void setBrightness(int b) throws IOException  {
-        if (b > 15) {
-            b = 15;
-        }
-        if (b < 0) {
-            b = 0;
-        }
-
-        device.write((byte)(HT16K33_CMD_BRIGHTNESS | b));
+        device.write((byte)(HT16K33_CMD_BRIGHTNESS | max(min(b,15), 0)));
     }
 
     public void blinkRate(EBlinkRate blinkRate) throws IOException {
