@@ -8,6 +8,13 @@
     <packaging>pom</packaging>
     <name>WeatherPi Parent</name>
 
+    <url>https://github.com/rose53/weather-pi</url>
+
+    <scm>
+        <url>https://github.com/rose53/weather-pi</url>
+        <connection>scm:git:git://github.com/rose53/weather-pi.git</connection>
+        <developerConnection>scm:git:git@github.com:rose53/weather-pi.git</developerConnection>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -76,13 +83,13 @@
         <dependencies>
 
             <dependency>
-	            <groupId>de.rose53.pi</groupId>
-    	        <artifactId>weatherpi-core</artifactId>
-	            <version>${project.version}</version>
+                <groupId>de.rose53.pi</groupId>
+                <artifactId>weatherpi-core</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
-	            <groupId>de.rose53.pi</groupId>
-    	        <artifactId>weatherpi-main</artifactId>
+                <groupId>de.rose53.pi</groupId>
+                <artifactId>weatherpi-main</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -248,9 +255,8 @@
     </dependencies>
 
     <modules>
-    	<module>weatherpi-core</module>
+        <module>weatherpi-core</module>
         <module>weatherpi-main</module>
     </modules>
 
-    <url>www.rose53.de/marvin</url>
 </project>
