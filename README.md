@@ -11,3 +11,6 @@ The list of actually implemented sensors.
 The list of actually implemented components.
 
 *   Clock: Shows the actual time
+
+## Database
+The sensor data is written to a [MySQL](http://www.mysql.com/) database for later processing of the data.

@@ -97,7 +97,7 @@ public class WeatherPi implements Runnable {
 	        while (running) {
 
 	        	actMinute =LocalDateTime.now().getMinute();
-	        	if (actMinute > lastMinute) {
+	        	if ((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0)) {
 	        		lastMinute = actMinute;
 	        		// read sensor and add to database
 	        		statement.setFloat(1, temperature);
@@ -120,9 +120,8 @@ public class WeatherPi implements Runnable {
 	                logger.warn("run:",e);
 	            }
 	        }
-        } catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+        } catch (SQLException e) {
+			logger.error("run:",e);
 		}
     }
 
@@ -157,7 +156,7 @@ public class WeatherPi implements Runnable {
         WeatherPi marvin = container.instance().select(WeatherPi.class).get();
         System.out.println("\b\b\bdone.");
 
-        System.out.println("Starting Marvin ...");
+        System.out.println("Starting WeatherPi ...");
         Thread thread = new Thread(marvin);
         thread.start();
 
