@@ -16,8 +16,16 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioPin;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.trigger.GpioTriggerBase;
+
 import de.rose53.pi.weatherpi.componets.Displayable;
-import de.rose53.pi.weatherpi.display.EBase;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
@@ -54,6 +62,9 @@ public class WeatherPi implements Runnable {
     @Inject
     Connection connection;
 
+    @Inject
+    GpioController gpio;
+
     private float  temperature = 0;
     private double pressure = 0;
 
@@ -64,10 +75,11 @@ public class WeatherPi implements Runnable {
  //           webServer.start();
             System.out.println("\b\b\bdone.");
 
+
+
         } catch (Exception e) {
             logger.error("start:",e);
         }
-        show();
 
         System.out.println("\n\n ####################################################### ");
         System.out.println(" ####              WEATHER PI IS ALIVE !!!           ### ");
@@ -90,12 +102,18 @@ public class WeatherPi implements Runnable {
     @Override
     public void run() {
         start();
+        final GpioPinDigitalInput displayOnOffSwitch = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02,PinPullResistance.PULL_DOWN);
+        displayOnOffSwitch.addTrigger(new DisplayTrigger());
+
+        GpioPinDigitalOutput led = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "LED #1", PinState.LOW);
+
+        led.setShutdownOptions(true, PinState.LOW);
 
         int lastMinute = -1;
         int actMinute;
         try (PreparedStatement statement = connection.prepareStatement(SENSOR_DATA_INSERT)) {
 	        while (running) {
-
+	        	led.toggle();
 	        	actMinute =LocalDateTime.now().getMinute();
 	        	if ((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0)) {
 	        		lastMinute = actMinute;
@@ -122,17 +140,6 @@ public class WeatherPi implements Runnable {
 	        }
         } catch (SQLException e) {
 			logger.error("run:",e);
-		}
-    }
-
-    public void show() {
-
-        try {
-        	display.print(0xBEEF, EBase.HEX);
-			display.writeDisplay();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
     }
 
@@ -167,6 +174,22 @@ public class WeatherPi implements Runnable {
                 weld.shutdown();
             }
         });
+
+    }
+
+    public class DisplayTrigger extends GpioTriggerBase {
+
+		@Override
+		public void invoke(GpioPin pin, PinState state) {
+			switch (state) {
+			case HIGH:
+				display.on();
+				break;
+			case LOW:
+				display.off();
+				break;
+			}
+		}
 
     }
 }

@@ -74,7 +74,7 @@ public class LEDBackpack implements AutoCloseable, Display {
     		I2CBus bus = I2CFactory.getInstance(i2cBusNumber);
 	        device = bus.getDevice(HT16K33_I2C_ADDRESS);
 
-	        device.write((byte)0x21);  // turn on oscillator
+	        on();  // turn on oscillator
 
 	        blinkRate(EBlinkRate.BLINK_OFF);
 	        setBrightness(15); // max brightness
@@ -88,8 +88,24 @@ public class LEDBackpack implements AutoCloseable, Display {
     @Override
     public void close() throws IOException {
         if (device != null) {
-            device.write((byte)0x20);  // turn off oscillator
+            off();
         }
+    }
+
+    public void on() {
+        try {
+			device.write((byte)0x21); // turn on oscillator
+		} catch (IOException e) {
+			logger.error("on:",e);
+		}
+    }
+
+    public void off() {
+        try {
+			device.write((byte)0x20); // turn on oscillator
+		} catch (IOException e) {
+			logger.error("off:",e);
+		}
     }
 
     public void setBrightness(int b) throws IOException  {
