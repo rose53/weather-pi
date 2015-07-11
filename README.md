@@ -6,6 +6,7 @@ Java 8 program to display various sensors or components on a [7-segment display]
 The list of actually implemented sensors.
 
 *   BMP085: Temperature and Pressure
+*   LDR (VT43N2): Illuminance
 
 ## Components
 The list of actually implemented components.

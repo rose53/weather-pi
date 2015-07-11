@@ -114,8 +114,8 @@ public class WeatherPi implements Runnable {
         try (PreparedStatement statement = connection.prepareStatement(SENSOR_DATA_INSERT)) {
 	        while (running) {
 	        	led.toggle();
-	        	actMinute =LocalDateTime.now().getMinute();
-	        	if ((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0)) {
+	        	actMinute = LocalDateTime.now().getMinute();
+	        	if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
 	        		lastMinute = actMinute;
 	        		// read sensor and add to database
 	        		statement.setFloat(1, temperature);
