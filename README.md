@@ -6,6 +6,7 @@ Java 8 program to display various sensors or components on a [7-segment display]
 The list of actually implemented sensors.
 
 *   BMP085: Temperature and Pressure
+*   DHT22: Temperature and Humidity
 *   LDR (VT43N2): Illuminance
 *   TGS2600: Air quality
 

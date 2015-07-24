@@ -2,18 +2,18 @@ package de.rose53.pi.weatherpi.events;
 
 public class TemperatureEvent extends SensorEvent {
 
-    private float temperature;
+    private double temperature;
 
     public TemperatureEvent() {
-    	super();
+        super();
     }
 
-    public TemperatureEvent(String sensor, float temperature) {
-    	super(sensor);
+    public TemperatureEvent(String sensor, double temperature, double accuracy) {
+        super(sensor,accuracy);
         this.temperature = temperature;
     }
 
-    public float getTemperature() {
+    public double getTemperature() {
         return temperature;
     }
 }

@@ -14,27 +14,46 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 
-
 import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.display.EBase;
-import de.rose53.pi.weatherpi.events.PressureEvent;
+import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
+import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
-@Singleton
+@ApplicationScoped
 public class DHT22 implements Displayable {
+
+    public final static double TEMPERATURE_ACCURACY = 0.5;
+
 
     @Inject
     Logger logger;
+
+    @Inject
+    @StringConfiguration(key = "dht22.gpioPin", defaultValue = "6")
+    private String gpioPin;
+
+    @Inject
+    @IntegerConfiguration(key = "dht22.timeBetweenReads", defaultValue = 3000)
+    private int timeBetweenReads;
 
     private double temperature = 0.0;
     private double humidity    = 0.0;
 
     final ScheduledExecutorService clientProcessingPool = Executors.newScheduledThreadPool(1);
+
+    @Inject
+    Event<TemperatureEvent> temperatureEvent;
+
+    @Inject
+    Event<HumidityEvent> humidityEvent;
 
     @PostConstruct
     public void init()  {
@@ -48,7 +67,7 @@ public class DHT22 implements Displayable {
         List<String> command = new ArrayList<>();
         command.add("./dht");
         command.add("22");
-        command.add("6");
+        command.add(gpioPin);
 
         ProcessBuilder pb = new ProcessBuilder(command);
         logger.debug("readValues: starting process ...");
@@ -65,8 +84,8 @@ public class DHT22 implements Displayable {
                 if (result.length() > 0) {
                     String[] parts= result.split(",");
                     retVal = new double[2];
-                    retVal[0] = Double.valueOf(result.split(",")[0]);
-                    retVal[1] = Double.valueOf(result.split(",")[1]);
+                    retVal[0] = Double.valueOf(parts[0]);
+                    retVal[1] = Double.valueOf(parts[1]);
                 }
             } else {
                 logger.error("auqireImage: raspistill terminated with an error");
@@ -94,10 +113,8 @@ public class DHT22 implements Displayable {
             delay(3000);
             display.clear();
             display.print((int)readHumidity(),EBase.DEC);
-
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("display:",e);
         }
     }
 
@@ -140,28 +157,28 @@ public class DHT22 implements Displayable {
 
         @Override
         public void run() {
+            try {
+                double[] values;
 
-                try {
-                    double[] values;
-
-                    int count = 0;
-                    while ((values = readValues()).length == 0 || (count < 5)) {
-                        delay(3000);
-                        count++;
-                    }
-
-                    if (values != null && values.length == 2) {
-                        temperature = values[0];
-                        humidity = values[1];
-                    }
-                    //temperatureEvent.fire(new TemperatureEvent("BMP085", readTemperature()));
-                    //pressureEvent.fire(new PressureEvent("BMP085", readNormalizedPressure()));
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                int count = 0;
+                while ((values = readValues()).length == 0 || (count < 5)) {
+                    delay(timeBetweenReads);
+                    count++;
                 }
 
-
+                if (values != null && values.length == 2) {
+                    if (temperature != values[0]) {
+                        temperature = values[0];
+                        temperatureEvent.fire(new TemperatureEvent("DHT22", temperature, TEMPERATURE_ACCURACY));
+                    }
+                    if (humidity != values[1]) {
+                        humidity = values[1];
+                        humidityEvent.fire(new HumidityEvent("DHT22", humidity));
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("run:",e);
+            }
         }
     }
 }

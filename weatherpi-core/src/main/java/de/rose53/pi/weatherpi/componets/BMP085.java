@@ -52,6 +52,10 @@ public class BMP085 implements Displayable {
     public final static int BMP085_READPRESSURECMD = 0x34;
     public final static int BMP085_PRESSUREDATA    = 0xF6;
 
+    public final static double TEMPERATURE_ACCURACY = 2.0f;
+    public final static double PRESSURE_ACCURACY    = 2.0f;
+
+
     public enum EOSRS {
         ULTRALOWPOWER(0,5),
         STANDARD(1,8),
@@ -99,6 +103,10 @@ public class BMP085 implements Displayable {
     private int   b5;
 
     private EOSRS osrs = EOSRS.STANDARD;
+
+
+    private float  lastTemperature = 0.0f;
+    private double lastPressure = 0.0f;
 
     @Inject
     @IntegerConfiguration(key = "bmp085.heightAboveSeaLevel", defaultValue = 335)
@@ -267,15 +275,20 @@ public class BMP085 implements Displayable {
         @Override
         public void run() {
 
-                try {
-                    temperatureEvent.fire(new TemperatureEvent("BMP085", readTemperature()));
-                    pressureEvent.fire(new PressureEvent("BMP085", readNormalizedPressure()));
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+            try {
+                float temperature = readTemperature();
+                if (lastTemperature != temperature) {
+                    lastTemperature = temperature;
+                    temperatureEvent.fire(new TemperatureEvent("BMP085", temperature,TEMPERATURE_ACCURACY));
                 }
-
-
+                double pressure = readNormalizedPressure();
+                if (lastPressure != pressure) {
+                    lastPressure = pressure;
+                    pressureEvent.fire(new PressureEvent("BMP085", pressure));
+                }
+            } catch (IOException e) {
+                logger.error("run:",e);
+            }
         }
     }
 }

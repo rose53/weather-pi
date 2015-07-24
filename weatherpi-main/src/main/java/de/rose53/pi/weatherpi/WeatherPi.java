@@ -4,7 +4,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -26,6 +33,8 @@ import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.trigger.GpioTriggerBase;
 
 import de.rose53.pi.weatherpi.componets.Displayable;
+import de.rose53.pi.weatherpi.events.HumidityEvent;
+import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
@@ -39,7 +48,7 @@ import de.rose53.pi.weatherpi.utils.StringConfiguration;
 @Singleton
 public class WeatherPi implements Runnable {
 
-	static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE) values (SYSDATE(),?,?)";
+    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION) values (SYSDATE(),?,?,?,?)";
 
     @Inject
     Logger logger;
@@ -65,8 +74,11 @@ public class WeatherPi implements Runnable {
     @Inject
     GpioController gpio;
 
-    private float  temperature = 0;
     private double pressure = 0;
+    private double humidity = 0;
+    private double illuminance= 0;
+
+    private Map<String, TemperatureValue> temperatureSensorMap = new HashMap<>();
 
     public void start() {
 
@@ -84,7 +96,7 @@ public class WeatherPi implements Runnable {
         System.out.println("\n\n ####################################################### ");
         System.out.println(" ####              WEATHER PI IS ALIVE !!!           ### ");
         System.out.println(" ####################################################### ");
-        //System.out.println(" ### Date: " + LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL)));
+        System.out.println(" ### Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         running = true;
     }
 
@@ -112,45 +124,60 @@ public class WeatherPi implements Runnable {
         int lastMinute = -1;
         int actMinute;
         try (PreparedStatement statement = connection.prepareStatement(SENSOR_DATA_INSERT)) {
-	        while (running) {
-	        	led.toggle();
-	        	actMinute = LocalDateTime.now().getMinute();
-	        	if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
-	        		lastMinute = actMinute;
-	        		// read sensor and add to database
-	        		statement.setFloat(1, temperature);
-	        		statement.setDouble(2, pressure);
+            while (running) {
+                led.toggle();
+                actMinute = LocalDateTime.now().getMinute();
+                if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
+                    lastMinute = actMinute;
+                    // read sensor and add to database
+                    List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
 
-	        		statement.executeUpdate();
-	        	}
 
-	            try {
+                    statement.setDouble(1, sorted.isEmpty()?0.0:sorted.get(0).getTemperature());
+                    statement.setDouble(2, pressure);
+                    statement.setDouble(3, humidity);
+                    statement.setDouble(4, illuminance);
 
-	            	// update display
-		        	for (Displayable displayable : displayables) {
-		        		display.clear();
-		        		displayable.display(display);
-		        		display.writeDisplay();
-		        		Thread.sleep(5000);
-		        	}
+                    statement.executeUpdate();
+                }
 
-	            } catch (InterruptedException | IOException e) {
-	                logger.warn("run:",e);
-	            }
-	        }
+                try {
+
+                    // update display
+                    for (Displayable displayable : displayables) {
+                        display.clear();
+                        displayable.display(display);
+                        display.writeDisplay();
+                        Thread.sleep(5000);
+                    }
+
+                } catch (InterruptedException | IOException e) {
+                    logger.warn("run:",e);
+                }
+            }
         } catch (SQLException e) {
-			logger.error("run:",e);
-		}
+            logger.error("run:",e);
+        }
     }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: ");
-        temperature = event.getTemperature();
+        temperatureSensorMap.put(event.getSensor(),new TemperatureValue(event.getTemperature(),event.getAccuracy()));
     }
 
     public void onReadPressureEvent(@Observes PressureEvent event) {
         logger.debug("onReadPressureEvent: ");
         pressure = event.getPressure();
+    }
+
+    public void onReadHumidityEvent(@Observes HumidityEvent event) {
+        logger.debug("onReadHumidityEvent: ");
+        humidity = event.getHumidity();
+    }
+
+    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
+        logger.debug("onReadIlluminanceEvent: ");
+        illuminance = event.getIlluminance();
     }
 
     public static void main(String[] args) {
@@ -179,17 +206,17 @@ public class WeatherPi implements Runnable {
 
     public class DisplayTrigger extends GpioTriggerBase {
 
-		@Override
-		public void invoke(GpioPin pin, PinState state) {
-			switch (state) {
-			case HIGH:
-				display.on();
-				break;
-			case LOW:
-				display.off();
-				break;
-			}
-		}
+        @Override
+        public void invoke(GpioPin pin, PinState state) {
+            switch (state) {
+            case HIGH:
+                display.on();
+                break;
+            case LOW:
+                display.off();
+                break;
+            }
+        }
 
     }
 }
