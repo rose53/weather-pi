@@ -28,54 +28,54 @@ import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 @ApplicationScoped
 public class BMP085 implements Displayable {
 
-	public final static int BMP085_I2C_ADDRESS = 0x77;
+    public final static int BMP085_I2C_ADDRESS = 0x77;
 
-	public final static int EEPROM_DATA_SIZE = 22;
+    public final static int EEPROM_DATA_SIZE = 22;
 
-	public final static int BMP085_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_AC2           = 0xAC;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_AC3           = 0xAE;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_AC4           = 0xB0;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_AC5           = 0xB2;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_AC6           = 0xB4;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_B1            = 0xB6;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_B2            = 0xB8;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_MB            = 0xBA;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_MC            = 0xBC;  // R   Calibration data (16 bits)
-	public final static int BMP085_CAL_MD            = 0xBE;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC2           = 0xAC;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC3           = 0xAE;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC4           = 0xB0;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC5           = 0xB2;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_AC6           = 0xB4;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_B1            = 0xB6;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_B2            = 0xB8;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_MB            = 0xBA;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_MC            = 0xBC;  // R   Calibration data (16 bits)
+    public final static int BMP085_CAL_MD            = 0xBE;  // R   Calibration data (16 bits)
 
-	public final static int BMP085_CONTROL = 0xF4;
+    public final static int BMP085_CONTROL = 0xF4;
 
-	public final static int BMP085_READTEMPCMD = 0x2E;
-	public final static int BMP085_TEMPDATA    = 0xF6;
+    public final static int BMP085_READTEMPCMD = 0x2E;
+    public final static int BMP085_TEMPDATA    = 0xF6;
 
-	public final static int BMP085_READPRESSURECMD = 0x34;
-	public final static int BMP085_PRESSUREDATA    = 0xF6;
+    public final static int BMP085_READPRESSURECMD = 0x34;
+    public final static int BMP085_PRESSUREDATA    = 0xF6;
 
-	public enum EOSRS {
-		ULTRALOWPOWER(0,5),
-		STANDARD(1,8),
-		HIGHRES(2,14),
-		ULTRAHIGHRES(3,26);
+    public enum EOSRS {
+        ULTRALOWPOWER(0,5),
+        STANDARD(1,8),
+        HIGHRES(2,14),
+        ULTRAHIGHRES(3,26);
 
-		private final int osrs;
-		private final int delay;
+        private final int osrs;
+        private final int delay;
 
-		private EOSRS(int osrs, int delay) {
-			this.osrs = osrs;
-			this.delay = delay;
-		}
+        private EOSRS(int osrs, int delay) {
+            this.osrs = osrs;
+            this.delay = delay;
+        }
 
-		public int getOsrs() {
-			return osrs;
-		}
+        public int getOsrs() {
+            return osrs;
+        }
 
-		public int getDelay() {
-			return delay;
-		}
-	}
+        public int getDelay() {
+            return delay;
+        }
+    }
 
-	@Inject
+    @Inject
     Logger logger;
 
     @Inject
@@ -114,9 +114,9 @@ public class BMP085 implements Displayable {
 
     @PostConstruct
     public void init()  {
-    	try {
-			I2CBus bus = I2CFactory.getInstance(i2cBusNumber);
-	        device = bus.getDevice(BMP085_I2C_ADDRESS);
+        try {
+            I2CBus bus = I2CFactory.getInstance(i2cBusNumber);
+            device = bus.getDevice(BMP085_I2C_ADDRESS);
 
             Thread.sleep(500);
 
@@ -153,34 +153,34 @@ public class BMP085 implements Displayable {
             logger.debug("      md  = >{}<",md);
 
             clientProcessingPool.scheduleAtFixedRate(new ReadDataTask(), 10, 30, TimeUnit.SECONDS);
-		} catch (IOException | InterruptedException e) {
-			logger.error("init:",e);
-		}
+        } catch (IOException | InterruptedException e) {
+            logger.error("init:",e);
+        }
 
     }
 
-	@Override
-	public void display(Display display) {
-		try {
-			display.print(readTemperature(), 1);
-			display.writeDisplay();
-			delay(2000);
-			display.clear();
-			display.print((int)readNormalizedPressure(),EBase.DEC);
+    @Override
+    public void display(Display display) {
+        try {
+            display.print(readTemperature(), 1);
+            display.writeDisplay();
+            delay(3000);
+            display.clear();
+            display.print((int)readNormalizedPressure(),EBase.DEC);
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-	}
+    }
 
-	public synchronized float readTemperature() throws IOException {
+    public synchronized float readTemperature() throws IOException {
 
-		device.write(BMP085_CONTROL, (byte)BMP085_READTEMPCMD);
-		delay(5);
+        device.write(BMP085_CONTROL, (byte)BMP085_READTEMPCMD);
+        delay(5);
 
-		int ut = readUncompensatedTemperature();
+        int ut = readUncompensatedTemperature();
         int x1 = ((ut - ac6) * ac5) >> 15;
         int x2 = (mc << 11) / (x1 + md);
         b5 = x1 + x2;
@@ -190,8 +190,8 @@ public class BMP085 implements Displayable {
         return celsius;
     }
 
-	public synchronized int readPressure() throws IOException {
-		device.write(BMP085_CONTROL, (byte)(BMP085_READPRESSURECMD + (osrs.getOsrs() << 6)));
+    public synchronized int readPressure() throws IOException {
+        device.write(BMP085_CONTROL, (byte)(BMP085_READPRESSURECMD + (osrs.getOsrs() << 6)));
         delay(osrs.getDelay());
         int up = readUncompensatedPressure();
         int b6 = b5 - 4000;
@@ -223,16 +223,16 @@ public class BMP085 implements Displayable {
         return (int)p;
     }
 
-	public double readNormalizedPressure() throws IOException {
-		return readPressure() /  (100  * Math.pow((1 - heightAboveSeaLevel / 44330.0), 5.255));
-	}
+    public double readNormalizedPressure() throws IOException {
+        return readPressure() /  (100  * Math.pow((1 - heightAboveSeaLevel / 44330.0), 5.255));
+    }
 
     private int readUncompensatedTemperature() throws IOException {
         byte[] t = new byte[2];
         int r = device.read(BMP085_TEMPDATA, t, 0, 2);
 
         if (r != 2) {
-        	logger.error("readUncompensatedTemperature: 2 bytes required, got {} bytes",r);
+            logger.error("readUncompensatedTemperature: 2 bytes required, got {} bytes",r);
             throw new IOException("Cannot read temperature; r = " + r);
         }
 
@@ -244,7 +244,7 @@ public class BMP085 implements Displayable {
 
     public int readUncompensatedPressure() throws IOException {
 
-    	int msb  = device.read(BMP085_PRESSUREDATA);
+        int msb  = device.read(BMP085_PRESSUREDATA);
         int lsb  = device.read(BMP085_PRESSUREDATA + 1);
         int xlsb = device.read(BMP085_PRESSUREDATA + 2);
 
@@ -256,10 +256,10 @@ public class BMP085 implements Displayable {
 
 
     private static void delay(long howMuch) {
-    	try {
-    		Thread.sleep(howMuch);
-    	} catch (InterruptedException ie) {
-    	}
+        try {
+            Thread.sleep(howMuch);
+        } catch (InterruptedException ie) {
+        }
     }
 
     private class ReadDataTask implements Runnable {
@@ -268,12 +268,12 @@ public class BMP085 implements Displayable {
         public void run() {
 
                 try {
-					temperatureEvent.fire(new TemperatureEvent("BMP085", readTemperature()));
-					pressureEvent.fire(new PressureEvent("BMP085", readNormalizedPressure()));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                    temperatureEvent.fire(new TemperatureEvent("BMP085", readTemperature()));
+                    pressureEvent.fire(new PressureEvent("BMP085", readNormalizedPressure()));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
 
         }

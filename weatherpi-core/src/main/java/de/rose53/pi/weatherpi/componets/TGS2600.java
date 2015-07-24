@@ -1,5 +1,7 @@
 package de.rose53.pi.weatherpi.componets;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,39 +16,46 @@ import de.rose53.pi.weatherpi.Display;
 @ApplicationScoped
 public class TGS2600 extends MCP3008Sensor implements Displayable {
 
-	private static final double VREF                 = 5.0;
-	private static final int RES_PULL_UP             = 22000; // 22kOhm
+    private static final double VREF                 = 5.0;
+    private static final int RES_PULL_UP             = 22000; // 22kOhm
 
-	@Inject
+    @Inject
     Logger logger;
 
-	private GpioPinAnalogInput tgsPin;
+    private GpioPinAnalogInput tgsPin;
 
-	@PostConstruct
+    @PostConstruct
     public void init()  {
 
-		tgsPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.CH1,"TGS2600Sensor-A1");
+        tgsPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.CH1,"TGS2600Sensor-A1");
 
-	}
+    }
 
-	@Override
-	protected double getVRef() {
-		return VREF;
-	}
+    @Override
+    protected double getVRef() {
+        return VREF;
+    }
 
-	@Override
-	protected double getValue() {
-		return tgsPin.getValue();
-	}
+    @Override
+    protected double getValue() {
+        return tgsPin.getValue();
+    }
 
-	private double getRes() {
-		return RES_PULL_UP * ((getVRef() / getVout())-1);
-	}
+    private double getRes() {
+        return RES_PULL_UP * ((getVRef() / getVout())-1);
+    }
 
-	@Override
-	public void display(Display display) {
-		double rs = getRes();
-		logger.debug("display: rs = >{}<",rs);
-	}
+    @Override
+    public void display(Display display) {
+        double rs = getRes();
+        logger.debug("display: rs = >{}<",rs);
+        try {
+             display.print(rs/1000,1);
+            display.writeDisplay();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
 }

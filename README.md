@@ -7,6 +7,7 @@ The list of actually implemented sensors.
 
 *   BMP085: Temperature and Pressure
 *   LDR (VT43N2): Illuminance
+*   TGS2600: Air quality
 
 ## Components
 The list of actually implemented components.
