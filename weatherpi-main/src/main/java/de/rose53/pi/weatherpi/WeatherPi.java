@@ -38,6 +38,8 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
+import de.rose53.weatherpi.web.TemperatureValue;
+import de.rose53.weatherpi.web.Webserver;
 
 
 
@@ -62,8 +64,10 @@ public class WeatherPi implements Runnable {
     @Inject
     Display display;
 
-//    @Inject
-//    Webserver webServer;
+    @Inject
+    Webserver webServer;
+
+
     @Inject
     @Any
     Instance<Displayable> displayables;
@@ -84,7 +88,7 @@ public class WeatherPi implements Runnable {
 
         try {
             System.out.print("Starting WebServer ...");
- //           webServer.start();
+            webServer.start();
             System.out.println("\b\b\bdone.");
 
 
@@ -105,7 +109,7 @@ public class WeatherPi implements Runnable {
             running = false;
         }
         try {
-           // webServer.stop();
+            webServer.stop();
         } catch (Exception e) {
             logger.error("stop: ",e);
         }

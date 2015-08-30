@@ -8,8 +8,8 @@ public class TemperatureEvent extends SensorEvent {
         super();
     }
 
-    public TemperatureEvent(String sensor, double temperature, double accuracy) {
-        super(sensor,accuracy);
+    public TemperatureEvent(ESensorPlace place, String sensor, double temperature, double accuracy) {
+        super(ESensorType.TEMPERATURE,place,sensor,accuracy);
         this.temperature = temperature;
     }
 

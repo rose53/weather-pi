@@ -5,11 +5,11 @@ public class PressureEvent extends SensorEvent {
     private double pressure;
 
     public PressureEvent() {
-    	super();
+        super();
     }
 
-    public PressureEvent(String sensor, double pressure) {
-    	super(sensor);
+    public PressureEvent(ESensorPlace place, String sensor, double pressure) {
+        super(ESensorType.PRESSURE,place,sensor);
         this.pressure = pressure;
     }
 

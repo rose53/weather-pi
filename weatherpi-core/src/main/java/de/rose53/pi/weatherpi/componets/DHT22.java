@@ -24,6 +24,7 @@ import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.display.EBase;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.events.SensorEvent.ESensorPlace;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
@@ -47,7 +48,11 @@ public class DHT22 implements Displayable {
     private double temperature = 0.0;
     private double humidity    = 0.0;
 
-    final ScheduledExecutorService clientProcessingPool = Executors.newScheduledThreadPool(1);
+    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread retVal = new Thread(r,"DHT22 ReaderThread");
+        retVal.setPriority(Thread.MIN_PRIORITY);
+        return retVal;
+    });
 
     @Inject
     Event<TemperatureEvent> temperatureEvent;
@@ -169,11 +174,11 @@ public class DHT22 implements Displayable {
                 if (values != null && values.length == 2) {
                     if (temperature != values[0]) {
                         temperature = values[0];
-                        temperatureEvent.fire(new TemperatureEvent("DHT22", temperature, TEMPERATURE_ACCURACY));
+                        temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"DHT22", temperature, TEMPERATURE_ACCURACY));
                     }
                     if (humidity != values[1]) {
                         humidity = values[1];
-                        humidityEvent.fire(new HumidityEvent("DHT22", humidity));
+                        humidityEvent.fire(new HumidityEvent(ESensorPlace.INDOOR,"DHT22", humidity));
                     }
                 }
             } catch (IOException e) {

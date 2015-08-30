@@ -1,6 +1,8 @@
-package de.rose53.pi.weatherpi;
+package de.rose53.weatherpi.web;
 
-class TemperatureValue {
+import de.rose53.pi.weatherpi.events.TemperatureEvent;
+
+public class TemperatureValue {
 
     private final double temperature;
     private final double accuracy;
@@ -9,6 +11,10 @@ class TemperatureValue {
         super();
         this.temperature = temperature;
         this.accuracy = accuracy;
+    }
+
+    public TemperatureValue(TemperatureEvent event) {
+        this(event.getTemperature(),event.getAccuracy());
     }
 
     public double getTemperature() {

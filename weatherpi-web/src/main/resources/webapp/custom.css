@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'LcarsGTJ3';
+    src: url("fonts/lcarsgtj3.ttf");
+}
+
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+
+html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+
+canvas { display:block; } /* To remove the scrollbars */
+

@@ -8,8 +8,8 @@ public class HumidityEvent extends SensorEvent {
         super();
     }
 
-    public HumidityEvent(String sensor, double humidity) {
-        super(sensor);
+    public HumidityEvent(ESensorPlace place, String sensor, double humidity) {
+        super(ESensorType.HUMIDITY,place,sensor);
         this.humidity = humidity;
     }
 

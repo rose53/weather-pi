@@ -22,6 +22,7 @@ import com.pi4j.io.gpio.GpioPinAnalogInput;
 
 import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.events.SensorEvent.ESensorPlace;
 
 @ApplicationScoped
 public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
@@ -107,7 +108,7 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
 
             if (illuminance != value) {
                 illuminance = value;
-                illuminanceEvent.fire(new IlluminanceEvent("LDRVT43N2", illuminance));
+                illuminanceEvent.fire(new IlluminanceEvent(ESensorPlace.INDOOR,"LDRVT43N2", illuminance));
             }
         }
     }

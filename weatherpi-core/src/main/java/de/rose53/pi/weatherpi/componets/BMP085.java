@@ -22,6 +22,7 @@ import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.display.EBase;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.events.SensorEvent.ESensorPlace;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 
@@ -177,8 +178,7 @@ public class BMP085 implements Displayable {
             display.print((int)readNormalizedPressure(),EBase.DEC);
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("display:",e);
         }
 
     }
@@ -279,12 +279,12 @@ public class BMP085 implements Displayable {
                 float temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
-                    temperatureEvent.fire(new TemperatureEvent("BMP085", temperature,TEMPERATURE_ACCURACY));
+                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"BMP085", temperature,TEMPERATURE_ACCURACY));
                 }
                 double pressure = readNormalizedPressure();
                 if (lastPressure != pressure) {
                     lastPressure = pressure;
-                    pressureEvent.fire(new PressureEvent("BMP085", pressure));
+                    pressureEvent.fire(new PressureEvent(ESensorPlace.INDOOR,"BMP085", pressure));
                 }
             } catch (IOException e) {
                 logger.error("run:",e);

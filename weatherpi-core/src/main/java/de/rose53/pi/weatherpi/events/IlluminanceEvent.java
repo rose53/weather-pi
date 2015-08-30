@@ -8,8 +8,8 @@ public class IlluminanceEvent extends SensorEvent {
         super();
     }
 
-    public IlluminanceEvent(String sensor, double illuminance) {
-        super(sensor);
+    public IlluminanceEvent(ESensorPlace place, String sensor, double illuminance) {
+        super(ESensorType.ILLUMINANCE,place,sensor);
         this.illuminance = illuminance;
     }
 
