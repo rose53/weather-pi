@@ -2,6 +2,8 @@ package de.rose53.weatherpi.web;
 
 import java.net.URL;
 
+import javax.inject.Inject;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -12,13 +14,17 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
+import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
+
 public class Webserver {
+
+    @Inject
+    @IntegerConfiguration(key = "web.port", defaultValue = 8080)
+    private int port;
 
     private Server server;
 
-    public Webserver() {
 
-    }
 
     public void start() throws Exception {
 
@@ -26,7 +32,7 @@ public class Webserver {
 //        System.setProperty("java.naming.factory.initial","org.eclipse.jetty.jndi.InitialContextFactory");
 
 
-        server = new Server(8080);
+        server = new Server(port);
 
         ServletContextHandler ctx = new ServletContextHandler();
         ctx.setContextPath("/");
@@ -69,11 +75,15 @@ public class Webserver {
     }
 
     public void stop() throws Exception {
-        server.stop();
+        if (server != null) {
+            server.stop();
+        }
     }
 
 
     public static class SensorEventSocketServlet extends WebSocketServlet {
+
+        private static final long serialVersionUID = 2805587332238800859L;
 
         @Override
         public void configure(WebSocketServletFactory factory) {
