@@ -19,4 +19,6 @@ The list of actually implemented components.
 The sensor data is written to a [MySQL](http://www.mysql.com/) database for later processing of the data.
 
 ## 7'' Touch Screen
-The touch screen used is the 7'' display set from [Polin](http://www.pollin.de/shop/dt/NTMwOTc4OTk-/Bauelemente_Bauteile/Aktive_Bauelemente/Displays/7_17_78_cm_Display_Set_mit_Touchscreen_LS_7T_HDMI_DVI_VGA_CVBS.html). It is connected via the HDMI port to the RaspberryPi. 
+The touch screen used is the 7'' display set from [Polin](http://www.pollin.de/shop/dt/NTMwOTc4OTk-/Bauelemente_Bauteile/Aktive_Bauelemente/Displays/7_17_78_cm_Display_Set_mit_Touchscreen_LS_7T_HDMI_DVI_VGA_CVBS.html). It is connected via the HDMI port to the RaspberryPi.
+
+![](./src/main/resources/images/touch_screen.jpg "Touch Screen")
