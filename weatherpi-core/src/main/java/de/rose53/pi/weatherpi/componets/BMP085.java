@@ -19,10 +19,10 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 
 import de.rose53.pi.weatherpi.Display;
+import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.display.EBase;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
-import de.rose53.pi.weatherpi.events.SensorEvent.ESensorPlace;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 

@@ -2,7 +2,6 @@ package de.rose53.pi.weatherpi;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -33,6 +32,7 @@ import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.trigger.GpioTriggerBase;
 
 import de.rose53.pi.weatherpi.componets.Displayable;
+import de.rose53.pi.weatherpi.database.Database;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
@@ -49,8 +49,6 @@ import de.rose53.weatherpi.web.Webserver;
  */
 @Singleton
 public class WeatherPi implements Runnable {
-
-    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION) values (SYSDATE(),?,?,?,?)";
 
     @Inject
     Logger logger;
@@ -74,6 +72,9 @@ public class WeatherPi implements Runnable {
 
     @Inject
     Connection connection;
+
+    @Inject
+    Database database;
 
     @Inject
     GpioController gpio;
@@ -127,25 +128,20 @@ public class WeatherPi implements Runnable {
 
         int lastMinute = -1;
         int actMinute;
-        try (PreparedStatement statement = connection.prepareStatement(SENSOR_DATA_INSERT)) {
             while (running) {
-                led.toggle();
-                actMinute = LocalDateTime.now().getMinute();
-                if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
-                    lastMinute = actMinute;
-                    // read sensor and add to database
-                    List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
-
-
-                    statement.setDouble(1, sorted.isEmpty()?0.0:sorted.get(0).getTemperature());
-                    statement.setDouble(2, pressure);
-                    statement.setDouble(3, humidity);
-                    statement.setDouble(4, illuminance);
-
-                    statement.executeUpdate();
-                }
-
                 try {
+
+                    led.toggle();
+                    actMinute = LocalDateTime.now().getMinute();
+                    if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
+                        lastMinute = actMinute;
+                        // read sensor and add to database
+
+
+                        List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
+
+                        database.insertSensorData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressure,humidity,illuminance);
+                    }
 
                     // update display
                     for (Displayable displayable : displayables) {
@@ -155,13 +151,10 @@ public class WeatherPi implements Runnable {
                         Thread.sleep(5000);
                     }
 
-                } catch (InterruptedException | IOException e) {
+                } catch (InterruptedException | IOException | SQLException e) {
                     logger.warn("run:",e);
                 }
             }
-        } catch (SQLException e) {
-            logger.error("run:",e);
-        }
     }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {

@@ -23,7 +23,8 @@
         <pi4j.version>1.0</pi4j.version>
         <weld.version>2.2.14.Final</weld.version>
         <jetty.version>9.3.1.v20150714</jetty.version>
-        <resteasy.version>3.0.11.Final</resteasy.version>
+        <resteasy.version>3.0.13.Final</resteasy.version>
+        <jackson.version>2.6.2</jackson.version>
     </properties>
 
     <build>
@@ -93,7 +94,7 @@
                 <artifactId>weatherpi-main</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           <dependency>
+            <dependency>
                 <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-web</artifactId>
                 <version>${project.version}</version>
@@ -167,15 +168,21 @@
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-  <groupId>org.eclipse.jetty.cdi</groupId>
-  <artifactId>cdi-core</artifactId>
-  <version>${jetty.version}</version>
-</dependency>
+                <groupId>org.eclipse.jetty.cdi</groupId>
+                <artifactId>cdi-core</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.websocket</groupId>
                 <artifactId>websocket-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlets</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jaxrs</artifactId>
@@ -188,7 +195,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jackson-provider</artifactId>
+                <artifactId>resteasy-jackson2-provider</artifactId>
                 <version>${resteasy.version}</version>
             </dependency>
             <dependency>
@@ -196,18 +203,44 @@
                 <artifactId>resteasy-servlet-initializer</artifactId>
                 <version>${resteasy.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-cdi</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+                               <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+                               <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 
-          <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
-          </dependency>
 
-          <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.5</version>
-          </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.35</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.5</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>

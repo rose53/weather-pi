@@ -1,18 +1,9 @@
 package de.rose53.pi.weatherpi.events;
 
+import de.rose53.pi.weatherpi.ESensorPlace;
+import de.rose53.pi.weatherpi.ESensorType;
+
 public class SensorEvent {
-
-    public enum ESensorType {
-        TEMPERATURE,
-        HUMIDITY,
-        PRESSURE,
-        ILLUMINANCE
-    }
-
-    public enum ESensorPlace {
-        INDOOR,
-        OUTDOOR,
-    }
 
     private String sensor;
     private ESensorType type;

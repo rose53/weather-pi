@@ -1,5 +1,8 @@
 package de.rose53.pi.weatherpi.events;
 
+import de.rose53.pi.weatherpi.ESensorPlace;
+import de.rose53.pi.weatherpi.ESensorType;
+
 public class IlluminanceEvent extends SensorEvent {
 
     private double illuminance;

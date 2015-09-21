@@ -1,8 +1,6 @@
-/* global log */
+/* global log, sensordataService */
 
 (function($) {
-
-    // var log = log4javascript.getLogger('init');
 
     var methods = {
         initControlPage: function(options) {
@@ -17,20 +15,12 @@
             var $page = $("#controlview");
             $("#controlcanvas").jLCARSControlView();
 
-            $("#controlcanvas").on("scanbuttontouch", function(event) {
-                handleScanButtonEvent(event);
+            $("#controlcanvas").on("daybuttontouch", function(event) {
+                handleDayButtonEvent(event);
             });
 
-            $("#controlcanvas").on("soundbuttontouch", function(event) {
-                handleSoundButtonEvent(event);
-            });
-
-            $("#controlcanvas").on("dht22buttontouch", function(event) {
-                handleDHT22ButtonEvent(event);
-            });
-
-            $("#controlcanvas").on("bmp085buttontouch", function(event) {
-                handleBMP085ButtonEvent(event);
+            $("#controlcanvas").on("weekbuttontouch", function(event) {
+                handleWeekButtonEvent(event);
             });
 
             var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
@@ -40,9 +30,9 @@
 
             lcarsControlView.refresh();
 
-            log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/sensorevents");
+            log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevent");
 
-            var sensorWebSocket = new WebSocket("ws://" + location.host + "/sensorevents");
+            var sensorWebSocket = new WebSocket("ws://munin.local:8080/websocket/sensorevents");
 
             sensorWebSocket.onopen = function() {
             };
@@ -64,9 +54,14 @@
                 }
             };
 
-            lcarsControlView.updateIndoorHumidity(parseInt(dht22Service.getHumidity()));
-            lcarsControlView.updateIndoorPressure(parseInt(bmp085Service.getPressure()));
-            lcarsControlView.updateLuminance("FRONT",parseInt(Math.floor(luminanceService.getLuminance("front"))));
+            //sensordataService.getHello();
+
+
+            //lcarsControlView.updateIndoorHumidity(parseInt(dht22Service.getHumidity()));
+            //lcarsControlView.updateIndoorPressure(parseInt(bmp085Service.getPressure()));
+            //lcarsControlView.updateLuminance("FRONT",parseInt(Math.floor(luminanceService.getLuminance("front"))));
+
+            setInterval(function(){ clock(); }, 5000);
         },
         initAll: function(options) {
             var settings = {
@@ -101,24 +96,19 @@ $(document).ready(function() {
     $().initApp();
 });
 
-var handleDHT22ButtonEvent = function(event) {
-    log.debug("handleDHT22ButtonEvent: dht22buttontouch");
+var handleDayButtonEvent = function(event) {
+    log.debug("handleDayButtonEvent: daybuttontouch");
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    lcarsControlView.updateTemperatureDHT22(dht22Service.getTemperature()
-            .toFixed(1));
-    lcarsControlView.updateHumidityDHT22(parseInt(dht22Service.getHumidity()));
+    sensordataService.getTemperature("day",function(data){ log.debug("cb" + data.maxValue); });
 };
 
-var handleBMP085ButtonEvent = function(event) {
-    log.debug("handleBMP085ButtonEvent: bmp085buttontouch");
-    var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    lcarsControlView.updateTemperatureBMP085(bmp085Service.getTemperature()
-            .toFixed(1));
-    lcarsControlView
-            .updatePressureBMP085(parseInt(bmp085Service.getPressure()));
+
+var handleWeekButtonEvent = function(event) {
+    log.debug("handleWeekButtonEvent: weekbuttontouch");
+    sensordataService.getTemperature("week",function(data){ log.debug(data); });
 };
 
-var handleSoundButtonEvent = function(event) {
-    log.debug("handleSoundButtonEvent: soundbuttontouch");
-    soundService.toggle();
+var clock = function() {
+    var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
+    lcarsControlView.updateClock();
 };

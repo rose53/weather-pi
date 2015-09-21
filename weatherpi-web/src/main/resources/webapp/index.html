@@ -24,12 +24,11 @@
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/log4javascript.js"></script>
 <script type="text/javascript">
-    
+
     //<![CDATA[
     var log = log4javascript.getLogger();
     var consoleAppender = new log4javascript.BrowserConsoleAppender();
-    var consoleLayout = new log4javascript.PatternLayout(
-            "%d{HH:mm:ss} %-5p - %m%n");
+    var consoleLayout = new log4javascript.PatternLayout("%d{HH:mm:ss} %-5p - %m%n");
     consoleAppender.setLayout(consoleLayout);
     log.addAppender(consoleAppender);
     //var ajaxAppender = new log4javascript.AjaxAppender("myloggingservlet.do");
@@ -44,7 +43,7 @@
 <script type="text/javascript" src="js/plugins/jquery.lcarscontrol.js"></script>
 <script type="text/javascript" src="js/services/dht22.service.js"></script>
 <script type="text/javascript" src="js/services/bmp085.service.js"></script>
-<script type="text/javascript" src="js/services/luminance.service.js"></script>
+<script type="text/javascript" src="js/services/sensordata.service.js"></script>
 <script type="text/javascript" src="js/weatherpi.js"></script>
 <!-- Startup Images for iDevices -->
 

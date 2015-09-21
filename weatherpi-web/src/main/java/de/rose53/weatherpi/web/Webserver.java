@@ -1,8 +1,9 @@
 package de.rose53.weatherpi.web;
 
-import java.net.URL;
+import java.util.EnumSet;
 
 import javax.inject.Inject;
+import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -10,6 +11,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
@@ -22,55 +24,43 @@ public class Webserver {
     @IntegerConfiguration(key = "web.port", defaultValue = 8080)
     private int port;
 
+    @SuppressWarnings("unused")
+    @Inject
+    private SensorDataCdiHelper sensorDataCdiHelper; // needed for missing JaxRs CDI integration
+
     private Server server;
 
-
-
     public void start() throws Exception {
-
-//        System.setProperty("java.naming.factory.url","org.eclipse.jetty.jndi");
-//        System.setProperty("java.naming.factory.initial","org.eclipse.jetty.jndi.InitialContextFactory");
-
 
         server = new Server(port);
 
         ServletContextHandler ctx = new ServletContextHandler();
-        ctx.setContextPath("/");
+        ctx.setContextPath("/websocket/");
         ctx.addServlet(SensorEventSocketServlet.class, "/sensorevents");
 
-//        ServletContextHandler contexHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-//        contexHandler.setContextPath("/marvin/resources");
-//        ServletHolder restEasyServletHolder = new ServletHolder(new HttpServletDispatcher());
+        ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        contextHandler.setContextPath("/rest/");
 
-//        restEasyServletHolder.setInitParameter("javax.ws.rs.Application","de.rose53.marvin.server.JaxRsApplication");
+        contextHandler.setInitParameter("resteasy.servlet.mapping.prefix","/resources");
+        contextHandler.addFilter(CrossOriginFilter.class, "/resources/*",EnumSet.of(DispatcherType.REQUEST));
 
-//        contexHandler.addServlet(restEasyServletHolder, "/*");
-//        context.addEventListener(new Listener());
-//        context.addEventListener(new BeanManagerResourceBindingListener());
+        ServletHolder restEasyServletHolder = new ServletHolder(new HttpServletDispatcher());
 
- //       final HandlerList handlers = new HandlerList();
- //       handlers.setHandlers(new Handler[] { contextHandler });
+        restEasyServletHolder.setInitOrder(1);
+        restEasyServletHolder.setInitParameter("javax.ws.rs.Application","de.rose53.weatherpi.web.JaxRsApplication");
 
-        String  baseStr  = "/webapp";  //... contains: helloWorld.html, login.html, etc. and folder: other/xxx.html
-        URL    baseUrl  = Webserver.class.getResource( baseStr );
-        String  basePath = baseUrl.toExternalForm();
+        contextHandler.addServlet(restEasyServletHolder, "/resources/*");
 
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setDirectoriesListed(true);
         resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
-
-        resourceHandler.setResourceBase(basePath);
+        resourceHandler.setResourceBase(Webserver.class.getResource("/webapp").toExternalForm());
 
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resourceHandler, ctx/*, contexHandler */});
+        handlers.setHandlers(new Handler[] { resourceHandler, ctx, contextHandler});
         server.setHandler(handlers);
 
         server.start();
-
-
-
-//        new Resource("BeanManager", new Reference("javax.enterprise.inject.spi.BeanMnanager",
-//                "org.jboss.weld.resources.ManagerObjectFactory", null));
         //server.join();
     }
 
