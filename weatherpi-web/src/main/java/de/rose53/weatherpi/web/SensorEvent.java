@@ -96,9 +96,16 @@ public class SensorEvent {
     }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
-        temperatureSensorMap.put(event.getSensor(),event);
-        List<TemperatureEvent> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
-        send(sorted.get(0));
+        switch (event.getPlace()) {
+        case INDOOR:
+            temperatureSensorMap.put(event.getSensor(),event);
+            List<TemperatureEvent> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
+            send(sorted.get(0));
+            break;
+        case OUTDOOR:
+            send(event);
+            break;
+        }
     }
 
     public void onReadPressureEvent(@Observes PressureEvent event) {

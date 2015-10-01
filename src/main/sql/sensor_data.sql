@@ -5,5 +5,7 @@ CREATE TABLE `SENSOR_DATA` (
   `PRESSURE` double NOT NULL COMMENT 'The pressure relative to the sealevel in hPa',
   `HUMIDITY` double NOT NULL COMMENT 'The humidity ',
   `ILLUMINATION` double NOT NULL COMMENT 'The illumination in LUX',
+  `TEMPERATURE_OUT` double NOT NULL COMMENT 'The outdoor temperature in celsius degrees.',
+  `HUMIDITY_OUT` double NOT NULL COMMENT 'The outdoor humidity ',
   PRIMARY KEY (`ID`)
 );

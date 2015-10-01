@@ -24,10 +24,12 @@ import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.componets.Displayable;
 import de.rose53.pi.weatherpi.database.Database;
+import de.rose53.pi.weatherpi.database.RowData;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.mqtt.MqttCdiEventBridge;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 import de.rose53.weatherpi.web.TemperatureValue;
 import de.rose53.weatherpi.web.Webserver;
@@ -67,11 +69,17 @@ public class WeatherPi implements Runnable {
     @Inject
     Database database;
 
-    private double pressure = 0;
-    private double humidity = 0;
-    private double illuminance= 0;
+    @Inject
+    MqttCdiEventBridge mqttCdiEventBridge;
+
+    private double pressureIndoor = 0;
+    private double humidityIndoor = 0;
+    private double illuminance = 0;
 
     private Map<String, TemperatureValue> temperatureSensorMap = new HashMap<>();
+
+    private double humidityOutdoor = 0;
+    private double temperatureOutdoor = 0;
 
     public void start() {
 
@@ -112,14 +120,12 @@ public class WeatherPi implements Runnable {
             while (running) {
                 try {
                     actMinute = LocalDateTime.now().getMinute();
-                    if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
+                    if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressureIndoor > 0.0))) {
                         lastMinute = actMinute;
                         // read sensor and add to database
-
-
                         List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
 
-                        database.insertSensorData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressure,humidity,illuminance);
+                        database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor));
                     }
 
                     // update display
@@ -138,17 +144,37 @@ public class WeatherPi implements Runnable {
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: ");
-        temperatureSensorMap.put(event.getSensor(),new TemperatureValue(event.getTemperature(),event.getAccuracy()));
+        switch (event.getPlace()) {
+        case INDOOR:
+            temperatureSensorMap.put(event.getSensor(),new TemperatureValue(event.getTemperature(),event.getAccuracy()));
+            break;
+        case OUTDOOR:
+            temperatureOutdoor = event.getTemperature();
+            break;
+        }
     }
 
     public void onReadPressureEvent(@Observes PressureEvent event) {
         logger.debug("onReadPressureEvent: ");
-        pressure = event.getPressure();
+        switch (event.getPlace()) {
+        case INDOOR:
+            pressureIndoor = event.getPressure();
+            break;
+        case OUTDOOR:
+            break;
+        }
     }
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: ");
-        humidity = event.getHumidity();
+        switch (event.getPlace()) {
+        case INDOOR:
+            humidityIndoor = event.getHumidity();
+            break;
+        case OUTDOOR:
+            humidityOutdoor = event.getHumidity();
+            break;
+        }
     }
 
     public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {

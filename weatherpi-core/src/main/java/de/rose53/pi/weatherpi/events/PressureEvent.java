@@ -8,7 +8,7 @@ public class PressureEvent extends SensorEvent {
     private double pressure;
 
     public PressureEvent() {
-        super();
+        super(ESensorType.PRESSURE);
     }
 
     public PressureEvent(ESensorPlace place, String sensor, double pressure) {

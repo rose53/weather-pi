@@ -21,12 +21,14 @@ import de.rose53.pi.weatherpi.ESensorType;
 
 public class Database {
 
-    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION) values (SYSDATE(),?,?,?,?)";
+    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION,TEMPERATURE_OUT,HUMIDITY_OUT) values (SYSDATE(),?,?,?,?,?,?)";
 
     static private final String SENSOR_DATA_TEMPERATURE_GET = "select TIME,TEMPERATURE from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_HUMIDITY_GET = "select TIME,HUMIDITY from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_PRESSURE_GET = "select TIME,PRESSURE from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_ILLUMINATION_GET = "select TIME,ILLUMINATION from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_TEMPERATURE_OUT_GET = "select TIME,TEMPERATURE_OUT from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_HUMIDITY_OUT_GET = "select TIME,HUMIDITY_OUT from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
 
     @Inject
     Logger logger;
@@ -40,15 +42,19 @@ public class Database {
     private PreparedStatement humidityGetStatement;
     private PreparedStatement pressureGetStatement;
     private PreparedStatement illuminationGetStatement;
+    private PreparedStatement temperatureOutGetStatement;
+    private PreparedStatement humidityOutGetStatement;
 
     @PostConstruct
     public void init() {
         try {
             insertStatement = connection.prepareStatement(SENSOR_DATA_INSERT);
-            temperatureGetStatement  = connection.prepareStatement(SENSOR_DATA_TEMPERATURE_GET);
-            humidityGetStatement     = connection.prepareStatement(SENSOR_DATA_HUMIDITY_GET);
-            pressureGetStatement     = connection.prepareStatement(SENSOR_DATA_PRESSURE_GET);
-            illuminationGetStatement = connection.prepareStatement(SENSOR_DATA_ILLUMINATION_GET);
+            temperatureGetStatement     = connection.prepareStatement(SENSOR_DATA_TEMPERATURE_GET);
+            humidityGetStatement        = connection.prepareStatement(SENSOR_DATA_HUMIDITY_GET);
+            pressureGetStatement        = connection.prepareStatement(SENSOR_DATA_PRESSURE_GET);
+            illuminationGetStatement    = connection.prepareStatement(SENSOR_DATA_ILLUMINATION_GET);
+            temperatureOutGetStatement  = connection.prepareStatement(SENSOR_DATA_TEMPERATURE_OUT_GET);
+            humidityOutGetStatement     = connection.prepareStatement(SENSOR_DATA_HUMIDITY_OUT_GET);
         } catch (SQLException e) {
             logger.error("init:",e);
         }
@@ -62,16 +68,24 @@ public class Database {
             humidityGetStatement.close();
             pressureGetStatement.close();
             illuminationGetStatement.close();
+            temperatureOutGetStatement.close();
+            humidityOutGetStatement.close();
         } catch (SQLException e) {
             logger.error("destroy:",e);
         }
     }
 
-    public void insertSensorData(double temperature, double pressure, double humidity, double illuminance) throws SQLException {
-        insertStatement.setDouble(1, temperature);
-        insertStatement.setDouble(2, pressure);
-        insertStatement.setDouble(3, humidity);
-        insertStatement.setDouble(4, illuminance);
+    public void insertSensorData(RowData rowData) throws SQLException {
+        if (rowData == null) {
+            logger.debug("insertSensorData: not data given.");
+            return;
+        }
+        insertStatement.setDouble(1, rowData.getTemperatureIndoor());
+        insertStatement.setDouble(2, rowData.getPressureIndoor());
+        insertStatement.setDouble(3, rowData.getHumidityIndoor());
+        insertStatement.setDouble(4, rowData.getIlluminanceIndoor());
+        insertStatement.setDouble(5, rowData.getTemperatureOutdoor());
+        insertStatement.setDouble(6, rowData.getHumidityOutdoor());
 
         insertStatement.executeUpdate();
     }
@@ -85,7 +99,14 @@ public class Database {
         PreparedStatement s = null;
         switch (sensorType) {
         case HUMIDITY:
-            s = humidityGetStatement;
+            switch (place) {
+            case INDOOR:
+                s = humidityGetStatement;
+                break;
+            case OUTDOOR:
+                s = humidityOutGetStatement;
+                break;
+            }
             break;
         case ILLUMINANCE:
             s = illuminationGetStatement;
@@ -94,7 +115,14 @@ public class Database {
             s = pressureGetStatement;
             break;
         case TEMPERATURE:
-            s = temperatureGetStatement;
+            switch (place) {
+            case INDOOR:
+                s = temperatureGetStatement;
+                break;
+            case OUTDOOR:
+                s = temperatureOutGetStatement;
+                break;
+            }
             break;
         default:
             break;

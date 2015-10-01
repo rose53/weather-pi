@@ -18,6 +18,9 @@
     var lastIndoorTemperature    = '0';
     var lastIndoorPressure       = '0';
 
+    var lastOutdoorHumidity       = '0';
+    var lastOutdoorTemperature    = '0';
+
     var lastTime                 = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});;
 
     var buttons = {
@@ -183,6 +186,24 @@
                 return;
             }
             lastIndoorPressure = pressure;
+            refresh(this.canvas);
+        },
+
+        updateOutdoorTemperature : function(temperature) {
+            if (temperature === lastOutdoorTemperature) {
+                // no change, nothing to do
+                return;
+            }
+            lastOutdoorTemperature = temperature;
+            refresh(this.canvas);
+        },
+
+        updateOutdoorHumidity : function(humidity) {
+            if (humidity === lastOutdoorHumidity) {
+                // no change, nothing to do
+                return;
+            }
+            lastOutdoorHumidity = humidity;
             refresh(this.canvas);
         },
 
@@ -512,11 +533,11 @@
 
         drawButton(ctx,buttons.indorButtonRect);
 
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastIndoorHumidity,"#3366CC");
-        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastIndoorTemperature,"#3366CC");
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastIndoorHumidity,"#FFCC66");
+        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastIndoorTemperature,"#FFCC66");
 
         buttonPosY = buttonPosY + baseButton.height + baseButton.space;
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastIndoorPressure,"#3366CC");
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastIndoorPressure,"#FFCC66");
 
         buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
 
@@ -530,6 +551,10 @@
         buttons.outdoorButtonRect.h = baseButton.height;
 
         drawButton(ctx,buttons.outdoorButtonRect);
+
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastOutdoorHumidity,"#3366CC");
+        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastOutdoorTemperature,"#3366CC");
+
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -719,6 +744,8 @@
 
         var step = Math.floor(w / 24);
 
+        var pixelPerMS = step / (60 * 60 * 1000);
+
         for (var yAxis = 0; yAxis <= w / 2; yAxis += step) {
             ctx.moveTo(x + w / 2 + yAxis,y);
             ctx.lineTo(x + w / 2 + yAxis,y + h);
@@ -734,6 +761,29 @@
         }
         ctx.lineWidth = 1;
         ctx.strokeStyle = colorTable.frame;
+        ctx.stroke();
+
+        var data = jQuery.parseJSON(testData);
+
+
+        var maxValue = data.maxValue;
+        var minValue = data.minValue;
+
+        var pixelPerDegree = h / (maxValue - minValue);
+
+
+        data.sensorData.sort(function(a,b){
+              return new Date(b.time) - new Date(a.time);
+        });
+
+        var maxDate = new Date(data.sensorData[0].time);
+        var maxTimeInMS = maxDate.getTime();
+
+        for (var index = 0; index < data.sensorData.length; ++index) {
+            ctx.fillRect(x + w - pixelPerMS *(maxTimeInMS - new Date(data.sensorData[index].time).getTime()),y + h - data.sensorData[index].value / (pixelPerDegree) * h ,1,1);
+        }
+        ctx.lineWidth = 1;
+        //ctx.strokeStyle = '#FF0000';
         ctx.stroke();
 
 

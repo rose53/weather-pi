@@ -30,9 +30,9 @@
 
             lcarsControlView.refresh();
 
-            log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevent");
+            log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevents");
 
-            var sensorWebSocket = new WebSocket("ws://munin.local:8080/websocket/sensorevents");
+            var sensorWebSocket = new WebSocket("ws://" + location.host + "/websocket/sensorevents");
 
             sensorWebSocket.onopen = function() {
             };
@@ -42,10 +42,14 @@
                 if ("TEMPERATURE" === sensorevent.type) {
                     if ("INDOOR" === sensorevent.place) {
                         lcarsControlView.updateIndoorTemperature(sensorevent.temperature.toFixed(1));
+                    } else if ("OUTDOOR" === sensorevent.place) {
+                        lcarsControlView.updateOutdoorTemperature(sensorevent.temperature.toFixed(1));
                     }
                 } else if ("HUMIDITY" === sensorevent.type) {
                     if ("INDOOR" === sensorevent.place) {
                         lcarsControlView.updateIndoorHumidity(parseInt(sensorevent.humidity));
+                    } else if ("OUTDOOR" === sensorevent.place) {
+                        lcarsControlView.updateOutdoorHumidity(parseInt(sensorevent.humidity));
                     }
                 } else if ("PRESSURE" === sensorevent.type) {
                     if ("INDOOR" === sensorevent.place) {
@@ -54,12 +58,40 @@
                 }
             };
 
-            //sensordataService.getHello();
+            sensordataService.getTemperature("actual","indoor",
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateIndoorTemperature(data.sensorData[0].value.toFixed(1));
+                    }
+                });
 
+            sensordataService.getPressure("actual","indoor",
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateIndoorPressure(parseInt(data.sensorData[0].value));
+                    }
+                });
 
-            //lcarsControlView.updateIndoorHumidity(parseInt(dht22Service.getHumidity()));
-            //lcarsControlView.updateIndoorPressure(parseInt(bmp085Service.getPressure()));
-            //lcarsControlView.updateLuminance("FRONT",parseInt(Math.floor(luminanceService.getLuminance("front"))));
+            sensordataService.getHumidity("actual","indoor",
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateIndoorHumidity(parseInt(data.sensorData[0].value));
+                    }
+                });
+
+            sensordataService.getTemperature("actual","outdoor",
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateOutdoorTemperature(data.sensorData[0].value.toFixed(1));
+                    }
+                });
+
+            sensordataService.getHumidity("actual","outdoor",
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateOutdoorHumidity(parseInt(data.sensorData[0].value));
+                    }
+                });
 
             setInterval(function(){ clock(); }, 5000);
         },

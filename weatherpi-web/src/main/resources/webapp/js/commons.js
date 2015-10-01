@@ -1,12 +1,7 @@
 
 //=== CONSTANTS ===
-var RUGOREST_ROOT      = 'service/';
-var RUGOREST_MOTOR     = RUGOREST_ROOT + 'motor';
-var RUGOREST_DISTANCE  = RUGOREST_ROOT + 'distance';
-var RUGOREST_GP2Y0A21  = RUGOREST_ROOT + 'gp2y0a21';
-var RUGOREST_DHT22     = RUGOREST_ROOT + 'dht22';
-var RUGOREST_BMP085    = RUGOREST_ROOT + 'bmp085';
-var RUGOREST_LUMINANCE = RUGOREST_ROOT + 'luminance';
+var WEATHERPI_REST_ROOT       = 'rest/resources/';
+var WEATHERPI_REST_SENSORDATA = WEATHERPI_REST_ROOT + 'sensordata';
 
 /*
  * Converts degrees to radians
