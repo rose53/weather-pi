@@ -22,15 +22,6 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioPin;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.trigger.GpioTriggerBase;
-
 import de.rose53.pi.weatherpi.componets.Displayable;
 import de.rose53.pi.weatherpi.database.Database;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
@@ -76,9 +67,6 @@ public class WeatherPi implements Runnable {
     @Inject
     Database database;
 
-    @Inject
-    GpioController gpio;
-
     private double pressure = 0;
     private double humidity = 0;
     private double illuminance= 0;
@@ -119,19 +107,10 @@ public class WeatherPi implements Runnable {
     @Override
     public void run() {
         start();
-        final GpioPinDigitalInput displayOnOffSwitch = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02,PinPullResistance.PULL_DOWN);
-        displayOnOffSwitch.addTrigger(new DisplayTrigger());
-
-        GpioPinDigitalOutput led = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "LED #1", PinState.LOW);
-
-        led.setShutdownOptions(true, PinState.LOW);
-
         int lastMinute = -1;
         int actMinute;
             while (running) {
                 try {
-
-                    led.toggle();
                     actMinute = LocalDateTime.now().getMinute();
                     if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressure > 0.0))) {
                         lastMinute = actMinute;
@@ -198,22 +177,6 @@ public class WeatherPi implements Runnable {
                 weld.shutdown();
             }
         });
-
-    }
-
-    public class DisplayTrigger extends GpioTriggerBase {
-
-        @Override
-        public void invoke(GpioPin pin, PinState state) {
-            switch (state) {
-            case HIGH:
-                display.on();
-                break;
-            case LOW:
-                display.off();
-                break;
-            }
-        }
 
     }
 }
