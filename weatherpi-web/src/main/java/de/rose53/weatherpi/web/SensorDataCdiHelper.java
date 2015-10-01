@@ -9,8 +9,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.ESensorType;
 import de.rose53.pi.weatherpi.database.Database;
+import de.rose53.pi.weatherpi.database.ERange;
 import de.rose53.pi.weatherpi.database.SensorDataQueryResult;
 
 // TODO change, if I will get CDI working in JAX RS resources
@@ -29,7 +31,7 @@ public class SensorDataCdiHelper {
         instance = this;
     }
 
-    public List<SensorDataQueryResult> getSensorData(String sensor) {
+    public List<SensorDataQueryResult> getSensorData(String sensor, String place, String range) {
 
         ESensorType sensorType = ESensorType.fromString(sensor);
         if (sensorType == null) {
@@ -37,14 +39,10 @@ public class SensorDataCdiHelper {
             return null;
         }
         try {
-            return database.getSensorData(sensorType);
+            return database.getSensorData(sensorType,ESensorPlace.fromString(place),ERange.fromString(range));
         } catch (SQLException e) {
             logger.error("getSensorData: ",e);
             return Collections.emptyList();
         }
-    }
-
-    public String getCurrent() {
-        return "Hello";
     }
 }

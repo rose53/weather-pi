@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,17 +24,13 @@ import de.rose53.pi.weatherpi.database.SensorDataQueryResult;
 public class SensorDataResource {
 
     @GET
-    @Path("/hello")
-    public String getCurrent() {
-        return SensorDataCdiHelper.instance.getCurrent();
-    }
-
-    @GET
     @Path("/{sensor}")
-    public Response getSensorData(@PathParam("sensor") String sensor, @QueryParam("range") String range) {
+    public Response getSensorData(@PathParam("sensor") String sensor,
+                                  @QueryParam("place") @DefaultValue("indoor") String place,
+                                  @QueryParam("range") String range) {
 
 
-        List<SensorDataQueryResult> data = SensorDataCdiHelper.instance.getSensorData(sensor);
+        List<SensorDataQueryResult> data = SensorDataCdiHelper.instance.getSensorData(sensor,place,range);
 
         StringWriter sw = new StringWriter();
 
@@ -43,11 +40,8 @@ public class SensorDataResource {
         try {
             mapper.writeValue(sw,new SensorDataQueryResponse(data));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            return Response.serverError().build();
         }
-
-
         return Response.ok(sw.toString(), MediaType.APPLICATION_JSON).build();
     }
 }

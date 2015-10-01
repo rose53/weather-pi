@@ -16,16 +16,17 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.ESensorType;
 
 public class Database {
 
     static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION) values (SYSDATE(),?,?,?,?)";
 
-    static private final String SENSOR_DATA_TEMPERATURE_GET = "select TIME,TEMPERATURE from SENSOR_DATA where TIME between ? and ? order by TIME";
-    static private final String SENSOR_DATA_HUMIDITY_GET = "select TIME,HUMIDITY from SENSOR_DATA where TIME between ? and ? order by TIME";
-    static private final String SENSOR_DATA_PRESSURE_GET = "select TIME,HUMIDITY from SENSOR_DATA where TIME between ? and ? order by TIME";
-    static private final String SENSOR_DATA_ILLUMINATION_GET = "select TIME,ILLUMINATION from SENSOR_DATA where TIME between ? and ? order by TIME";
+    static private final String SENSOR_DATA_TEMPERATURE_GET = "select TIME,TEMPERATURE from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_HUMIDITY_GET = "select TIME,HUMIDITY from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_PRESSURE_GET = "select TIME,PRESSURE from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_ILLUMINATION_GET = "select TIME,ILLUMINATION from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
 
     @Inject
     Logger logger;
@@ -75,9 +76,11 @@ public class Database {
         insertStatement.executeUpdate();
     }
 
-    public List<SensorDataQueryResult> getSensorData(ESensorType sensorType) throws SQLException {
+    public List<SensorDataQueryResult> getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) throws SQLException {
 
-        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
+        if (range == null) {
+            range = ERange.ACTUAL;
+        }
 
         PreparedStatement s = null;
         switch (sensorType) {
@@ -101,13 +104,17 @@ public class Database {
             return Collections.emptyList();
         }
 
-        s.setTimestamp(1, Timestamp.valueOf(oneDayAgo));
+        s.setTimestamp(1, Timestamp.valueOf(range.getPastTime()));
         s.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
 
         List<SensorDataQueryResult> retVal = new ArrayList<>();
         try (ResultSet result = s.executeQuery()) {
             while (result.next()) {
                 retVal.add(new SensorDataQueryResult(result.getTimestamp(1).toLocalDateTime(),result.getDouble(2)));
+                if (ERange.ACTUAL == range) {
+                    // we only use the first value
+                    break;
+                }
             }
         }
         return retVal;
