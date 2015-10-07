@@ -1,3 +1,5 @@
+/* global RangeEnum */
+
 /**
  *
  */
@@ -11,27 +13,35 @@
         x : -1,
         y : -1
     };
-
+    
     var lastLuminanceFront      = '0';
 
     var lastIndoorHumidity       = '0';
     var lastIndoorTemperature    = '0';
     var lastIndoorPressure       = '0';
-
+    
     var lastOutdoorHumidity       = '0';
     var lastOutdoorTemperature    = '0';
-
+    
     var lastTime                 = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});;
-
+    
+    var graphData = {
+        data  : null,
+        range : RangeEnum.DAY        
+    };
+    
     var buttons = {
-        dayButtonRect      : {text : 'DAY',   x : 0, y : 0, w : 0, h : 0, selected : true },
-        weekButtonRect     : {text : 'WEEK',  x : 0, y : 0, w : 0, h : 0, selected : false },
         indorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0 },
         outdoorButtonRect     : {text : 'OUTDOOR', x : 0, y : 0, w : 0, h : 0 },
         bmp085ButtonRect    : {text : 'BMP085', x : 0, y : 0, w : 0, h : 0 },
         luminanceButtonRect : {text : 'Luminance', x : 0, y : 0, w : 0, h : 0 }
     };
 
+    var graphButtonRangeGroup = {
+        dayButtonRect      : {text : 'DAY',   x : 0, y : 0, w : 0, h : 0, selected : true },
+        weekButtonRect     : {text : 'WEEK',  x : 0, y : 0, w : 0, h : 0, selected : false },
+                
+    };
     var historyFrameRect = {
         x : 0,
         y : 0,
@@ -71,9 +81,9 @@
             textWidth : 50,
             space : baseButton.space,
             seperatorBoxWidth : baseButton.space
-            //labeledInfoButtonWidth : baseButton.height / 2 + button.labelWidth + button.textWidth
+            //labeledInfoButtonWidth : baseButton.height / 2 + button.labelWidth + button.textWidth 
         };
-
+        
     var frame = {
         smallSize : 20,
         thinSize  : 10,
@@ -124,24 +134,27 @@
             lastTouch.x       = ev.gesture.center.pageX - offset.left;
             lastTouch.y       = ev.gesture.center.pageY - offset.top;
 
-            if (    lastTouch.x > buttons.dayButtonRect.x && lastTouch.x < (buttons.dayButtonRect.x + buttons.dayButtonRect.w)
-                        && lastTouch.y > buttons.dayButtonRect.y && lastTouch.y < (buttons.dayButtonRect.y + buttons.dayButtonRect.h)) {
-                buttons.dayButtonRect.selected = !buttons.dayButtonRect.selected;
-                drawToggleButton(canvas.getContext('2d'),buttons.dayButtonRect);
+            if (    lastTouch.x > graphButtonRangeGroup.dayButtonRect.x && lastTouch.x < (graphButtonRangeGroup.dayButtonRect.x + graphButtonRangeGroup.dayButtonRect.w)
+                        && lastTouch.y > graphButtonRangeGroup.dayButtonRect.y && lastTouch.y < (graphButtonRangeGroup.dayButtonRect.y + graphButtonRangeGroup.dayButtonRect.h)) {
+                graphButtonRangeGroup.dayButtonRect.selected = !graphButtonRangeGroup.dayButtonRect.selected;
+                setSelected(graphButtonRangeGroup,graphButtonRangeGroup.dayButtonRect); 
+                drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);
                 $element.triggerHandler({
-                    type:"daybuttontouch"
+                    type:"rangebuttontouch",
+                    range:RangeEnum.DAY
                   });
-            } else if (    lastTouch.x > buttons.weekButtonRect.x && lastTouch.x < (buttons.weekButtonRect.x + buttons.weekButtonRect.w)
-                        && lastTouch.y > buttons.weekButtonRect.y && lastTouch.y < (buttons.weekButtonRect.y + buttons.weekButtonRect.h)) {
-                buttons.weekButtonRect.selected = !buttons.weekButtonRect.selected;
-                drawToggleButton(canvas.getContext('2d'),buttons.weekButtonRect);
-
+            } else if (    lastTouch.x > graphButtonRangeGroup.weekButtonRect.x && lastTouch.x < (graphButtonRangeGroup.weekButtonRect.x + graphButtonRangeGroup.weekButtonRect.w)
+                        && lastTouch.y > graphButtonRangeGroup.weekButtonRect.y && lastTouch.y < (graphButtonRangeGroup.weekButtonRect.y + graphButtonRangeGroup.weekButtonRect.h)) {
+                graphButtonRangeGroup.weekButtonRect.selected = !graphButtonRangeGroup.weekButtonRect.selected;
+                setSelected(graphButtonRangeGroup,graphButtonRangeGroup.weekButtonRect);    
+                drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);
                 $element.triggerHandler({
-                    type:"weekbuttontouch"
+                    type:"rangebuttontouch",
+                    range:RangeEnum.WEEK
                   });
             } else if (    lastTouch.x > buttons.indorButtonRect.x && lastTouch.x < (buttons.indorButtonRect.x + buttons.indorButtonRect.w)
                         && lastTouch.y > buttons.indorButtonRect.y && lastTouch.y < (buttons.indorButtonRect.y + buttons.indorButtonRect.h)) {
-
+               
                 $element.triggerHandler({
                     type:"indoorbuttontouch"
                   });
@@ -150,7 +163,7 @@
                 $element.triggerHandler({
                     type:"outdoorbuttontouch"
                   });
-            }
+            } 
             ev.gesture.preventDefault();
 
         });
@@ -212,16 +225,23 @@
                 if (luminance !== lastLuminanceFront) {
                     lastLuminanceFront = luminance;
                     refresh(this.canvas);
-                }
-            }
+                }    
+            } 
         },
-
+        
         updateClock : function() {
+            
             var tt = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
             if (tt !== lastTime) {
                 lastTime = tt;
                 refresh(this.canvas);
-            }
+            }    
+        },
+        
+        updateGraphData : function(data, range) {
+            graphData.data  = data;
+            graphData.range = range;
+            refresh(this.canvas);
         }
     };
 
@@ -230,7 +250,7 @@
         if (!canvas) {
             return;
         }
-
+ 
         $(canvas).attr({
             width: $(window).innerWidth(),
             height: $(window).innerHeight()
@@ -266,13 +286,13 @@
         forecastFrameRect.h = sensorFrameRect.h;
 
         var baseButtonPosX = forecastFrameRect.x + frame.largeSize + 30 + baseButton.space;
-
+            
         ctx.clearRect(0, 0, windowWidth, windowHeight);
 
         drawHeader(ctx,FRAME_INSET,baseButton.space,windowWidth - FRAME_INSET);
         drawHistoryFrame(ctx,historyFrameRect.x,historyFrameRect.y,historyFrameRect.w,historyFrameRect.h,baseButtonPosX);
         drawIndoorFrame(ctx,sensorFrameRect.x,sensorFrameRect.y,sensorFrameRect.w,sensorFrameRect.h);
-        drawOutdoorFrame(ctx,forecastFrameRect.x,forecastFrameRect.y,forecastFrameRect.w,forecastFrameRect.h,baseButtonPosX);
+        drawForecastFrame(ctx,forecastFrameRect.x,forecastFrameRect.y,forecastFrameRect.w,forecastFrameRect.h,baseButtonPosX);
 
 
     }
@@ -332,12 +352,12 @@
 
         ctx.fill();
         ctx.closePath();
-
+        
         // image left
         var leftBarX = x + frame.largeSize + 50;
         var leftBarY = y + baseButton.space;
-        var leftBarH = h - 2 * baseButton.space - frame.smallSize;
-
+        var leftBarH = h - 2 * baseButton.space - frame.smallSize; 
+                
         ctx.fillStyle = '#ffff99';
 
         ctx.beginPath();
@@ -355,12 +375,12 @@
 
         ctx.fill();
         ctx.closePath();
-
+        
         //drawButtonVerticalGap(ctx,baseButtonPosX - baseButton.space,y + h - frame.smallSize,frame.smallSize);
-
+        
         // image right
         var rightBarX = x + w - getStatusButtonWidth() - 2 * baseButton.space;
-
+        
         ctx.beginPath();
         ctx.moveTo(rightBarX - frame.smallSize ,leftBarY);
         ctx.lineTo(rightBarX - frame.smallSize +  frame.thinSize,leftBarY);
@@ -376,51 +396,44 @@
         ctx.fill();
         ctx.closePath();
 
-        drawGraphArea(ctx,leftBarX + baseButton.space + frame.smallSize,leftBarY,rightBarX - leftBarX - 2 * baseButton.space - 2* frame.smallSize, leftBarH);
+        //var graphData = jQuery.parseJSON(testData);
+        drawGraphArea(ctx,leftBarX + baseButton.space + frame.smallSize,leftBarY,rightBarX - leftBarX - 2 * baseButton.space - 2* frame.smallSize, leftBarH,graphData);
         /////////
-
+        
         var buttonGapY = y + baseButton.height;
         var buttonPosX = x;
         var buttonPosY = y;
 
-        buttons.dayButtonRect.x = buttonPosX;
-        buttons.dayButtonRect.y = buttonPosY;
-        buttons.dayButtonRect.w = frame.largeSize;
-        buttons.dayButtonRect.h = baseButton.height;
+        graphButtonRangeGroup.dayButtonRect.x = buttonPosX;
+        graphButtonRangeGroup.dayButtonRect.y = buttonPosY;
+        graphButtonRangeGroup.dayButtonRect.w = frame.largeSize;
+        graphButtonRangeGroup.dayButtonRect.h = baseButton.height;
 
-        drawButton(ctx,buttons.dayButtonRect);
+        //drawToggleButton(ctx,graphButtonRangeGroup.dayButtonRect);
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
 
         buttonPosY = buttonGapY + baseButton.space;
 
-        buttons.weekButtonRect.x = buttonPosX;
-        buttons.weekButtonRect.y = buttonPosY;
-        buttons.weekButtonRect.w = frame.largeSize;
-        buttons.weekButtonRect.h = baseButton.height;
+        graphButtonRangeGroup.weekButtonRect.x = buttonPosX;
+        graphButtonRangeGroup.weekButtonRect.y = buttonPosY;
+        graphButtonRangeGroup.weekButtonRect.w = frame.largeSize;
+        graphButtonRangeGroup.weekButtonRect.h = baseButton.height;
 
-        drawToggleButton(ctx,buttons.weekButtonRect);
-
+        //drawToggleButton(ctx,graphButtonRangeGroup.weekButtonRect);
+  
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
-
-
+        
+        // draw the button group
+        drawToggleButtonGroup(ctx,graphButtonRangeGroup);
+        
         drawStatusButton(ctx,x + w - getStatusButtonWidth(),y,lastTime,false);
-
+        
         ctx.restore();
     }
 
-    /**
-     * Draws the sensor information.
-     * @param {type} ctx
-     * @param {type} x
-     * @param {type} y
-     * @param {type} w the width of the sensor area on the screen in pixel
-     * @param {type} h the height of the sensor area on the screen in pixel
-     * @param {type} baseButtonPosX description
-     * @returns {undefined}
-     */
-    function drawOutdoorFrame(ctx,x,y,w,h,baseButtonPosX) {
+    function drawForecastFrame(ctx,x,y,w,h,baseButtonPosX) {
         ctx.save();
 
         ctx.fillStyle = colorTable.frame;
@@ -443,52 +456,6 @@
         ctx.fill();
         ctx.closePath();
 
-/*
-        drawButtonVerticalGap(ctx,baseButtonPosX - baseButton.space,y,frame.smallSize);
-        drawButtonVerticalGap(ctx,baseButtonPosX - baseButton.space,y + h - frame.smallSize,frame.smallSize);
-
-        var buttonGapY = y + (frame.smallSize + baseButton.height);
-        var buttonPosX = baseButtonPosX;
-        var buttonPosY = buttonGapY + baseButton.space;
-
-        // temperature and humidity
-
-        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
-
-
-
-        // temperature and pressure
-
-        buttons.bmp085ButtonRect.x = x;
-        buttons.bmp085ButtonRect.y = buttonPosY;
-        buttons.bmp085ButtonRect.w = frame.largeSize;
-        buttons.bmp085ButtonRect.h = 2 * baseButton.height +  baseButton.space;
-
-        drawButton(ctx,buttons.bmp085ButtonRect);
-        //drawLabeledInfoButton(ctx,buttonPosX,buttonPosY,"TEMP.",lastTemperatureBMP085,"#3366CC");
-        buttonPosY = buttonPosY + baseButton.height + baseButton.space;
-        //drawLabeledInfoButton(ctx,buttonPosX,buttonPosY,"PRESSURE",lastPressureBMP085,"#3366CC");
-
-        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
-        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
-
-        // luminance front and rear
-        buttonPosY = buttonGapY + baseButton.space;
-
-        buttons.luminanceButtonRect.x = x;
-        buttons.luminanceButtonRect.y = buttonPosY;
-        buttons.luminanceButtonRect.w = frame.largeSize;
-        buttons.luminanceButtonRect.h = baseButton.height +  baseButton.space;
-
-        drawButton(ctx,buttons.luminanceButtonRect);
-        var ibw = drawLabeledInfoButton(ctx,buttonPosX,buttonPosY,"FRONT",lastLuminanceFront,"#3366CC");
-
-        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
-        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
-
-        drawButtonVerticalGap(ctx,baseButtonPosX + ibw,y,frame.smallSize);
-        drawButtonVerticalGap(ctx,baseButtonPosX + ibw,y + h - frame.smallSize,frame.smallSize);
-        */
         ctx.restore();
     }
 
@@ -508,7 +475,7 @@
         ctx.lineTo(x,y + h);
         ctx.lineTo(x,y + h - frame.smallSize);
         ctx.lineTo(x + w - frame.largeSize - baseButton.height,y + h - frame.smallSize);
-
+ 
         ctx.quadraticCurveTo(x + w - frame.largeSize,y + h - frame.smallSize,x + w - frame.largeSize,y + h - frame.smallSize - baseButton.height);
         ctx.lineTo(x + w - frame.largeSize,y + frame.smallSize + baseButton.height);
         ctx.quadraticCurveTo(x + w - frame.largeSize,y + frame.smallSize,x + w - frame.largeSize - baseButton.height,y + frame.smallSize);
@@ -517,13 +484,12 @@
         ctx.fill();
 
         ctx.closePath();
-
+        
         var buttonGapY = y + (frame.smallSize + baseButton.height);
         var buttonPosX = x + w - frame.largeSize;
         var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - 30 - button.space;
         var buttonPosY = buttonGapY + baseButton.space;
 
-        // engine on/off
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
 
         buttons.indorButtonRect.x = buttonPosX;
@@ -532,7 +498,7 @@
         buttons.indorButtonRect.h = 2 * baseButton.height + baseButton.space;
 
         drawButton(ctx,buttons.indorButtonRect);
-
+        
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastIndoorHumidity,"#FFCC66");
         drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastIndoorTemperature,"#FFCC66");
 
@@ -540,11 +506,11 @@
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastIndoorPressure,"#FFCC66");
 
         buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
-
+        
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
-
+        
         buttonPosY = buttonGapY + baseButton.space;
-
+        
         buttons.outdoorButtonRect.x = buttonPosX;
         buttons.outdoorButtonRect.y = buttonPosY;
         buttons.outdoorButtonRect.w = frame.largeSize;
@@ -557,13 +523,13 @@
 
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
-
+        
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
 
-        ctx.restore();
+        ctx.restore(); 
     }
-
-
+    
+ 
 
     function drawLabeledInfoButton(ctx,x,y,labelText,infoText,labelColor) {
         ctx.save();
@@ -579,7 +545,7 @@
         ctx.lineTo(leftHalfCirclePosX,y + button.size);
         ctx.fill();
         ctx.closePath();
-
+        
         // Draw label text
         ctx.font      = "20pt LcarsGTJ3";
         ctx.fillStyle = colorTable.background;
@@ -590,7 +556,7 @@
 
         // draw small seperator box
         var seperatorBoxPosX = leftHalfCirclePosX + button.labelWidth + baseButton.space;
-
+        
         ctx.beginPath();
         ctx.moveTo(seperatorBoxPosX,y);
         ctx.lineTo(seperatorBoxPosX + button.seperatorBoxWidth,y);
@@ -601,14 +567,14 @@
 
         // Draw info text
         var infoBoxPosX = seperatorBoxPosX + button.seperatorBoxWidth + baseButton.space;
-
+        
         ctx.font         = "30pt LcarsGTJ3";
         ctx.textAlign    = "right";
-
+        
         ctx.fillText(infoText, infoBoxPosX + button.textWidth, y + button.size / 2);
 
         var rightHalfCirclePosX = infoBoxPosX + button.textWidth + baseButton.space;
-
+        
         ctx.beginPath();
         ctx.arc(rightHalfCirclePosX + baseButton.space, y + button.radius, button.radius, Math.radians(90), Math.radians(270), true);
         ctx.moveTo(rightHalfCirclePosX ,y);
@@ -617,10 +583,10 @@
         ctx.lineTo(rightHalfCirclePosX ,y + button.size);
         ctx.fill();
         ctx.closePath();
-
+        
         ctx.restore();
-
-
+        
+        
         return rightHalfCirclePosX + baseButton.space + button.radius - x;
     }
 
@@ -635,28 +601,28 @@
         } else {
             ctx.fillStyle = colorTable.statusbutton_normal;
         }
-
+        
         ctx.beginPath();
         ctx.arc(leftHalfCirclePosX, y + button.radius, button.radius, Math.radians(90), Math.radians(270), false);
         ctx.moveTo(leftHalfCirclePosX,y);
         ctx.lineTo(rightHalfCirclePosX,y);
         ctx.lineTo(rightHalfCirclePosX,y + button.size);
-        ctx.lineTo(leftHalfCirclePosX,y + button.size);
+        ctx.lineTo(leftHalfCirclePosX,y + button.size);       
         ctx.fill();
         ctx.closePath();
         ctx.beginPath();
         ctx.arc(rightHalfCirclePosX - 1, y + button.radius, button.radius, Math.radians(90), Math.radians(270), true);
         ctx.fill();
         ctx.closePath();
-
+        
         // Draw label text
         ctx.font      = "30pt LcarsGTJ3";
         ctx.fillStyle = colorTable.background;
         ctx.textAlign = "center";
+        
         ctx.fillText(statusText, leftHalfCirclePosX+ rightHalfCirclePosX/2 - leftHalfCirclePosX /2, y + button.size / 2);
 
         ctx.restore();
-
         return rightHalfCirclePosX + baseButton.space + button.radius - x;
     }
 
@@ -678,7 +644,7 @@
         ctx.fillText(button.text,button.x + frame.largeSize - baseButton.space,button.y + baseButton.space);
         ctx.restore();
     }
-
+    
     function drawToggleButton(ctx,button) {
         ctx.save();
 
@@ -702,7 +668,13 @@
         ctx.fillText(button.text,button.x + frame.largeSize - baseButton.space,button.y + baseButton.space);
         ctx.restore();
     }
-
+    
+    function drawToggleButtonGroup(ctx,buttonGroup) {
+        for (var name in buttonGroup) {
+            drawToggleButton(ctx,buttonGroup[name]);
+        } 
+    }
+    
     function drawButtonHorizontalGap(ctx,x,y,w) {
         ctx.save();
 
@@ -716,7 +688,7 @@
 
         ctx.restore();
     }
-
+    
     function drawButtonVerticalGap(ctx,x,y,h) {
         ctx.save();
 
@@ -740,56 +712,75 @@
     }
 
     function drawGraphArea(ctx,x,y,w,h) {
+                
         ctx.save();
-
+        
         var step = Math.floor(w / 24);
-
-        var pixelPerMS = step / (60 * 60 * 1000);
-
+        
+        
+        
+        
+        
+        var width  = step * Math.floor(w/step);
+        var height = step * Math.floor(h/step) - step;
+        
+        var xZeroMS = x + w / 2 + width / 2;
+        var yZero = y + h / 2 + height / 2;
+                
+        ctx.beginPath();        
         for (var yAxis = 0; yAxis <= w / 2; yAxis += step) {
             ctx.moveTo(x + w / 2 + yAxis,y);
             ctx.lineTo(x + w / 2 + yAxis,y + h);
-            ctx.moveTo(x + w / 2 - yAxis,y);
-            ctx.lineTo(x + w / 2 - yAxis,y + h);
+            if (yAxis !== 0) {
+                ctx.moveTo(x + w / 2 - yAxis,y);
+                ctx.lineTo(x + w / 2 - yAxis,y + h);
+            }
         }
-
+        
         for (var xAxis = 0; xAxis <= h / 2; xAxis += step) {
             ctx.moveTo(x,  y + h / 2 + xAxis);
             ctx.lineTo(x + w, y + h / 2 + xAxis);
-            ctx.moveTo(x,  y + h / 2 - xAxis);
-            ctx.lineTo(x + w, y + h / 2 - xAxis);
+            if (xAxis !== 0) {
+                ctx.moveTo(x,  y + h / 2 - xAxis);
+                ctx.lineTo(x + w, y + h / 2 - xAxis);
+            }
         }
         ctx.lineWidth = 1;
-        ctx.strokeStyle = colorTable.frame;
+        ctx.strokeStyle = '#006699';
         ctx.stroke();
-
-        var data = jQuery.parseJSON(testData);
-
-
-        var maxValue = data.maxValue;
-        var minValue = data.minValue;
-
-        var pixelPerDegree = h / (maxValue - minValue);
-
-
-        data.sensorData.sort(function(a,b){
-              return new Date(b.time) - new Date(a.time);
-        });
-
-        var maxDate = new Date(data.sensorData[0].time);
-        var maxTimeInMS = maxDate.getTime();
-
-        for (var index = 0; index < data.sensorData.length; ++index) {
-            ctx.fillRect(x + w - pixelPerMS *(maxTimeInMS - new Date(data.sensorData[index].time).getTime()),y + h - data.sensorData[index].value / (pixelPerDegree) * h ,1,1);
+        
+        if (graphData.data === null || graphData.data.sensordata === null) {
+            return;
         }
-        ctx.lineWidth = 1;
-        //ctx.strokeStyle = '#FF0000';
+        var maxValue = graphData.data.maxValue;
+        var minValue = graphData.data.minValue;
+                
+        var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
+        var pixelPerDegree = height / (maxValue - minValue);
+         
+        var maxDate = new Date(graphData.data.sensorData[0].time);
+        var maxTimeInMS = maxDate.getTime(); 
+
+        ctx.beginPath();         
+        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),yZero - graphData.data.sensorData[0].value * (pixelPerDegree));
+        for (var index = 0; index < graphData.data.sensorData.length; ++index) {
+            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),yZero - graphData.data.sensorData[index].value * (pixelPerDegree) );
+        }
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#FF9933';
         ctx.stroke();
-
-
+        
+        
         ctx.restore();
     }
-
+    
+    function setSelected(buttonGroup, button) {
+        for (var name in buttonGroup) {
+            buttonGroup[name].selected = false;
+        }
+        button.selected = true;
+    };
+        
     $.fn.jLCARSControlView = function(options) {
 
         // var log = log4javascript.getLogger('jMobileDocView');

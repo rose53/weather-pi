@@ -26,10 +26,15 @@ public class SensorDataResource {
     @Path("/{sensor}")
     public Response getSensorData(@PathParam("sensor") String sensor,
                                   @QueryParam("place") @DefaultValue("indoor") String place,
-                                  @QueryParam("range") String range) {
+                                  @QueryParam("range") String range,
+                                  @QueryParam("samples") Integer samples) {
 
 
         List<SensorDataQueryResult> data = SensorDataCdiHelper.instance.getSensorData(sensor,place,range);
+
+        if (samples != null && samples > 0) {
+
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

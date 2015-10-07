@@ -1,4 +1,4 @@
-/* global log, sensordataService */
+/* global log, sensordataService, RangeEnum */
 
 (function($) {
 
@@ -15,14 +15,10 @@
             var $page = $("#controlview");
             $("#controlcanvas").jLCARSControlView();
 
-            $("#controlcanvas").on("daybuttontouch", function(event) {
-                handleDayButtonEvent(event);
+            $("#controlcanvas").on("rangebuttontouch", function(event) {
+                handleRangeButtonEvent(event);
             });
-
-            $("#controlcanvas").on("weekbuttontouch", function(event) {
-                handleWeekButtonEvent(event);
-            });
-
+            
             var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
             $page.on("pageshow", function(event, ui) {
                 lcarsControlView.refresh();
@@ -59,38 +55,38 @@
             };
 
             sensordataService.getTemperature("actual","indoor",
-                function(data){
+                function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorTemperature(data.sensorData[0].value.toFixed(1));
-                    }
+                    }                    
                 });
-
+                
             sensordataService.getPressure("actual","indoor",
-                function(data){
+                function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorPressure(parseInt(data.sensorData[0].value));
-                    }
+                    }                    
                 });
 
             sensordataService.getHumidity("actual","indoor",
-                function(data){
+                function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorHumidity(parseInt(data.sensorData[0].value));
-                    }
+                    }                    
                 });
 
             sensordataService.getTemperature("actual","outdoor",
-                function(data){
+                function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateOutdoorTemperature(data.sensorData[0].value.toFixed(1));
-                    }
+                    }                    
                 });
 
             sensordataService.getHumidity("actual","outdoor",
-                function(data){
+                function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateOutdoorHumidity(parseInt(data.sensorData[0].value));
-                    }
+                    }                    
                 });
 
             setInterval(function(){ clock(); }, 5000);
@@ -113,8 +109,7 @@
 
         // Method calling logic
         if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(
-                    arguments, 1));
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
             return methods.initAll.apply(this, arguments);
         } else {
@@ -128,16 +123,15 @@ $(document).ready(function() {
     $().initApp();
 });
 
-var handleDayButtonEvent = function(event) {
-    log.debug("handleDayButtonEvent: daybuttontouch");
+var handleRangeButtonEvent = function(event) {
+    log.debug("handleRangeButtonEvent: " + RangeEnum.properties[event.range].name);
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    sensordataService.getTemperature("day",function(data){ log.debug("cb" + data.maxValue); });
-};
-
-
-var handleWeekButtonEvent = function(event) {
-    log.debug("handleWeekButtonEvent: weekbuttontouch");
-    sensordataService.getTemperature("week",function(data){ log.debug(data); });
+    sensordataService.getTemperature(RangeEnum.properties[event.range].queryvalue,"indoor",
+        function(data){ 
+            if (data.sensorData.length > 0) {
+                lcarsControlView.updateGraphData(data,event.range);
+            }                    
+        });    
 };
 
 var clock = function() {

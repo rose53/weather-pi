@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.ESensorType;
 
+@ApplicationScoped
 public class Database {
 
     static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION,TEMPERATURE_OUT,HUMIDITY_OUT) values (SYSDATE(),?,?,?,?,?,?)";
