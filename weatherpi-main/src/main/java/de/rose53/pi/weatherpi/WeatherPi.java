@@ -30,6 +30,7 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.mqtt.MqttCdiEventBridge;
+import de.rose53.pi.weatherpi.twitter.TwitterPlublisher;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 import de.rose53.weatherpi.web.TemperatureValue;
 import de.rose53.weatherpi.web.Webserver;
@@ -58,6 +59,8 @@ public class WeatherPi implements Runnable {
     @Inject
     Webserver webServer;
 
+    @Inject
+    TwitterPlublisher twitter;
 
     @Inject
     @Any

@@ -15,8 +15,8 @@
             var $page = $("#controlview");
             $("#controlcanvas").jLCARSControlView();
 
-            $("#controlcanvas").on("rangebuttontouch", function(event) {
-                handleRangeButtonEvent(event);
+            $("#controlcanvas").on("graphbuttontouch", function(event) {
+                handleGraphButtonEvent(event);
             });
             
             var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
@@ -54,35 +54,35 @@
                 }
             };
 
-            sensordataService.getTemperature("actual","indoor",
+            sensordataService.getTemperature("actual","indoor",1,
                 function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorTemperature(data.sensorData[0].value.toFixed(1));
                     }                    
                 });
                 
-            sensordataService.getPressure("actual","indoor",
+            sensordataService.getPressure("actual","indoor",1,
                 function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorPressure(parseInt(data.sensorData[0].value));
                     }                    
                 });
 
-            sensordataService.getHumidity("actual","indoor",
+            sensordataService.getHumidity("actual","indoor",1,
                 function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateIndoorHumidity(parseInt(data.sensorData[0].value));
                     }                    
                 });
 
-            sensordataService.getTemperature("actual","outdoor",
+            sensordataService.getTemperature("actual","outdoor",1,
                 function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateOutdoorTemperature(data.sensorData[0].value.toFixed(1));
                     }                    
                 });
 
-            sensordataService.getHumidity("actual","outdoor",
+            sensordataService.getHumidity("actual","outdoor",1,
                 function(data){ 
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateOutdoorHumidity(parseInt(data.sensorData[0].value));
@@ -123,10 +123,13 @@ $(document).ready(function() {
     $().initApp();
 });
 
-var handleRangeButtonEvent = function(event) {
-    log.debug("handleRangeButtonEvent: " + RangeEnum.properties[event.range].name);
+var handleGraphButtonEvent = function(event) {
+    log.debug("handleRangeButtonEvent: " + event.sensor);
+    log.debug("                        " + RangeEnum.properties[event.range].name);
+    log.debug("                        " + event.place);
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    sensordataService.getTemperature(RangeEnum.properties[event.range].queryvalue,"indoor",
+    sensordataService.doRestCall(event.sensor,RangeEnum.properties[event.range].queryvalue,event.place,
+        lcarsControlView.getMaxGraphData(),
         function(data){ 
             if (data.sensorData.length > 0) {
                 lcarsControlView.updateGraphData(data,event.range);

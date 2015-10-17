@@ -92,7 +92,7 @@ public class Database {
         insertStatement.executeUpdate();
     }
 
-    public List<SensorDataQueryResult> getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) throws SQLException {
+    public SensorDataQueryResult[] getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) throws SQLException {
 
         if (range == null) {
             range = ERange.ACTUAL;
@@ -131,7 +131,7 @@ public class Database {
         }
         if (s == null) {
             logger.error("getSensorData: no statement found for sensorType = >{}<",sensorType);
-            return Collections.emptyList();
+            return new SensorDataQueryResult[0];
         }
 
         s.setTimestamp(1, Timestamp.valueOf(range.getPastTime()));
@@ -147,6 +147,6 @@ public class Database {
                 }
             }
         }
-        return retVal;
+        return retVal.toArray(new SensorDataQueryResult[retVal.size()]);
     }
 }

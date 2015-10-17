@@ -1,8 +1,8 @@
 package de.rose53.weatherpi.web;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingDouble;
-
-import java.util.Collections;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ class SensorDataQueryResponse {
 
     public SensorDataQueryResponse(List<SensorDataQueryResult> sensorData) {
         if (sensorData == null) {
-            this.sensorData = Collections.emptyList();
+            this.sensorData = emptyList();
         } else {
             this.sensorData = sensorData;
         }
@@ -24,6 +24,10 @@ class SensorDataQueryResponse {
             maxValue = sensorData.stream().max(comparingDouble(data -> data.getValue())).get().getValue();
             minValue = sensorData.stream().min(comparingDouble(data -> data.getValue())).get().getValue();
         }
+    }
+
+    public SensorDataQueryResponse(SensorDataQueryResult[] sensorData) {
+        this(asList(sensorData));
     }
 
     public List<SensorDataQueryResult> getSensorData() {

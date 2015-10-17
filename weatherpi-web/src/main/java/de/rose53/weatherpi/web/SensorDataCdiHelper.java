@@ -31,7 +31,7 @@ public class SensorDataCdiHelper {
         instance = this;
     }
 
-    public List<SensorDataQueryResult> getSensorData(String sensor, String place, String range) {
+    public SensorDataQueryResult[] getSensorData(String sensor, String place, String range) {
 
         ESensorType sensorType = ESensorType.fromString(sensor);
         if (sensorType == null) {
@@ -42,7 +42,7 @@ public class SensorDataCdiHelper {
             return database.getSensorData(sensorType,ESensorPlace.fromString(place),ERange.fromString(range));
         } catch (SQLException e) {
             logger.error("getSensorData: ",e);
-            return Collections.emptyList();
+            return new SensorDataQueryResult[0];
         }
     }
 }

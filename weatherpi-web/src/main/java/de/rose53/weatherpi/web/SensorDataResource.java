@@ -1,5 +1,7 @@
 package de.rose53.weatherpi.web;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -30,18 +32,33 @@ public class SensorDataResource {
                                   @QueryParam("samples") Integer samples) {
 
 
-        List<SensorDataQueryResult> data = SensorDataCdiHelper.instance.getSensorData(sensor,place,range);
+        SensorDataQueryResult[] data = SensorDataCdiHelper.instance.getSensorData(sensor,place,range);
 
-        if (samples != null && samples > 0) {
-
-        }
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String retVal = null;
         try {
-            retVal = mapper.writeValueAsString(new SensorDataQueryResponse(data));
+            if (samples != null && samples > 0 && data.length > samples) {
+                // reduce the number of samples
+                int window = data.length / samples;
+                if ((window & 1) == 0) {
+                    window--;
+                }
+                List<SensorDataQueryResult> reducedData = new LinkedList<>();
+                reducedData.add(data[0]); // add first element
+
+                SensorDataQueryResult[] windowData;
+                for (int i = 1; i + window < data.length; i+= window) {
+                    windowData = Arrays.copyOfRange(data,i,i+window);
+                    Arrays.sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));
+                    reducedData.add(windowData[window/2]);
+                }
+                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(reducedData));
+            }  else {
+                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(data));
+            }
         } catch (JsonProcessingException e) {
             return Response.serverError().build();
         }

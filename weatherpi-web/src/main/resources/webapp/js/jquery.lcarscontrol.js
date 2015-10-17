@@ -1,4 +1,4 @@
-/* global RangeEnum */
+/* global RangeEnum, log */
 
 /**
  *
@@ -9,6 +9,18 @@
 
     var FRAME_INSET = 20;
 
+    var colorTable = {
+        header                : '#FF9933',
+        text                  : '#3366CC',
+        background            : '#000000',
+        frame                 : '#CC99CC',
+        button_normal         : '#99CCFF',
+        togglebutton_selected : '#FFFF99',
+        togglebutton_normal   : '#99CCFF',
+        statusbutton_set      : '#FFCC66',
+        statusbutton_normal   : '#99CCFF'
+    };
+    
     var lastTouch = {
         x : -1,
         y : -1
@@ -31,17 +43,29 @@
     };
     
     var buttons = {
-        indorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0 },
-        outdoorButtonRect     : {text : 'OUTDOOR', x : 0, y : 0, w : 0, h : 0 },
-        bmp085ButtonRect    : {text : 'BMP085', x : 0, y : 0, w : 0, h : 0 },
-        luminanceButtonRect : {text : 'Luminance', x : 0, y : 0, w : 0, h : 0 }
+        indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
+        outdoorButtonRect   : {text : 'OUTDOOR', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
     };
 
     var graphButtonRangeGroup = {
-        dayButtonRect      : {text : 'DAY',   x : 0, y : 0, w : 0, h : 0, selected : true },
-        weekButtonRect     : {text : 'WEEK',  x : 0, y : 0, w : 0, h : 0, selected : false },
-                
+        dayButtonRect      : {text : 'DAY',  range: RangeEnum.DAY,   x : 0, y : 0, w : 0, h : 0, selected : true  },
+        weekButtonRect     : {text : 'WEEK', range: RangeEnum.WEEK,  x : 0, y : 0, w : 0, h : 0, selected : false },
+        monthButtonRect    : {text : 'MONTH',range: RangeEnum.MONTH, x : 0, y : 0, w : 0, h : 0, selected : false },        
+        yearButtonRect     : {text : 'YEAR', range: RangeEnum.YEAR,  x : 0, y : 0, w : 0, h : 0, selected : false }        
     };
+    
+    var graphButtonSensorGroup = {
+        temperatureButtonRect : {text : 'TEMP.',    sensor: "temperature", x : 0, y : 0, w : 0, h : 0, selected : true },
+        humidityButtonRect    : {text : 'HUMIDITY', sensor: "humidity",  x : 0, y : 0, w : 0, h : 0, selected : false },
+        pressureButtonRect    : {text : 'PRESSURE', sensor: "pressure", x : 0, y : 0, w : 0, h : 0, selected : false }        
+    };
+
+    var graphButtonPlaceGroup = {
+        indoorButtonRect   : {text : 'INDOOR',  place: 'indoor',  x : 0, y : 0, w : 0, h : 0, selected : true },
+        outdoor1ButtonRect : {text : 'OUTDOOR', place: 'outdoor', x : 0, y : 0, w : 0, h : 0, selected : false }       
+    };
+
+
     var historyFrameRect = {
         x : 0,
         y : 0,
@@ -96,17 +120,7 @@
     //-1=Off(zoomingMode); 0=1:1; 1=FitToWidth; 2=FitToWindow; 3=FitToHeight
     };
 
-    var colorTable = {
-        header                : '#FF9933',
-        text                  : '#3366CC',
-        background            : '#000000',
-        frame                 : '#CC99CC',
-        button_normal         : '#99CCFF',
-        togglebutton_selected : '#FFFF99',
-        togglebutton_normal   : '#99CCFF',
-        statusbutton_set      : '#FFCC66',
-        statusbutton_normal   : '#99CCFF'
-    };
+
 
     var jLCARSControlView = function(element, options) {
         var $element = $(element);
@@ -133,37 +147,17 @@
 
             lastTouch.x       = ev.gesture.center.pageX - offset.left;
             lastTouch.y       = ev.gesture.center.pageY - offset.top;
-
-            if (    lastTouch.x > graphButtonRangeGroup.dayButtonRect.x && lastTouch.x < (graphButtonRangeGroup.dayButtonRect.x + graphButtonRangeGroup.dayButtonRect.w)
-                        && lastTouch.y > graphButtonRangeGroup.dayButtonRect.y && lastTouch.y < (graphButtonRangeGroup.dayButtonRect.y + graphButtonRangeGroup.dayButtonRect.h)) {
-                graphButtonRangeGroup.dayButtonRect.selected = !graphButtonRangeGroup.dayButtonRect.selected;
-                setSelected(graphButtonRangeGroup,graphButtonRangeGroup.dayButtonRect); 
-                drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);
-                $element.triggerHandler({
-                    type:"rangebuttontouch",
-                    range:RangeEnum.DAY
-                  });
-            } else if (    lastTouch.x > graphButtonRangeGroup.weekButtonRect.x && lastTouch.x < (graphButtonRangeGroup.weekButtonRect.x + graphButtonRangeGroup.weekButtonRect.w)
-                        && lastTouch.y > graphButtonRangeGroup.weekButtonRect.y && lastTouch.y < (graphButtonRangeGroup.weekButtonRect.y + graphButtonRangeGroup.weekButtonRect.h)) {
-                graphButtonRangeGroup.weekButtonRect.selected = !graphButtonRangeGroup.weekButtonRect.selected;
-                setSelected(graphButtonRangeGroup,graphButtonRangeGroup.weekButtonRect);    
-                drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);
-                $element.triggerHandler({
-                    type:"rangebuttontouch",
-                    range:RangeEnum.WEEK
-                  });
-            } else if (    lastTouch.x > buttons.indorButtonRect.x && lastTouch.x < (buttons.indorButtonRect.x + buttons.indorButtonRect.w)
-                        && lastTouch.y > buttons.indorButtonRect.y && lastTouch.y < (buttons.indorButtonRect.y + buttons.indorButtonRect.h)) {
-               
-                $element.triggerHandler({
-                    type:"indoorbuttontouch"
-                  });
-            } else if (    lastTouch.x > buttons.outdoorButtonRect.x && lastTouch.x < (buttons.outdoorButtonRect.x + buttons.outdoorButtonRect.w)
-                        && lastTouch.y > buttons.outdoorButtonRect.y && lastTouch.y < (buttons.outdoorButtonRect.y + buttons.outdoorButtonRect.h)) {
-                $element.triggerHandler({
-                    type:"outdoorbuttontouch"
-                  });
-            } 
+           
+            if ((bb = isTouchedButtonGroup(graphButtonRangeGroup)) !== null) {
+                setSelected(graphButtonRangeGroup,bb,canvas); 
+                $element.triggerHandler(getGraphEventData());
+            } else if ((bb = isTouchedButtonGroup(graphButtonPlaceGroup)) !== null) {
+                setSelected(graphButtonPlaceGroup,bb,canvas); 
+                $element.triggerHandler(getGraphEventData());
+            } else if ((bb = isTouchedButtonGroup(graphButtonSensorGroup)) !== null) {
+                setSelected(graphButtonSensorGroup,bb,canvas); 
+                $element.triggerHandler(getGraphEventData());
+            }
             ev.gesture.preventDefault();
 
         });
@@ -241,10 +235,68 @@
         updateGraphData : function(data, range) {
             graphData.data  = data;
             graphData.range = range;
+            
+            graphData.data.sensorData.sort(function(a,b){
+              return new Date(b.time) - new Date(a.time);
+            });
             refresh(this.canvas);
+        },
+        
+        getMaxGraphData : function() {
+            return historyFrameRect.w;
         }
     };
 
+    function isTouched(button) {
+        
+        if (   lastTouch.x > button.x && lastTouch.x < (button.x + button.w)
+            && lastTouch.y > button.y && lastTouch.y < (button.y + button.h)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function isTouchedButtonGroup(buttonGroup) {
+        for (var name in buttonGroup) {
+            if (isTouched(buttonGroup[name])){
+                return buttonGroup[name];
+            }
+        } 
+        return null;
+    }
+    
+    function getGraphEventData() {
+        
+        var range;
+        for (var name in graphButtonRangeGroup) {
+            if (graphButtonRangeGroup[name].selected){
+                range = graphButtonRangeGroup[name].range;
+            }
+        } 
+
+        var place;
+        for (var name in graphButtonPlaceGroup) {
+            if (graphButtonPlaceGroup[name].selected){
+                place = graphButtonPlaceGroup[name].place;
+            }
+        } 
+
+        var sensor;
+        for (var name in graphButtonSensorGroup) {
+            if (graphButtonSensorGroup[name].selected){
+                sensor = graphButtonSensorGroup[name].sensor;
+            }
+        } 
+        
+        return {    
+            type   :"graphbuttontouch",
+            range  : range,
+            place  : place,
+            sensor : sensor
+        };
+    }
+    
     function refresh(canvas) {
 
         if (!canvas) {
@@ -273,7 +325,7 @@
         historyFrameRect.x = FRAME_INSET;
         historyFrameRect.y = header.size + 2 * baseButton.space;
         historyFrameRect.w = windowWidth - 2 * FRAME_INSET;
-        historyFrameRect.h = 250;
+        historyFrameRect.h = 236;
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
@@ -291,10 +343,8 @@
 
         drawHeader(ctx,FRAME_INSET,baseButton.space,windowWidth - FRAME_INSET);
         drawHistoryFrame(ctx,historyFrameRect.x,historyFrameRect.y,historyFrameRect.w,historyFrameRect.h,baseButtonPosX);
-        drawIndoorFrame(ctx,sensorFrameRect.x,sensorFrameRect.y,sensorFrameRect.w,sensorFrameRect.h);
+        drawActSensorDataFrame(ctx,sensorFrameRect.x,sensorFrameRect.y,sensorFrameRect.w,sensorFrameRect.h);
         drawForecastFrame(ctx,forecastFrameRect.x,forecastFrameRect.y,forecastFrameRect.w,forecastFrameRect.h,baseButtonPosX);
-
-
     }
 
 
@@ -302,7 +352,7 @@
         ctx.save();
 
         ctx.fillStyle = colorTable.header;
-        ctx.font      = "40pt LcarsGTJ3";
+        
         ctx.beginPath();
         ctx.arc(x + header.radius, header.radius + baseButton.space, header.radius, Math.radians(90), Math.radians(270), false);
         ctx.moveTo(x + header.radius,y);
@@ -311,8 +361,9 @@
         ctx.lineTo(x + header.radius,y + header.size);
         ctx.fill();
         ctx.closePath();
-
+        
         ctx.fillStyle = "#3366CC";
+        ctx.font      = "40pt LcarsGTJ3";
         var metrics = ctx.measureText("WeatherPi");
         var width = metrics.width;
         ctx.fillText("WeatherPi",x + w - 2 * header.radius - header.size - width - header.space, y + header.size);
@@ -330,6 +381,12 @@
         ctx.fill();
         ctx.closePath();
 
+        // Draw label text
+        ctx.font      = "30pt LcarsGTJ3";
+        ctx.fillStyle = colorTable.background;
+        ctx.textBaseline = "middle";
+        
+        ctx.fillText(lastTime, x + frame.largeSize + header.space, y + header.size / 2);
         ctx.restore();
     }
 
@@ -354,7 +411,7 @@
         ctx.closePath();
         
         // image left
-        var leftBarX = x + frame.largeSize + 50;
+        var leftBarX = x + frame.largeSize + baseButton.space + 2 * baseButton.width + 2 * baseButton.space;
         var leftBarY = y + baseButton.space;
         var leftBarH = h - 2 * baseButton.space - frame.smallSize; 
                 
@@ -379,7 +436,7 @@
         //drawButtonVerticalGap(ctx,baseButtonPosX - baseButton.space,y + h - frame.smallSize,frame.smallSize);
         
         // image right
-        var rightBarX = x + w - getStatusButtonWidth() - 2 * baseButton.space;
+        var rightBarX = x + w ;
         
         ctx.beginPath();
         ctx.moveTo(rightBarX - frame.smallSize ,leftBarY);
@@ -408,8 +465,17 @@
         graphButtonRangeGroup.dayButtonRect.y = buttonPosY;
         graphButtonRangeGroup.dayButtonRect.w = frame.largeSize;
         graphButtonRangeGroup.dayButtonRect.h = baseButton.height;
+        
+        graphButtonSensorGroup.temperatureButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.temperatureButtonRect.y = buttonPosY;
+        graphButtonSensorGroup.temperatureButtonRect.w = frame.largeSize;
+        graphButtonSensorGroup.temperatureButtonRect.h = baseButton.height;
 
-        //drawToggleButton(ctx,graphButtonRangeGroup.dayButtonRect);
+        graphButtonPlaceGroup.indoorButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.indoorButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.indoorButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.indoorButtonRect.h = baseButton.height;
+
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
 
         buttonPosY = buttonGapY + baseButton.space;
@@ -419,16 +485,53 @@
         graphButtonRangeGroup.weekButtonRect.w = frame.largeSize;
         graphButtonRangeGroup.weekButtonRect.h = baseButton.height;
 
+        graphButtonSensorGroup.pressureButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.pressureButtonRect.y = buttonPosY;
+        graphButtonSensorGroup.pressureButtonRect.w = frame.largeSize;
+        graphButtonSensorGroup.pressureButtonRect.h = baseButton.height;
+
+        graphButtonPlaceGroup.outdoor1ButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.outdoor1ButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.outdoor1ButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.outdoor1ButtonRect.h = baseButton.height;
+
+        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
+
+        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
+        
+        buttonPosY = buttonGapY + baseButton.space;
+
+        graphButtonRangeGroup.monthButtonRect.x = buttonPosX;
+        graphButtonRangeGroup.monthButtonRect.y = buttonPosY;
+        graphButtonRangeGroup.monthButtonRect.w = frame.largeSize;
+        graphButtonRangeGroup.monthButtonRect.h = baseButton.height;
+
+        graphButtonSensorGroup.humidityButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.humidityButtonRect.y = buttonPosY;
+        graphButtonSensorGroup.humidityButtonRect.w = frame.largeSize;
+        graphButtonSensorGroup.humidityButtonRect.h = baseButton.height;  
+        
+        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
+
+        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
+        
+        buttonPosY = buttonGapY + baseButton.space;
+
+        graphButtonRangeGroup.yearButtonRect.x = buttonPosX;
+        graphButtonRangeGroup.yearButtonRect.y = buttonPosY;
+        graphButtonRangeGroup.yearButtonRect.w = frame.largeSize;
+        graphButtonRangeGroup.yearButtonRect.h = baseButton.height;
+
         //drawToggleButton(ctx,graphButtonRangeGroup.weekButtonRect);
   
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
         
-        // draw the button group
+        // draw the button groups
         drawToggleButtonGroup(ctx,graphButtonRangeGroup);
-        
-        drawStatusButton(ctx,x + w - getStatusButtonWidth(),y,lastTime,false);
+        drawToggleButtonGroup(ctx,graphButtonSensorGroup);
+        drawToggleButtonGroup(ctx,graphButtonPlaceGroup);
         
         ctx.restore();
     }
@@ -460,7 +563,7 @@
     }
 
 
-    function drawIndoorFrame(ctx,x,y,w,h) {
+    function drawActSensorDataFrame(ctx,x,y,w,h) {
         ctx.save();
         ctx.fillStyle = colorTable.frame;
         ctx.beginPath();
@@ -492,12 +595,12 @@
 
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
 
-        buttons.indorButtonRect.x = buttonPosX;
-        buttons.indorButtonRect.y = buttonPosY;
-        buttons.indorButtonRect.w = frame.largeSize;
-        buttons.indorButtonRect.h = 2 * baseButton.height + baseButton.space;
+        buttons.indoorButtonRect.x = buttonPosX;
+        buttons.indoorButtonRect.y = buttonPosY;
+        buttons.indoorButtonRect.w = frame.largeSize;
+        buttons.indoorButtonRect.h = 2 * baseButton.height + baseButton.space;
 
-        drawButton(ctx,buttons.indorButtonRect);
+        drawButton(ctx,buttons.indoorButtonRect);
         
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastIndoorHumidity,"#FFCC66");
         drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastIndoorTemperature,"#FFCC66");
@@ -631,8 +734,8 @@
 
         ctx.beginPath();
         ctx.rect(button.x,button.y,button.w,button.h);
-        ctx.fillStyle   = colorTable.button_normal;
-        ctx.strokeStyle = colorTable.button_normal;
+        ctx.fillStyle   = button.color;
+        ctx.strokeStyle = button.color;
         ctx.fill();
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -727,6 +830,7 @@
         var xZeroMS = x + w / 2 + width / 2;
         var yZero = y + h / 2 + height / 2;
                 
+
         ctx.beginPath();        
         for (var yAxis = 0; yAxis <= w / 2; yAxis += step) {
             ctx.moveTo(x + w / 2 + yAxis,y);
@@ -756,29 +860,34 @@
         var minValue = graphData.data.minValue;
                 
         var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
-        var pixelPerDegree = height / (maxValue - minValue);
+        var pixelPerUnit = height / (maxValue  - minValue);
          
+        log.debug("drawGraphArea: maxValue     " + maxValue); 
+        log.debug("drawGraphArea: minValue     " + minValue);
+        log.debug("drawGraphArea: pixelPerUnit " + pixelPerUnit); 
         var maxDate = new Date(graphData.data.sensorData[0].time);
         var maxTimeInMS = maxDate.getTime(); 
 
         ctx.beginPath();         
-        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),yZero - graphData.data.sensorData[0].value * (pixelPerDegree));
-        for (var index = 0; index < graphData.data.sensorData.length; ++index) {
-            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),yZero - graphData.data.sensorData[index].value * (pixelPerDegree) );
-        }
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = '#FF9933';
+        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),yZero - graphData.data.sensorData[0].value * pixelPerUnit + minValue * pixelPerUnit);
+        for (var index = 0; index < graphData.data.sensorData.length; ++index) {
+            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),yZero - graphData.data.sensorData[index].value * pixelPerUnit + minValue * pixelPerUnit);
+        }
+ 
         ctx.stroke();
         
         
         ctx.restore();
     }
     
-    function setSelected(buttonGroup, button) {
+    function setSelected(buttonGroup, button,canvas) {
         for (var name in buttonGroup) {
             buttonGroup[name].selected = false;
         }
         button.selected = true;
+        drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);        
     };
         
     $.fn.jLCARSControlView = function(options) {
