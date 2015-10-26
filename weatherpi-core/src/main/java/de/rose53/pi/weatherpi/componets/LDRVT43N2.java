@@ -23,6 +23,7 @@ import com.pi4j.io.gpio.GpioPinAnalogInput;
 import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
 public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
@@ -38,6 +39,11 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
     Logger logger;
 
     @Inject
+    @IntegerConfiguration(key = "ldrvt43n2.mcp3008pin", defaultValue = 0)
+    int mcp3008pin;
+
+
+    @Inject
     Event<IlluminanceEvent> illuminanceEvent;
 
     private GpioPinAnalogInput ldrPin;
@@ -51,7 +57,6 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
 
     @PostConstruct
     public void init()  {
-
         // building a linear equation from the information in the data sheed of the VT43N2
         SimpleRegression regression = new SimpleRegression();
 
@@ -63,7 +68,7 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
         b = regression.getIntercept();
         logger.debug("init: b = >{}<",b);
 
-        ldrPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.CH0,"LDRSensor-A0");
+        ldrPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.ALL[mcp3008pin],"LDRSensor-A0");
 
         clientProcessingPool.scheduleAtFixedRate(new ReadDataTask(), 0, 30, TimeUnit.SECONDS);
     }
@@ -90,13 +95,11 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
 
     @Override
     public void display(Display display) {
-
         try {
             display.print(getLux(), 1);
             display.writeDisplay();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("display:",e);
         }
     }
 

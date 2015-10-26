@@ -12,6 +12,7 @@ import com.pi4j.gpio.extension.mcp.MCP3008Pin;
 import com.pi4j.io.gpio.GpioPinAnalogInput;
 
 import de.rose53.pi.weatherpi.Display;
+import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
 public class TGS2600 extends MCP3008Sensor implements Displayable {
@@ -22,13 +23,15 @@ public class TGS2600 extends MCP3008Sensor implements Displayable {
     @Inject
     Logger logger;
 
+    @Inject
+    @IntegerConfiguration(key = "tgs2600.mcp3008pin", defaultValue = 0)
+    int mcp3008pin;
+
     private GpioPinAnalogInput tgsPin;
 
     @PostConstruct
     public void init()  {
-
-        tgsPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.CH1,"TGS2600Sensor-A1");
-
+        tgsPin = gpio.provisionAnalogInputPin(gpioProvider, MCP3008Pin.ALL[mcp3008pin],"TGS2600Sensor-A1");
     }
 
     @Override
@@ -53,8 +56,7 @@ public class TGS2600 extends MCP3008Sensor implements Displayable {
              display.print(rs/1000,1);
             display.writeDisplay();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("display:",e);
         }
     }
 

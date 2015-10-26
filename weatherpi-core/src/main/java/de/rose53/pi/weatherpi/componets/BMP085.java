@@ -1,5 +1,7 @@
 package de.rose53.pi.weatherpi.componets;
 
+import static de.rose53.pi.weatherpi.utils.Utils.delay;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -119,7 +121,11 @@ public class BMP085 implements Displayable {
     @Inject
     Event<PressureEvent> pressureEvent;
 
-    final ScheduledExecutorService clientProcessingPool = Executors.newScheduledThreadPool(1);
+    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r,"BMP085ValueReader");
+        t.setPriority(Thread.MIN_PRIORITY);
+        return t;
+    });
 
     @PostConstruct
     public void init()  {
@@ -184,7 +190,6 @@ public class BMP085 implements Displayable {
     }
 
     public synchronized float readTemperature() throws IOException {
-
         device.write(BMP085_CONTROL, (byte)BMP085_READTEMPCMD);
         delay(5);
 
@@ -250,7 +255,7 @@ public class BMP085 implements Displayable {
         return ut;
     }
 
-    public int readUncompensatedPressure() throws IOException {
+    private int readUncompensatedPressure() throws IOException {
 
         int msb  = device.read(BMP085_PRESSUREDATA);
         int lsb  = device.read(BMP085_PRESSUREDATA + 1);
@@ -261,20 +266,10 @@ public class BMP085 implements Displayable {
         return up;
     }
 
-
-
-    private static void delay(long howMuch) {
-        try {
-            Thread.sleep(howMuch);
-        } catch (InterruptedException ie) {
-        }
-    }
-
     private class ReadDataTask implements Runnable {
 
         @Override
         public void run() {
-
             try {
                 float temperature = readTemperature();
                 if (lastTemperature != temperature) {

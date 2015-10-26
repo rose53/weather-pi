@@ -1,5 +1,7 @@
 package de.rose53.pi.weatherpi.componets;
 
+import static de.rose53.pi.weatherpi.utils.Utils.delay;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -29,7 +31,7 @@ import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
 @ApplicationScoped
-public class DHT22 implements Displayable {
+public class DHT22 /*implements Displayable*/ {
 
     public final static double TEMPERATURE_ACCURACY = 0.5;
 
@@ -110,7 +112,7 @@ public class DHT22 implements Displayable {
         return humidity;
     }
 
-    @Override
+    //@Override
     public void display(Display display) {
         try {
             display.print(readTemperature(), 1);
@@ -149,13 +151,6 @@ public class DHT22 implements Displayable {
         }
         logger.debug("copy: done, got bytes = {}",count);
         return count;
-    }
-
-    private static void delay(long howMuch) {
-        try {
-            Thread.sleep(howMuch);
-        } catch (InterruptedException ie) {
-        }
     }
 
     private class ReadDataTask implements Runnable {
