@@ -91,7 +91,9 @@ public class MqttCdiEventBridge implements MqttCallback {
         publish(event);
     }
 
-    private <T extends SensorEvent> void publish(T event) {
+    synchronized private <T extends SensorEvent> void publish(T event) {
+        return;
+        /*
         if (event == null) {
             return;
         }
@@ -101,11 +103,12 @@ public class MqttCdiEventBridge implements MqttCallback {
         }
         try {
             MqttMessage message = new MqttMessage(mapper.writeValueAsString(event).getBytes());
-            message.setQos(2);
+            message.setQos(0);
             client.publish(getTopic(event),message);
         } catch (MqttException | JsonProcessingException e) {
             logger.error("publish:",e);
         }
+        */
     }
 
     static private <T extends SensorEvent> String getTopic(T event) {
@@ -120,15 +123,15 @@ public class MqttCdiEventBridge implements MqttCallback {
     }
 
     @Override
-    public void connectionLost(Throwable arg0) {
-        // TODO Auto-generated method stub
-
+    public void connectionLost(Throwable e) {
+       logger.error("connectionLost:",e);
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken arg0) {
-        // TODO Auto-generated method stub
-
+    public void deliveryComplete(IMqttDeliveryToken token) {
+        for (String topic : token.getTopics()) {
+            logger.debug("Message delivered successfully to topic : >{}<",topic);
+        }
     }
 
     @Override

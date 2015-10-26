@@ -49,7 +49,9 @@ public class MqttClientExposer {
     public void closeConnection(@Disposes MqttClient client) {
         if (client != null) {
             try {
-                client.disconnect();
+                if (client.isConnected()) {
+                    client.disconnect();
+                }
             } catch (MqttException e) {
                 logger.error("closeConnection",e);
             }

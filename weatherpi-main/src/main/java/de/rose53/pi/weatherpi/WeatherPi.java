@@ -1,15 +1,22 @@
 package de.rose53.pi.weatherpi;
 
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
@@ -34,6 +41,7 @@ import de.rose53.pi.weatherpi.twitter.TwitterPlublisher;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 import de.rose53.weatherpi.web.TemperatureValue;
 import de.rose53.weatherpi.web.Webserver;
+import twitter4j.TwitterException;
 
 
 
@@ -84,6 +92,8 @@ public class WeatherPi implements Runnable {
     private double humidityOutdoor = 0;
     private double temperatureOutdoor = 0;
 
+    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor();
+
     public void start() {
 
         try {
@@ -91,8 +101,7 @@ public class WeatherPi implements Runnable {
             webServer.start();
             System.out.println("\b\b\bdone.");
 
-
-
+            clientProcessingPool.scheduleAtFixedRate(new TwitterTask(), 30, 30, TimeUnit.SECONDS);
         } catch (Exception e) {
             logger.error("start:",e);
         }
@@ -130,7 +139,6 @@ public class WeatherPi implements Runnable {
 
                         database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor));
                     }
-
                     // update display
                     for (Displayable displayable : displayables) {
                         display.clear();
@@ -183,6 +191,44 @@ public class WeatherPi implements Runnable {
     public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
         logger.debug("onReadIlluminanceEvent: ");
         illuminance = event.getIlluminance();
+    }
+
+    private class TwitterTask implements Runnable {
+
+        List<LocalTime> twitterTimes = asList(LocalTime.of(6, 0),LocalTime.of(12, 0),LocalTime.of(18, 0), LocalTime.of(0, 0));
+
+        DecimalFormat tempFormat = new DecimalFormat("#.0");
+        DecimalFormat humidityFormat = new DecimalFormat("#.0");
+        DecimalFormat pressureFormat = new DecimalFormat("#");
+
+        LocalTime lastTweet = null;
+
+        @Override
+        public void run() {
+            try {
+                LocalTime now = LocalTime.now();
+                for (LocalTime twitterTime : twitterTimes) {
+                    if (now.getHour() == twitterTime.getHour() && now.getMinute() == twitterTime.getMinute() && lastTweet != twitterTime) {
+
+                        lastTweet = twitterTime;
+                        List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
+
+                        StringBuilder status = new StringBuilder();
+
+                        status.append("Indoor:").append('\n')
+                              .append("Temp.   : ").append(tempFormat.format(sorted.isEmpty()?0.0:sorted.get(0).getTemperature())).append("°C").append('\n')
+                              .append("Humidity: ").append(humidityFormat.format(humidityIndoor)).append("%").append('\n')
+                              .append("Pressure: ").append(pressureFormat.format(pressureIndoor)).append('\n')
+                              .append("Outdoor:").append('\n')
+                              .append("Temp.   : ").append(tempFormat.format(temperatureOutdoor)).append("°C").append('\n')
+                              .append("Humidity: ").append(humidityFormat.format(humidityOutdoor)).append("%").append('\n');
+                        twitter.updateStatus(status.toString());
+                    }
+                }
+            } catch (TwitterException e) {
+                logger.warn("run:",e);
+            }
+        }
     }
 
     public static void main(String[] args) {
