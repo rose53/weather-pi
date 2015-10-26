@@ -8,7 +8,7 @@ The list of actually implemented sensors. The indoor sensors are connected to th
 
 Indoor:
 *   BMP085: Temperature and Pressure
-*   DHT22: Temperature and Humidity
+*   HTU21D: Temperature and Humidity
 *   LDR (VT43N2): Illuminance
 *   TGS2600: Air quality
 
@@ -22,7 +22,9 @@ The list of actually implemented components.
 
 ## MQTT
 Both, the RaspberryPi and the ESP8266 are publishing their sensor data via MQTT to a local installed
-[Mosquitto broker](http://www.eclipse.org/mosquitto/).
+[Mosquitto broker](http://www.eclipse.org/mosquitto/). [Here](http://www.mymakerprojects.com/index.php/setup-mosquitto-mqtt-server-on-the-raspberry-pi/) are
+some instructions for the installation of the Mosquitto MQTT Server on the RaspberryPi.
+
 
 ## Database
 The sensor data is written to a [MySQL](http://www.mysql.com/) database for later processing of the data.
@@ -34,3 +36,7 @@ The touch screen used is the 7'' display set from [Polin](http://www.pollin.de/s
 ![](./src/main/resources/images/touch_screen.jpg "Touch Screen")
 
 Chrome is started in Kiosk mode to display the data. Updates of the sensor data is pushed via WebSockets.
+
+## Twitter
+Actual weather data is pushed via the [Twitter REST API](https://dev.twitter.com/rest/public). This is done using the
+[Twitter4J](http://twitter4j.org/en/index.html) library.

@@ -59,7 +59,8 @@ public class MqttCdiEventBridge implements MqttCallback {
     public void subscribe() {
         client.setCallback(this);
         try {
-            client.subscribe("sensordata/outdoor/+");
+            client.subscribe(new String[]{"sensordata/outdoor/+",
+                                          "sensordata/birdhouse/+"});
         } catch (MqttException e) {
             logger.error("subscribe",e);
         }
