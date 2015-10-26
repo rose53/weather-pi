@@ -1,4 +1,4 @@
-# WeatherPi
+# ![WeatherPi](./src/main/resources/images/weather_pi_logo.png "WeatherPi") WeatherPi
 
 Java 8 program to display various sensors or components connected to a RaspberryPi on a [7-segment display](https://learn.adafruit.com/adafruit-led-backpack/1-2-inch-7-segment-backpack). For the communication with the display and the sensors, [Pi4J](http://pi4j.com/) is used. Additionally, there is a touch screen displaying data.
 The outdoor sensors are connected to a ESP8266 WiFi module.
