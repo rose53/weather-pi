@@ -7,5 +7,7 @@ CREATE TABLE `SENSOR_DATA` (
   `ILLUMINATION` double NOT NULL COMMENT 'The illumination in LUX',
   `TEMPERATURE_OUT` double NOT NULL COMMENT 'The outdoor temperature in celsius degrees.',
   `HUMIDITY_OUT` double NOT NULL COMMENT 'The outdoor humidity ',
+  `TEMPERATURE_BIRD` double NOT NULL COMMENT 'The outdoor temperature at the birdhouse in celsius degrees.',
+  `HUMIDITY_BIRD` double NOT NULL COMMENT 'The outdoor humidity at the birdhouse',
   PRIMARY KEY (`ID`)
 );
