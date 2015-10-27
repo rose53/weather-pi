@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +22,7 @@ import de.rose53.pi.weatherpi.ESensorType;
 @ApplicationScoped
 public class Database {
 
-    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION,TEMPERATURE_OUT,HUMIDITY_OUT) values (SYSDATE(),?,?,?,?,?,?)";
+    static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION,TEMPERATURE_OUT,HUMIDITY_OUT,TEMPERATURE_BIRD,HUMIDITY_BIRD) values (SYSDATE(),?,?,?,?,?,?,?,?)";
 
     static private final String SENSOR_DATA_TEMPERATURE_GET = "select TIME,TEMPERATURE from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_HUMIDITY_GET = "select TIME,HUMIDITY from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
@@ -31,6 +30,8 @@ public class Database {
     static private final String SENSOR_DATA_ILLUMINATION_GET = "select TIME,ILLUMINATION from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_TEMPERATURE_OUT_GET = "select TIME,TEMPERATURE_OUT from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
     static private final String SENSOR_DATA_HUMIDITY_OUT_GET = "select TIME,HUMIDITY_OUT from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_TEMPERATURE_BIRD_GET = "select TIME,TEMPERATURE_BIRD from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
+    static private final String SENSOR_DATA_HUMIDITY_BIRD_GET = "select TIME,HUMIDITY_BIRD from SENSOR_DATA where TIME between ? and ? order by TIME DESC";
 
     @Inject
     Logger logger;
@@ -46,6 +47,8 @@ public class Database {
     private PreparedStatement illuminationGetStatement;
     private PreparedStatement temperatureOutGetStatement;
     private PreparedStatement humidityOutGetStatement;
+    private PreparedStatement temperatureBirdGetStatement;
+    private PreparedStatement humidityBirdGetStatement;
 
     @PostConstruct
     public void init() {
@@ -57,6 +60,8 @@ public class Database {
             illuminationGetStatement    = connection.prepareStatement(SENSOR_DATA_ILLUMINATION_GET);
             temperatureOutGetStatement  = connection.prepareStatement(SENSOR_DATA_TEMPERATURE_OUT_GET);
             humidityOutGetStatement     = connection.prepareStatement(SENSOR_DATA_HUMIDITY_OUT_GET);
+            temperatureBirdGetStatement = connection.prepareStatement(SENSOR_DATA_TEMPERATURE_BIRD_GET);
+            humidityBirdGetStatement    = connection.prepareStatement(SENSOR_DATA_HUMIDITY_BIRD_GET);
         } catch (SQLException e) {
             logger.error("init:",e);
         }
@@ -72,6 +77,8 @@ public class Database {
             illuminationGetStatement.close();
             temperatureOutGetStatement.close();
             humidityOutGetStatement.close();
+            temperatureBirdGetStatement.close();
+            humidityBirdGetStatement.close();
         } catch (SQLException e) {
             logger.error("destroy:",e);
         }
@@ -88,6 +95,8 @@ public class Database {
         insertStatement.setDouble(4, rowData.getIlluminanceIndoor());
         insertStatement.setDouble(5, rowData.getTemperatureOutdoor());
         insertStatement.setDouble(6, rowData.getHumidityOutdoor());
+        insertStatement.setDouble(7, rowData.getTemperatureBirdhouse());
+        insertStatement.setDouble(8, rowData.getHumidityBirdhouse());
 
         insertStatement.executeUpdate();
     }
@@ -108,6 +117,11 @@ public class Database {
             case OUTDOOR:
                 s = humidityOutGetStatement;
                 break;
+            case BIRDHOUSE:
+                s = humidityBirdGetStatement;
+                break;
+            default:
+                break;
             }
             break;
         case ILLUMINANCE:
@@ -123,6 +137,11 @@ public class Database {
                 break;
             case OUTDOOR:
                 s = temperatureOutGetStatement;
+                break;
+            case BIRDHOUSE:
+                s = temperatureBirdGetStatement;
+                break;
+            default:
                 break;
             }
             break;

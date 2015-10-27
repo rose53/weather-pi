@@ -8,9 +8,11 @@ public class RowData {
     private final double illuminanceIndoor;
     private final double temperatureOutdoor;
     private final double humidityOutdoor;
+    private final double temperatureBirdhouse;
+    private final double humidityBirdhouse;
 
     public RowData(double temperatureIndoor, double pressureIndoor, double humidityIndoor, double illuminanceIndoor,
-            double temperatureOutdoor, double humidityOutdoor) {
+            double temperatureOutdoor, double humidityOutdoor, double temperatureBirdhouse, double humidityBirdhouse) {
         super();
         this.temperatureIndoor = temperatureIndoor;
         this.pressureIndoor = pressureIndoor;
@@ -18,6 +20,8 @@ public class RowData {
         this.illuminanceIndoor = illuminanceIndoor;
         this.temperatureOutdoor = temperatureOutdoor;
         this.humidityOutdoor = humidityOutdoor;
+        this.temperatureBirdhouse = temperatureBirdhouse;
+        this.humidityBirdhouse = humidityBirdhouse;
     }
 
     public double getTemperatureIndoor() {
@@ -43,4 +47,13 @@ public class RowData {
     public double getHumidityOutdoor() {
         return humidityOutdoor;
     }
+
+    public double getTemperatureBirdhouse() {
+        return temperatureBirdhouse;
+    }
+
+    public double getHumidityBirdhouse() {
+        return humidityBirdhouse;
+    }
+
 }

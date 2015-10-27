@@ -103,7 +103,10 @@ public class SensorEvent {
             send(sorted.get(0));
             break;
         case OUTDOOR:
+        case BIRDHOUSE:
             send(event);
+            break;
+        default:
             break;
         }
     }

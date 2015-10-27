@@ -1,8 +1,6 @@
 package de.rose53.weatherpi.web;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

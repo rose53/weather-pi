@@ -92,6 +92,9 @@ public class WeatherPi implements Runnable {
     private double humidityOutdoor = 0;
     private double temperatureOutdoor = 0;
 
+    private double humidityBirdhouse = 0;
+    private double temperatureBirdhouse = 0;
+
     final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor();
 
     public void start() {
@@ -137,7 +140,7 @@ public class WeatherPi implements Runnable {
                         // read sensor and add to database
                         List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
 
-                        database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor));
+                        database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor,temperatureBirdhouse,humidityBirdhouse));
                     }
                     // update display
                     for (Displayable displayable : displayables) {
@@ -162,6 +165,11 @@ public class WeatherPi implements Runnable {
         case OUTDOOR:
             temperatureOutdoor = event.getTemperature();
             break;
+        case BIRDHOUSE:
+            temperatureBirdhouse = event.getTemperature();
+            break;
+        default:
+            break;
         }
     }
 
@@ -172,6 +180,9 @@ public class WeatherPi implements Runnable {
             pressureIndoor = event.getPressure();
             break;
         case OUTDOOR:
+        case BIRDHOUSE:
+            break;
+        default:
             break;
         }
     }
@@ -184,6 +195,11 @@ public class WeatherPi implements Runnable {
             break;
         case OUTDOOR:
             humidityOutdoor = event.getHumidity();
+            break;
+        case BIRDHOUSE:
+            humidityBirdhouse = event.getHumidity();
+            break;
+        default:
             break;
         }
     }
