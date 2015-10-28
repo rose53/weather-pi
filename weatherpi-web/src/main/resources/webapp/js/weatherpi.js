@@ -40,12 +40,16 @@
                         lcarsControlView.updateIndoorTemperature(sensorevent.temperature.toFixed(1));
                     } else if ("OUTDOOR" === sensorevent.place) {
                         lcarsControlView.updateOutdoorTemperature(sensorevent.temperature.toFixed(1));
+                    } else if ("BIRDHOUSE" === sensorevent.place) {
+                        lcarsControlView.updateBirdhouseTemperature(sensorevent.temperature.toFixed(1));
                     }
                 } else if ("HUMIDITY" === sensorevent.type) {
                     if ("INDOOR" === sensorevent.place) {
                         lcarsControlView.updateIndoorHumidity(parseInt(sensorevent.humidity));
                     } else if ("OUTDOOR" === sensorevent.place) {
                         lcarsControlView.updateOutdoorHumidity(parseInt(sensorevent.humidity));
+                    } else if ("BIRDHOUSE" === sensorevent.place) {
+                        lcarsControlView.updateBirdhouseHumidity(parseInt(sensorevent.humidity));
                     }
                 } else if ("PRESSURE" === sensorevent.type) {
                     if ("INDOOR" === sensorevent.place) {
@@ -88,6 +92,20 @@
                         lcarsControlView.updateOutdoorHumidity(parseInt(data.sensorData[0].value));
                     }                    
                 });
+                
+            sensordataService.getTemperature("actual","birdhouse",1,
+                function(data){ 
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateBirdhouseTemperature(data.sensorData[0].value.toFixed(1));
+                    }                    
+                });
+
+            sensordataService.getHumidity("actual","birdhouse",1,
+                function(data){ 
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateBirdhouseHumidity(parseInt(data.sensorData[0].value));
+                    }                    
+                });                
 
             setInterval(function(){ clock(); }, 5000);
         },
@@ -132,7 +150,7 @@ var handleGraphButtonEvent = function(event) {
         lcarsControlView.getMaxGraphData(),
         function(data){ 
             if (data.sensorData.length > 0) {
-                lcarsControlView.updateGraphData(data,event.range);
+                lcarsControlView.updateGraphData(data,event.sensor,event.range);
             }                    
         });    
 };

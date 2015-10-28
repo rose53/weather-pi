@@ -34,16 +34,21 @@
     
     var lastOutdoorHumidity       = '0';
     var lastOutdoorTemperature    = '0';
-    
+
+    var lastBirdhouseHumidity       = '0';
+    var lastBirdhouseTemperature    = '0';
+
     var lastTime                 = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});;
     
     var graphData = {
-        data  : null,
-        range : RangeEnum.DAY        
+        data   : null,
+        sensor : "temperature",
+        range  : RangeEnum.DAY        
     };
     
     var buttons = {
         indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
+        birdhouseButtonRect   : {text : 'BIRDHOUSE', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame},
         outdoorButtonRect   : {text : 'OUTDOOR', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
     };
 
@@ -62,6 +67,7 @@
 
     var graphButtonPlaceGroup = {
         indoorButtonRect   : {text : 'INDOOR',  place: 'indoor',  x : 0, y : 0, w : 0, h : 0, selected : true },
+        birdhouseButtonRect : {text : 'BIRDHOUSE', place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false }, 
         outdoor1ButtonRect : {text : 'OUTDOOR', place: 'outdoor', x : 0, y : 0, w : 0, h : 0, selected : false }       
     };
 
@@ -214,6 +220,24 @@
             refresh(this.canvas);
         },
 
+        updateBirdhouseTemperature : function(temperature) {
+            if (temperature === lastBirdhouseTemperature) {
+                // no change, nothing to do
+                return;
+            }
+            lastBirdhouseTemperature = temperature;
+            refresh(this.canvas);
+        },
+
+        updateBirdhouseHumidity : function(humidity) {
+            if (humidity === lastBirdhouseHumidity) {
+                // no change, nothing to do
+                return;
+            }
+            lastBirdhouseHumidity = humidity;
+            refresh(this.canvas);
+        },
+
         updateLuminance : function(location,luminance) {
             if (location.toUpperCase() === "FRONT") {
                 if (luminance !== lastLuminanceFront) {
@@ -232,9 +256,10 @@
             }    
         },
         
-        updateGraphData : function(data, range) {
-            graphData.data  = data;
-            graphData.range = range;
+        updateGraphData : function(data, sensor, range) {
+            graphData.data   = data;
+            graphData.sensor = sensor;
+            graphData.range  = range;
             
             graphData.data.sensorData.sort(function(a,b){
               return new Date(b.time) - new Date(a.time);
@@ -329,7 +354,7 @@
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
-        sensorFrameRect.w = 0.55 * windowWidth;
+        sensorFrameRect.w = 0.49 * windowWidth;
         sensorFrameRect.h = windowHeight - historyFrameRect.y - historyFrameRect.h - 2 * baseButton.space;
 
         forecastFrameRect.x = sensorFrameRect.w + baseButton.space + sensorFrameRect.x;
@@ -490,10 +515,10 @@
         graphButtonSensorGroup.pressureButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.pressureButtonRect.h = baseButton.height;
 
-        graphButtonPlaceGroup.outdoor1ButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.outdoor1ButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.outdoor1ButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.outdoor1ButtonRect.h = baseButton.height;
+        graphButtonPlaceGroup.birdhouseButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.birdhouseButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.birdhouseButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.birdhouseButtonRect.h = baseButton.height;
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -510,6 +535,11 @@
         graphButtonSensorGroup.humidityButtonRect.y = buttonPosY;
         graphButtonSensorGroup.humidityButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.humidityButtonRect.h = baseButton.height;  
+        
+        graphButtonPlaceGroup.outdoor1ButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.outdoor1ButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.outdoor1ButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.outdoor1ButtonRect.h = baseButton.height;
         
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -590,7 +620,7 @@
         
         var buttonGapY = y + (frame.smallSize + baseButton.height);
         var buttonPosX = x + w - frame.largeSize;
-        var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - 30 - button.space;
+        var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - button.space;
         var buttonPosY = buttonGapY + baseButton.space;
 
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
@@ -609,6 +639,22 @@
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastIndoorPressure,"#FFCC66");
 
         buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        
+        drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
+        
+        buttonPosY = buttonGapY + baseButton.space;
+        
+        buttons.birdhouseButtonRect.x = buttonPosX;
+        buttons.birdhouseButtonRect.y = buttonPosY;
+        buttons.birdhouseButtonRect.w = frame.largeSize;
+        buttons.birdhouseButtonRect.h = baseButton.height;
+
+        drawButton(ctx,buttons.birdhouseButtonRect);
+        
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastBirdhouseHumidity,"#3366CC");
+        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastBirdhouseTemperature,"#3366CC");
+        
+        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
         
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
         
@@ -858,6 +904,18 @@
         }
         var maxValue = graphData.data.maxValue;
         var minValue = graphData.data.minValue;
+        
+        var maxRange = 0;
+        if (graphData.sensor === 'temperature') {
+            maxValue = maxValue + 10;
+            minValue = minValue - 10;
+        } else if (graphData.sensor === 'humidity') {
+            maxValue = 100;
+            minValue = 0;
+        } else if (graphData.sensor === 'pressure') {
+            maxValue = 1100;
+            minValue = 900;
+        } 
                 
         var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
         var pixelPerUnit = height / (maxValue  - minValue);
