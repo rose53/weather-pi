@@ -40,3 +40,6 @@ Chrome is started in Kiosk mode to display the data. Updates of the sensor data 
 ## Twitter
 Actual weather data is pushed via the [Twitter REST API](https://dev.twitter.com/rest/public). This is done using the
 [Twitter4J](http://twitter4j.org/en/index.html) library.
+
+## ForecastIO
+Reading weather forecast from [ForecastIO](http://forecast.io) using their [API](https://developer.forecast.io/docs/v2). The data is queried each hour and cached internally.
