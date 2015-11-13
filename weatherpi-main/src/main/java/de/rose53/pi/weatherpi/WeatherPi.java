@@ -95,7 +95,11 @@ public class WeatherPi implements Runnable {
     private double humidityBirdhouse = 0;
     private double temperatureBirdhouse = 0;
 
-    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor();
+    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r,"Twitter");
+        t.setPriority(Thread.MIN_PRIORITY);
+        return t;
+    });
 
     public void start() {
 
