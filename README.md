@@ -42,4 +42,4 @@ Actual weather data is pushed via the [Twitter REST API](https://dev.twitter.com
 [Twitter4J](http://twitter4j.org/en/index.html) library.
 
 ## ForecastIO
-Reading weather forecast from [ForecastIO](http://forecast.io) using their [API](https://developer.forecast.io/docs/v2). The data is queried each hour and cached internally.
+Reading weather forecast from [ForecastIO](http://forecast.io) using their [API](https://developer.forecast.io/docs/v2). The data is queried each hour and cached internally. The icons used for displaying some weather informations are from [Adam Whitcroft](http://adamwhitcroft.com/climacons/)

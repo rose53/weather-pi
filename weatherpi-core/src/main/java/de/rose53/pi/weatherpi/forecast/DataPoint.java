@@ -56,6 +56,11 @@ public class DataPoint extends BaseDataPoint {
     private String precipType;
 
     /**
+     * (only defined on hourly and daily data points): the amount of snowfall accumulation expected to occur on the given day, in inches. (If no accumulation is expected, this property will not be defined.)
+     */
+    private double precipAccumulation;
+
+    /**
      * (not defined on daily data points): A numerical value representing the temperature at the given time in degrees Fahrenheit.
      */
     private double temperature;
@@ -182,6 +187,15 @@ public class DataPoint extends BaseDataPoint {
 
     public void setPrecipType(String precipType) {
         this.precipType = precipType;
+    }
+
+
+    public double getPrecipAccumulation() {
+        return precipAccumulation;
+    }
+
+    public void setPrecipAccumulation(double precipAccumulation) {
+        this.precipAccumulation = precipAccumulation;
     }
 
     public double getTemperature() {
