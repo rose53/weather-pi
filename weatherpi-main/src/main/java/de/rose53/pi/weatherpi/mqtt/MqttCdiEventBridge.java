@@ -19,10 +19,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.rose53.pi.weatherpi.ESensorPlace;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
@@ -60,7 +58,8 @@ public class MqttCdiEventBridge implements MqttCallback {
         client.setCallback(this);
         try {
             client.subscribe(new String[]{"sensordata/outdoor/+",
-                                          "sensordata/birdhouse/+"});
+                                          "sensordata/birdhouse/temperature",
+                                          "sensordata/birdhouse/humidity"});
         } catch (MqttException e) {
             logger.error("subscribe",e);
         }
