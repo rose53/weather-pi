@@ -239,9 +239,9 @@ public class WeatherPi implements Runnable {
                               .append("Temp.   : ").append(tempFormat.format(sorted.isEmpty()?0.0:sorted.get(0).getTemperature())).append("°C").append('\n')
                               .append("Humidity: ").append(humidityFormat.format(humidityIndoor)).append("%").append('\n')
                               .append("Pressure: ").append(pressureFormat.format(pressureIndoor)).append("hPa").append('\n')
-                              .append("Outdoor:").append('\n')
-                              .append("Temp.   : ").append(tempFormat.format(temperatureOutdoor)).append("°C").append('\n')
-                              .append("Humidity: ").append(humidityFormat.format(humidityOutdoor)).append("%").append('\n');
+                              .append("Birdhouse:").append('\n')
+                              .append("Temp.   : ").append(tempFormat.format(temperatureBirdhouse)).append("°C").append('\n')
+                              .append("Humidity: ").append(humidityFormat.format(humidityBirdhouse)).append("%").append('\n');
                         twitter.updateStatus(status.toString());
                     }
                 }
