@@ -77,6 +77,15 @@ public class Forecast {
         return LocalDateTime.ofInstant(Instant.ofEpochSecond(time),getZoneId());
     }
 
+    public Currently getCurrently() {
+        try {
+            return getForecastdata().getCurrently();
+        } catch (IOException e) {
+            logger.error("getCurrently:",e);
+        }
+        return null;
+    }
+
     public Daily getDaily() {
         try {
             return getForecastdata().getDaily();
