@@ -66,7 +66,7 @@ public class DataPoint extends BaseDataPoint {
     private double temperature;
 
     /**
-     * (only defined on daily data points): numerical values representing the minimum and maximumum temperatures (and the UNIX times at which they occur) on the given day in degrees Fahrenheit.
+     * (only defined on daily data points): numerical values representing the minimum and maximum temperatures (and the UNIX times at which they occur) on the given day in degrees Fahrenheit.
      */
     private double temperatureMin;
     private long temperatureMinTime;

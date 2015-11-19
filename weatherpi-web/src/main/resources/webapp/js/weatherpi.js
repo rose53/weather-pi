@@ -1,4 +1,4 @@
-/* global log, sensordataService, RangeEnum */
+/* global log, sensordataService, RangeEnum, forecastService */
 
 (function($) {
 
@@ -28,7 +28,7 @@
 
             log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevents");
 
-            var sensorWebSocket = new WebSocket("ws://" + location.host + "/websocket/sensorevents");
+            var sensorWebSocket = new WebSocket("ws://munin.local:8080/websocket/sensorevents");
 
             sensorWebSocket.onopen = function() {
             };
@@ -107,7 +107,7 @@
                     }                    
                 });                
 
-            setInterval(function(){ clock(); }, 5000);
+            setInterval(function(){ schedule(); }, 5000);
         },
         initAll: function(options) {
             var settings = {
@@ -155,7 +155,18 @@ var handleGraphButtonEvent = function(event) {
         });    
 };
 
-var clock = function() {
+
+var lastForecast = 0;
+
+var schedule = function() {
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
     lcarsControlView.updateClock();
+    if (lastForecast <= new Date().getTime() - 5 * 60 * 1000 ) {
+        lastForecast = new Date().getTime();
+        forecastService.dailyIcons(
+        function(data){ 
+            log.debug("schedule: " + data.length);   
+            lcarsControlView.updateForecast(data);
+        });
+    }
 };

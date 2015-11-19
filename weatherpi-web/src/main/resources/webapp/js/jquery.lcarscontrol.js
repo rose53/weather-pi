@@ -1,4 +1,4 @@
-/* global RangeEnum, log */
+/* global RangeEnum, log, ForecastIconEnum */
 
 /**
  *
@@ -46,6 +46,8 @@
         range  : RangeEnum.DAY        
     };
     
+    var icons = [];
+    
     var buttons = {
         indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
         birdhouseButtonRect   : {text : 'BIRDHOUSE', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame},
@@ -71,6 +73,10 @@
         outdoor1ButtonRect : {text : 'OUTDOOR', place: 'outdoor', x : 0, y : 0, w : 0, h : 0, selected : false }       
     };
 
+    var forcastButtons = {
+        currentButtonRect     : {text : 'CURRENT',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
+        nextDaysButtonRect   : {text : 'NEXT DAYS', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
+    };
 
     var historyFrameRect = {
         x : 0,
@@ -269,6 +275,11 @@
         
         getMaxGraphData : function() {
             return historyFrameRect.w;
+        },
+        
+        updateForecast: function(iconData) {
+            icons = iconData            
+            refresh(this.canvas);
         }
     };
 
@@ -589,6 +600,74 @@
         ctx.fill();
         ctx.closePath();
 
+        var buttonGapY = y + (frame.smallSize + baseButton.height);
+        var buttonPosX = x;
+        var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - button.space;
+        var buttonPosY = buttonGapY + baseButton.space;
+
+        drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
+
+        forcastButtons.currentButtonRect.x = buttonPosX;
+        forcastButtons.currentButtonRect.y = buttonPosY;
+        forcastButtons.currentButtonRect.w = frame.largeSize;
+        forcastButtons.currentButtonRect.h = 2 * baseButton.height + baseButton.space;
+
+        drawButton(ctx,forcastButtons.currentButtonRect);
+
+        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        
+        drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
+        
+        buttonPosY = buttonPosY + 2 * baseButton.height + 2 * baseButton.space;
+
+        forcastButtons.nextDaysButtonRect.x = buttonPosX;
+        forcastButtons.nextDaysButtonRect.y = buttonPosY;
+        forcastButtons.nextDaysButtonRect.w = frame.largeSize;
+        forcastButtons.nextDaysButtonRect.h = 2 * baseButton.height + baseButton.space;
+
+        drawButton(ctx,forcastButtons.nextDaysButtonRect);
+        
+        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        
+        drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
+        
+        var fBoxX = forcastButtons.nextDaysButtonRect.x + forcastButtons.nextDaysButtonRect.w + baseButton.space;
+        var fBoxY = forcastButtons.nextDaysButtonRect.y;
+        var fBoxW = w - frame.largeSize - baseButton.space;
+        var fBoxH = 2 * baseButton.height + baseButton.space;
+        
+        ctx.beginPath();
+        ctx.moveTo(fBoxX,  fBoxY);
+        ctx.lineTo(fBoxX+fBoxW,fBoxY);
+        ctx.lineTo(fBoxX+fBoxW,fBoxY + fBoxH);
+        ctx.lineTo(fBoxX,fBoxY + fBoxH);
+        ctx.lineTo(fBoxX,fBoxY);
+        
+        for (var i = 0; i < 7; i++) {
+            ctx.moveTo(fBoxX + i * fBoxW / 7,  fBoxY);
+            ctx.lineTo(fBoxX + i * fBoxW / 7, fBoxY + fBoxH);
+            
+            if (icons.length >= 8) {
+            var source = new Image();
+            source.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(icons[i+1])].src;
+            // Render our SVG image to the canvas once it loads.
+            //source.onload = function(){
+            ctx.drawImage(source,fBoxX + i * fBoxW / 7 ,fBoxY,fBoxW / 7,fBoxW / 7);
+            //}
+        }
+        }
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#FF0000';
+        ctx.stroke();
+        
+        //var source = new Image();
+        //source.src = ForecastIconEnum.properties[ForecastIconEnum.PARTLY_CLOUDY_DAY].src;
+        // Render our SVG image to the canvas once it loads.
+        //source.onload = function(){
+        //ctx.drawImage(source,forcastButtons.nextDaysButtonRect.x + forcastButtons.nextDaysButtonRect.w ,forcastButtons.nextDaysButtonRect.y,fBoxW / 6,fBoxW / 6);
+        //}
+        
         ctx.restore();
     }
 
@@ -861,22 +940,28 @@
     }
 
     function drawGraphArea(ctx,x,y,w,h) {
-                
+                    
         ctx.save();
         
-        var step = Math.floor(w / 24);
-        
-        
-        
-        
+        var step = Math.floor(h / 10);
         
         var width  = step * Math.floor(w/step);
-        var height = step * Math.floor(h/step) - step;
+        var height = step * Math.floor(h/step) ;
         
         var xZeroMS = x + w / 2 + width / 2;
         var yZero = y + h / 2 + height / 2;
                 
-
+        ctx.beginPath();
+        ctx.moveTo(xZeroMS,  yZero);
+        ctx.lineTo(xZeroMS,yZero - height);
+        ctx.lineTo(xZeroMS - width,yZero - height);
+        ctx.lineTo(xZeroMS-width,yZero);
+        ctx.lineTo(xZeroMS,yZero);
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#FF0000';
+        ctx.stroke();
+        
         ctx.beginPath();        
         for (var yAxis = 0; yAxis <= w / 2; yAxis += step) {
             ctx.moveTo(x + w / 2 + yAxis,y);
@@ -905,16 +990,15 @@
         var maxValue = graphData.data.maxValue;
         var minValue = graphData.data.minValue;
         
-        var maxRange = 0;
         if (graphData.sensor === 'temperature') {
-            maxValue = maxValue + 10;
-            minValue = minValue - 10;
+            maxValue = Math.floor(maxValue + 2);
+            minValue = Math.ceil(minValue - 2);
         } else if (graphData.sensor === 'humidity') {
             maxValue = 100;
             minValue = 0;
         } else if (graphData.sensor === 'pressure') {
-            maxValue = 1100;
-            minValue = 900;
+            maxValue = Math.ceil(maxValue);
+            minValue = Math.floor(minValue);
         } 
                 
         var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
@@ -929,9 +1013,12 @@
         ctx.beginPath();         
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#FF9933';
-        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),yZero - graphData.data.sensorData[0].value * pixelPerUnit + minValue * pixelPerUnit);
+        
+        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),
+                   yZero - (graphData.data.sensorData[0].value - minValue) * pixelPerUnit);
         for (var index = 0; index < graphData.data.sensorData.length; ++index) {
-            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),yZero - graphData.data.sensorData[index].value * pixelPerUnit + minValue * pixelPerUnit);
+            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),
+                       yZero - (graphData.data.sensorData[index].value - minValue) * pixelPerUnit);
         }
  
         ctx.stroke();

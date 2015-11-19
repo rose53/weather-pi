@@ -30,6 +30,7 @@ import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.componets.Displayable;
+import de.rose53.pi.weatherpi.componets.Sensor;
 import de.rose53.pi.weatherpi.database.Database;
 import de.rose53.pi.weatherpi.database.RowData;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
@@ -70,9 +71,13 @@ public class WeatherPi implements Runnable {
     @Inject
     TwitterPlublisher twitter;
 
+//    @Inject
+//    @Any
+//    Instance<Displayable> displayables;
+
     @Inject
     @Any
-    Instance<Displayable> displayables;
+    Instance<Sensor> sensors;
 
     @Inject
     Connection connection;
@@ -108,7 +113,13 @@ public class WeatherPi implements Runnable {
             webServer.start();
             System.out.println("\b\b\bdone.");
 
+            System.out.println("Collecting Sensors ...");
+            sensors.forEach(s -> System.out.println(s.getName()));
+            System.out.println("done.");
+
+            System.out.print("Starting TwitterTask ...");
             clientProcessingPool.scheduleAtFixedRate(new TwitterTask(), 30, 30, TimeUnit.SECONDS);
+            System.out.println("\b\b\bdone.");
         } catch (Exception e) {
             logger.error("start:",e);
         }
@@ -147,14 +158,14 @@ public class WeatherPi implements Runnable {
                         database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor,temperatureBirdhouse,humidityBirdhouse));
                     }
                     // update display
-                    for (Displayable displayable : displayables) {
-                        display.clear();
-                        displayable.display(display);
-                        display.writeDisplay();
-                        Thread.sleep(5000);
-                    }
+//                    for (Displayable displayable : displayables) {
+//                        display.clear();
+//                        displayable.display(display);
+//                        display.writeDisplay();
+//                        Thread.sleep(5000);
+//                    }
 
-                } catch (InterruptedException | IOException | SQLException e) {
+                } catch (SQLException e) {
                     logger.warn("run:",e);
                 }
             }

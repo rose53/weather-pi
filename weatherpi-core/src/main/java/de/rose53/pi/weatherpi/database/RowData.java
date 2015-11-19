@@ -56,4 +56,10 @@ public class RowData {
         return humidityBirdhouse;
     }
 
+    public boolean isValid() {
+        if (pressureIndoor <= 0.0) {
+            return false;
+        }
+        return true;
+    }
 }

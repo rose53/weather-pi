@@ -26,7 +26,7 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
-public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
+public class LDRVT43N2 extends MCP3008Sensor implements Displayable, Sensor {
 
     private static final double FC2LUX = 10.764; //  one foot-candle is equal to one lumen per square foot or approximately 10.764 lux
     private static final double regressionData[][] = {{log10(1),log10(32)}, {log10(2),log10(19)}, {log10(4),log10(10)},
@@ -94,6 +94,11 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
     }
 
     @Override
+    public String getName() {
+        return "LDRVT43N2";
+    }
+
+    @Override
     public void display(Display display) {
         try {
             display.print(getLux(), 1);
@@ -111,7 +116,7 @@ public class LDRVT43N2 extends MCP3008Sensor implements Displayable {
 
             if (illuminance != value) {
                 illuminance = value;
-                illuminanceEvent.fire(new IlluminanceEvent(ESensorPlace.INDOOR,"LDRVT43N2", illuminance));
+                illuminanceEvent.fire(new IlluminanceEvent(ESensorPlace.INDOOR,getName(), illuminance));
             }
         }
     }

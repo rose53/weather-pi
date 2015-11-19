@@ -28,6 +28,10 @@ public class Webserver {
     @Inject
     private SensorDataCdiHelper sensorDataCdiHelper; // needed for missing JaxRs CDI integration
 
+    @SuppressWarnings("unused")
+    @Inject
+    private ForecastCdiHelper forecastCdiHelper; // needed for missing JaxRs CDI integration
+
     private Server server;
 
     public void start() throws Exception  {

@@ -31,7 +31,7 @@ import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
 @ApplicationScoped
-public class DHT22 /*implements Displayable*/ {
+public class DHT22 /*implements Displayable, Sensor*/ {
 
     public final static double TEMPERATURE_ACCURACY = 0.5;
 

@@ -29,7 +29,7 @@ import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 
 @ApplicationScoped
-public class BMP085 implements Displayable {
+public class BMP085 implements Displayable, Sensor {
 
     public final static int BMP085_I2C_ADDRESS = 0x77;
 
@@ -175,6 +175,11 @@ public class BMP085 implements Displayable {
     }
 
     @Override
+    public String getName() {
+        return "BMP085";
+    }
+
+    @Override
     public void display(Display display) {
         try {
             display.print(readTemperature(), 1);
@@ -274,12 +279,12 @@ public class BMP085 implements Displayable {
                 float temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
-                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"BMP085", temperature,TEMPERATURE_ACCURACY));
+                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature,TEMPERATURE_ACCURACY));
                 }
                 double pressure = readNormalizedPressure();
                 if (lastPressure != pressure) {
                     lastPressure = pressure;
-                    pressureEvent.fire(new PressureEvent(ESensorPlace.INDOOR,"BMP085", pressure));
+                    pressureEvent.fire(new PressureEvent(ESensorPlace.INDOOR,getName(), pressure));
                 }
             } catch (IOException e) {
                 logger.error("run:",e);

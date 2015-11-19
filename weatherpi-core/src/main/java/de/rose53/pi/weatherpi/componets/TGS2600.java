@@ -15,7 +15,7 @@ import de.rose53.pi.weatherpi.Display;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
-public class TGS2600 extends MCP3008Sensor implements Displayable {
+public class TGS2600 extends MCP3008Sensor implements Displayable, Sensor {
 
     private static final double VREF                 = 5.0;
     private static final int RES_PULL_UP             = 22000; // 22kOhm
@@ -46,6 +46,11 @@ public class TGS2600 extends MCP3008Sensor implements Displayable {
 
     private double getRes() {
         return RES_PULL_UP * ((getVRef() / getVout())-1);
+    }
+
+    @Override
+    public String getName() {
+        return "TGS2600";
     }
 
     @Override

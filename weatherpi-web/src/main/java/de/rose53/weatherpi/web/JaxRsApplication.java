@@ -13,6 +13,7 @@ public class JaxRsApplication extends Application {
     static {
         HashSet<Class<?>> tmp = new HashSet<Class<?>>();
         tmp.add(SensorDataResource.class);
+        tmp.add(ForecastResource.class);
 
         CLASSES = Collections.unmodifiableSet(tmp);
     }

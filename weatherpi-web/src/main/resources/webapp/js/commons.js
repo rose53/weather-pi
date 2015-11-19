@@ -2,6 +2,7 @@
 //=== CONSTANTS ===
 var WEATHERPI_REST_ROOT       = 'rest/resources/';
 var WEATHERPI_REST_SENSORDATA = WEATHERPI_REST_ROOT + 'sensordata';
+var WEATHERPI_REST_FORCAST    = WEATHERPI_REST_ROOT + 'forecast';
 
 var RangeEnum = {
     ACTUAL : 1,
@@ -33,6 +34,79 @@ var RangeEnum = {
         ms: 365 * 24 * 60 * 60 * 1000}
   }
 };
+
+var ForecastIconEnum = {
+    CLEAR_DAY   : 1,
+    CLEAR_NIGHT : 2,
+    RAIN   : 3,
+    SNOW  : 4,
+    SLEET   : 5,
+    WIND   : 6,
+    FOG   : 7,
+    CLOUDY   : 8,
+    PARTLY_CLOUDY_DAY : 9,
+    PARTLY_CLOUDY_NIGHT : 10,
+    
+    properties: {
+    1:  {name: "clear-day", 
+         value: 1, 
+         src: "images/sun.svg"},  
+    2:  {name: "clear-night", 
+         value: 2, 
+         src: "images/moon.svg"},
+    3:  {name: "rain", 
+         value: 3, 
+         src: "images/cloud-rain.svg"},
+    4:  {name: "snow", 
+         value: 4, 
+         src: "images/cloud-snow.svg"},
+    5:  {name: "sleet", 
+         value: 5, 
+         src: "images/cloud-hail.svg"},
+    6:  {name: "wind", 
+         value: 6, 
+         src: "images/wind.svg"},
+    7:  {name: "fog", 
+         value: 7, 
+         src: "images/cloud-fog.svg"},
+    8:  {name: "cloudy", 
+         value: 8, 
+         src: "images/cloud.svg"},
+    9:  {name: "partly-cloudy-day", 
+         value: 9, 
+         src: "images/cloud-sun.svg"},
+    10: {name: "partly-cloudy-night", 
+         value: 10, 
+         src: "images/cloud-moon.svg"}    
+    },
+  
+    getForecastIconEnumForName : function(iconName) {
+        if (this.properties[this.CLEAR_DAY].name === iconName) {
+            return this.CLEAR_DAY;
+        } else if (this.properties[this.CLEAR_NIGHT].name === iconName) {
+            return this.CLEAR_NIGHT;
+        } else if (this.properties[this.RAIN].name === iconName) {
+            return this.RAIN;
+        } else if (this.properties[this.SNOW].name === iconName) {
+            return this.SNOW;
+        } else if (this.properties[this.SLEET].name === iconName) {
+            return this.SLEET;
+        } else if (this.properties[this.WIND].name === iconName) {
+            return this.WIND;
+        } else if (this.properties[this.FOG].name === iconName) {
+            return this.FOG;
+        } else if (this.properties[this.CLOUDY].name === iconName) {
+            return this.CLOUDY;
+        } else if (this.properties[this.PARTLY_CLOUDY_DAY].name === iconName) {
+            return this.PARTLY_CLOUDY_DAY;
+        } else if (this.properties[this.PARTLY_CLOUDY_NIGHT].name === iconName) {
+            return this.PARTLY_CLOUDY_NIGHT;
+        } else {
+            return null;
+        }
+    } 
+};
+
 /*
  * Converts degrees to radians
  */

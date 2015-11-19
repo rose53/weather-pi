@@ -89,6 +89,10 @@ public class Database {
             logger.debug("insertSensorData: not data given.");
             return;
         }
+        if (!rowData.isValid()) {
+            logger.debug("insertSensorData: not valid data given.");
+            return;
+        }
         insertStatement.setDouble(1, rowData.getTemperatureIndoor());
         insertStatement.setDouble(2, rowData.getPressureIndoor());
         insertStatement.setDouble(3, rowData.getHumidityIndoor());

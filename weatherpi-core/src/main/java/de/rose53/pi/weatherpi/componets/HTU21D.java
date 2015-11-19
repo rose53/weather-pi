@@ -26,7 +26,7 @@ import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
-public class HTU21D implements Displayable {
+public class HTU21D implements Sensor,Displayable {
 
     private static final int HTDU21D_I2C_ADDRESS = 0x40;
 
@@ -82,6 +82,11 @@ public class HTU21D implements Displayable {
     }
 
     @Override
+    public String getName() {
+        return "HTU21D";
+    }
+
+    @Override
     public void display(Display display)  {
 
         try {
@@ -95,7 +100,7 @@ public class HTU21D implements Displayable {
         }
     }
 
-    public double readHumidity() throws IOException {
+    public synchronized double readHumidity() throws IOException {
 
         device.write((byte)HTU21DF_READHUM_HOLD);
         delay(50);
@@ -118,7 +123,7 @@ public class HTU21D implements Displayable {
         return humidity;
     }
 
-    public double readTemperature() throws IOException {
+    public synchronized double readTemperature() throws IOException {
         device.write((byte)HTU21DF_READTEMP_HOLD);
         delay(50);
 
@@ -147,12 +152,12 @@ public class HTU21D implements Displayable {
                 double temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
-                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"HTU21D", temperature,TEMPERATURE_ACCURACY));
+                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature,TEMPERATURE_ACCURACY));
                 }
                 double humidity = readHumidity();
                 if (lastHumidity != humidity) {
                     lastHumidity = humidity;
-                    humidityEvent.fire(new HumidityEvent(ESensorPlace.INDOOR,"HTU21D", humidity));
+                    humidityEvent.fire(new HumidityEvent(ESensorPlace.INDOOR,getName(), humidity));
                 }
             } catch (IOException e) {
                 logger.error("run:",e);
