@@ -18,7 +18,9 @@
         togglebutton_selected : '#FFFF99',
         togglebutton_normal   : '#99CCFF',
         statusbutton_set      : '#FFCC66',
-        statusbutton_normal   : '#99CCFF'
+        statusbutton_normal   : '#99CCFF',
+        forecast_max_temp     : '#FFCC66',
+        forecast_min_temp     : '#3366CC'
     };
     
     var lastTouch = {
@@ -46,7 +48,7 @@
         range  : RangeEnum.DAY        
     };
     
-    var icons = [];
+    var daily = [];
     
     var buttons = {
         indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
@@ -277,8 +279,8 @@
             return historyFrameRect.w;
         },
         
-        updateForecast: function(iconData) {
-            icons = iconData            
+        updateForecast: function(dailyData) {
+            daily = dailyData;            
             refresh(this.canvas);
         }
     };
@@ -643,21 +645,34 @@
         ctx.lineTo(fBoxX,fBoxY + fBoxH);
         ctx.lineTo(fBoxX,fBoxY);
         
+        ctx.textBaseline = "middle";
+        ctx.font         = "14pt LcarsGTJ3";
+                
+        
         for (var i = 0; i < 7; i++) {
-            ctx.moveTo(fBoxX + i * fBoxW / 7,  fBoxY);
-            ctx.lineTo(fBoxX + i * fBoxW / 7, fBoxY + fBoxH);
+            //ctx.moveTo(fBoxX + i * fBoxW / 7,  fBoxY);
+            //ctx.lineTo(fBoxX + i * fBoxW / 7, fBoxY + fBoxH);
             
-            if (icons.length >= 8) {
+            if (daily.length >= 8) {
             var source = new Image();
-            source.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(icons[i+1])].src;
+            source.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon)].src;
             // Render our SVG image to the canvas once it loads.
             //source.onload = function(){
-            ctx.drawImage(source,fBoxX + i * fBoxW / 7 ,fBoxY,fBoxW / 7,fBoxW / 7);
+            ctx.drawImage(source,fBoxX + i * fBoxW / 7 ,fBoxY - 10 ,fBoxW / 7,fBoxW / 7);
             //}
-        }
+            ctx.save();
+            ctx.fillStyle    = colorTable.forecast_max_temp;
+            ctx.textAlign    = "left";
+            ctx.fillText(daily[i+1].temperatureMax.toFixed(1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 );
+            var metrics = ctx.measureText(daily[i+1].temperatureMax.toFixed(1));
+            //var width = metrics.width;
+            ctx.fillStyle    = colorTable.forecast_min_temp;
+            ctx.fillText(daily[i+1].temperatureMin.toFixed(1),fBoxX + i * fBoxW / 7 + metrics.width + 5, fBoxY + fBoxW / 7 - 10);
+            ctx.restore();
+            }
         }
         
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.strokeStyle = '#FF0000';
         ctx.stroke();
         

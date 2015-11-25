@@ -163,7 +163,7 @@ var schedule = function() {
     lcarsControlView.updateClock();
     if (lastForecast <= new Date().getTime() - 5 * 60 * 1000 ) {
         lastForecast = new Date().getTime();
-        forecastService.dailyIcons(
+        forecastService.daily(
         function(data){ 
             log.debug("schedule: " + data.length);   
             lcarsControlView.updateForecast(data);

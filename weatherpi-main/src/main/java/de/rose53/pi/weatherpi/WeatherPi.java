@@ -2,7 +2,6 @@ package de.rose53.pi.weatherpi;
 
 import static java.util.Arrays.asList;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -29,7 +28,6 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
-import de.rose53.pi.weatherpi.componets.Displayable;
 import de.rose53.pi.weatherpi.componets.Sensor;
 import de.rose53.pi.weatherpi.database.Database;
 import de.rose53.pi.weatherpi.database.RowData;
@@ -70,10 +68,6 @@ public class WeatherPi implements Runnable {
 
     @Inject
     TwitterPlublisher twitter;
-
-//    @Inject
-//    @Any
-//    Instance<Displayable> displayables;
 
     @Inject
     @Any
@@ -157,14 +151,6 @@ public class WeatherPi implements Runnable {
 
                         database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor,temperatureBirdhouse,humidityBirdhouse));
                     }
-                    // update display
-//                    for (Displayable displayable : displayables) {
-//                        display.clear();
-//                        displayable.display(display);
-//                        display.writeDisplay();
-//                        Thread.sleep(5000);
-//                    }
-
                 } catch (SQLException e) {
                     logger.warn("run:",e);
                 }

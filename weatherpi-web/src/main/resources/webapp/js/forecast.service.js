@@ -4,11 +4,11 @@
 function ForecastService(){
     var self = this;
     var servicePath = WEATHERPI_REST_FORCAST + '/';
-
-    self.dailyIcons = function(cb) {
-
-        var serviceUrl = servicePath + 'daily/icons';
-    $.ajax({
+    
+    self.daily = function(cb) {
+            
+        var serviceUrl = servicePath + 'daily';
+	$.ajax({
             type : 'GET',
             url : serviceUrl,
         dataType : 'json',
@@ -16,7 +16,7 @@ function ForecastService(){
         }).done(function(data) {
             cb(data);
         });
-
+        
     };
 }
 
