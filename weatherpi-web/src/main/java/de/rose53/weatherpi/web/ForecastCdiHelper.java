@@ -52,9 +52,7 @@ public class ForecastCdiHelper {
                                                     .collect(toList());
     }
 
-    public List<ForecastCurrentlyRespone> getCurrently() {
-
-        return stream(forecast.getDaily().getData()).map(d -> new ForecastCurrentlyRespone(d,forecast.getZoneId()))
-                                                    .collect(toList());
+    public ForecastCurrentlyRespone getCurrently() {
+        return new ForecastCurrentlyRespone(forecast.getCurrently(),forecast.getZoneId());
     }
 }

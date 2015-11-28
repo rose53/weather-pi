@@ -5,7 +5,6 @@ import java.time.ZoneId;
 
 import de.rose53.pi.weatherpi.forecast.DataPoint;
 import de.rose53.pi.weatherpi.forecast.Forecast;
-import de.rose53.pi.weatherpi.forecast.Forecastdata;
 
 public class BaseForecastRespone {
 
