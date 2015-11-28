@@ -1,7 +1,7 @@
 # ![WeatherPi](./src/main/resources/images/weather_pi_logo.png "WeatherPi") WeatherPi
 
-Java 8 program to display various sensors or components connected to a RaspberryPi on a [7-segment display](https://learn.adafruit.com/adafruit-led-backpack/1-2-inch-7-segment-backpack). For the communication with the display and the sensors, [Pi4J](http://pi4j.com/) is used. Additionally, there is a touch screen displaying data.
-The outdoor sensors are connected to an ESP8266 WiFi module.
+Java 8 program to collect data from various sensors connected to a RaspberryPi. For the connection to the sensors [Pi4J](http://pi4j.com/) is used. Additionally, there is a touch screen displaying data.
+Outdoor sensors are connected to an ESP8266 WiFi module.
 
 ## Sensors
 The list of actually implemented sensors. The indoor sensors are connected to the RaspberryPi.
@@ -15,16 +15,21 @@ Indoor:
 Outdoor
 *   DHT22: Temperature and Humidity
 
-## Components
-The list of actually implemented components.
-
-*   Clock: Shows the actual time
-
 ## MQTT
 Both, the RaspberryPi and the ESP8266 are publishing their sensor data via MQTT to a local installed
 [Mosquitto broker](http://www.eclipse.org/mosquitto/). [Here](http://www.mymakerprojects.com/index.php/setup-mosquitto-mqtt-server-on-the-raspberry-pi/) are
 some instructions for the installation of the Mosquitto MQTT Server on the RaspberryPi.
+The published messages are JSON encoded, this makes it easy to convert them to Java or JavaScript objects.
 
+```json
+{
+    "sensor": "DHT22",
+    "place": "BIRDHOUSE",
+    "type": "TEMPERATURE",
+    "accuracy": 0.50,
+    "temperature": 4.7000
+}
+```
 
 ## Database
 The sensor data is written to a [MySQL](http://www.mysql.com/) database for later processing of the data.
