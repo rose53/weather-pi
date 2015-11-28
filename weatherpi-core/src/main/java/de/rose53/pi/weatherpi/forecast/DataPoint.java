@@ -19,7 +19,7 @@ public class DataPoint extends BaseDataPoint {
     /**
      * (only defined on daily data points): A number representing the fractional part of the lunation number of the given day. This can be thought of as the “percentage complete” of the current lunar month: a value of 0 represents a new moon, a value of 0.25 represents a first quarter moon, a value of 0.5 represents a full moon, and a value of 0.75 represents a last quarter moon. (The ranges in between these represent waxing crescent, waxing gibbous, waning gibbous, and waning crescent moons, respectively.)
      */
-    private int moonPhase;
+    private double moonPhase;
 
     /**
      * A numerical value representing the distance to the nearest storm in miles.<p>
@@ -125,11 +125,11 @@ public class DataPoint extends BaseDataPoint {
         this.sunsetTime = sunsetTime;
     }
 
-    public int getMoonPhase() {
+    public double getMoonPhase() {
         return moonPhase;
     }
 
-    public void setMoonPhase(int moonPhase) {
+    public void setMoonPhase(double moonPhase) {
         this.moonPhase = moonPhase;
     }
 

@@ -10,7 +10,7 @@ public class ForecastDailyRespone extends BaseForecastRespone {
     private final double temperatureMax;
     private final double humidity;
     private final double pressure;
-    private final int    moonPhase;
+    private final double moonPhase;
 
     public ForecastDailyRespone(DataPoint d, ZoneId zoneId) {
         super(d,zoneId);
@@ -37,7 +37,7 @@ public class ForecastDailyRespone extends BaseForecastRespone {
         return pressure;
     }
 
-    public int getMoonPhase() {
+    public double getMoonPhase() {
         return moonPhase;
     }
 }
