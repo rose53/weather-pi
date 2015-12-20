@@ -1,4 +1,4 @@
-/* global RangeEnum, log, ForecastIconEnum */
+/* global RangeEnum, log, ForecastIconEnum, MoonPhaseIconEnum */
 
 /**
  *
@@ -8,6 +8,8 @@
 (function($) {
 
     var FRAME_INSET = 20;
+    
+    var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
 
     var colorTable = {
         header                : '#FF9933',
@@ -49,6 +51,7 @@
     };
     
     var daily = [];
+    var currently;
     
     var buttons = {
         indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
@@ -70,13 +73,13 @@
     };
 
     var graphButtonPlaceGroup = {
-        indoorButtonRect   : {text : 'INDOOR',  place: 'indoor',  x : 0, y : 0, w : 0, h : 0, selected : true },
-        birdhouseButtonRect : {text : 'BIRDHOUSE', place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false }, 
+        indoorButtonRect   : {text : 'INDOOR',  place: 'indoor',  x : 0, y : 0, w : 0, h : 0, selected : false },
+        birdhouseButtonRect : {text : 'BIRDHOUSE', place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : true }, 
         outdoor1ButtonRect : {text : 'OUTDOOR', place: 'outdoor', x : 0, y : 0, w : 0, h : 0, selected : false }       
     };
 
     var forcastButtons = {
-        currentButtonRect     : {text : 'CURRENT',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
+        currentButtonRect     : {text : 'TODAY',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
         nextDaysButtonRect   : {text : 'NEXT DAYS', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
     };
 
@@ -264,6 +267,10 @@
             }    
         },
         
+        getGraphDataParams : function() {
+            return getGraphEventData();  
+        },
+        
         updateGraphData : function(data, sensor, range) {
             graphData.data   = data;
             graphData.sensor = sensor;
@@ -279,8 +286,13 @@
             return historyFrameRect.w;
         },
         
-        updateForecast: function(dailyData) {
+        updateDailyForecast: function(dailyData) {
             daily = dailyData;            
+            refresh(this.canvas);
+        },
+        
+        updateCurrentlyForecast: function(currentlyData) {
+            currently = currentlyData;            
             refresh(this.canvas);
         }
     };
@@ -363,7 +375,7 @@
         historyFrameRect.x = FRAME_INSET;
         historyFrameRect.y = header.size + 2 * baseButton.space;
         historyFrameRect.w = windowWidth - 2 * FRAME_INSET;
-        historyFrameRect.h = 236;
+        historyFrameRect.h = 228;
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
@@ -492,7 +504,7 @@
         ctx.closePath();
 
         //var graphData = jQuery.parseJSON(testData);
-        drawGraphArea(ctx,leftBarX + baseButton.space + frame.smallSize,leftBarY,rightBarX - leftBarX - 2 * baseButton.space - 2* frame.smallSize, leftBarH,graphData);
+        drawGraphArea(ctx,leftBarX + 3 * baseButton.space + frame.smallSize,leftBarY,rightBarX - leftBarX - 6 * baseButton.space - 2* frame.smallSize, leftBarH,graphData);
         /////////
         
         var buttonGapY = y + baseButton.height;
@@ -602,9 +614,9 @@
         ctx.fill();
         ctx.closePath();
 
-        var buttonGapY = y + (frame.smallSize + baseButton.height);
+        var buttonGapY = y + (frame.smallSize + baseButton.height - baseButton.space);
         var buttonPosX = x;
-        var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - button.space;
+        //var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - button.space;
         var buttonPosY = buttonGapY + baseButton.space;
 
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
@@ -612,77 +624,121 @@
         forcastButtons.currentButtonRect.x = buttonPosX;
         forcastButtons.currentButtonRect.y = buttonPosY;
         forcastButtons.currentButtonRect.w = frame.largeSize;
-        forcastButtons.currentButtonRect.h = 2 * baseButton.height + baseButton.space;
+        forcastButtons.currentButtonRect.h = baseButton.height + baseButton.space;
 
         drawButton(ctx,forcastButtons.currentButtonRect);
 
-        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        buttonGapY = buttonGapY + baseButton.height + 2 * baseButton.space;
         
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
         
-        buttonPosY = buttonPosY + 2 * baseButton.height + 2 * baseButton.space;
+        if (daily.length >= 1) {
+            var dBoxX = forcastButtons.currentButtonRect.x + forcastButtons.currentButtonRect.w + baseButton.space;
+            var dBoxY = forcastButtons.currentButtonRect.y;
+            var dBoxW = w - frame.largeSize - baseButton.space;
+
+            ctx.beginPath();
+
+            ctx.save();
+            ctx.textBaseline = "middle";
+            ctx.font         = "14pt LcarsGTJ3";
+            ctx.fillStyle    = colorTable.forecast_max_temp;
+            ctx.textAlign    = "center";
+            var sunriseTimeStr = daily[0].sunriseTime;
+            var sunsetTimeStr  = daily[0].sunsetTime
+            
+            ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 33);
+            ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 33);
+            ctx.restore();
+
+            var sunriseIconSource = new Image();
+            sunriseIconSource.src = 'images/sunrise.svg';
+            sunriseIconSource.onload = (function(source,x,y,s){
+                ctx.drawImage(source,x,y,s,s);
+            })(sunriseIconSource,dBoxX,dBoxY - baseButton.height / 2,1.5 * baseButton.height);
+
+            var sunsetIconSource = new Image();
+            sunsetIconSource.src = 'images/sunset.svg';
+            sunsetIconSource.onload = (function(source,x,y,s){
+                ctx.drawImage(source,x,y,s,s);
+            })(sunsetIconSource,dBoxX + 1.5 * baseButton.height,dBoxY - baseButton.height / 2,1.5 * baseButton.height);
+
+            ctx.stroke();
+        }
+        buttonPosY = buttonPosY + baseButton.height + 2 * baseButton.space;
 
         forcastButtons.nextDaysButtonRect.x = buttonPosX;
         forcastButtons.nextDaysButtonRect.y = buttonPosY;
         forcastButtons.nextDaysButtonRect.w = frame.largeSize;
-        forcastButtons.nextDaysButtonRect.h = 2 * baseButton.height + baseButton.space;
+        forcastButtons.nextDaysButtonRect.h = 3 * baseButton.height + baseButton.space;
 
         drawButton(ctx,forcastButtons.nextDaysButtonRect);
         
-        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        buttonGapY = buttonGapY + 3 * baseButton.height + 2 * baseButton.space;
         
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
         
         var fBoxX = forcastButtons.nextDaysButtonRect.x + forcastButtons.nextDaysButtonRect.w + baseButton.space;
         var fBoxY = forcastButtons.nextDaysButtonRect.y;
         var fBoxW = w - frame.largeSize - baseButton.space;
-        var fBoxH = 2 * baseButton.height + baseButton.space;
         
         ctx.beginPath();
-        ctx.moveTo(fBoxX,  fBoxY);
-        ctx.lineTo(fBoxX+fBoxW,fBoxY);
-        ctx.lineTo(fBoxX+fBoxW,fBoxY + fBoxH);
-        ctx.lineTo(fBoxX,fBoxY + fBoxH);
-        ctx.lineTo(fBoxX,fBoxY);
         
         ctx.textBaseline = "middle";
         ctx.font         = "14pt LcarsGTJ3";
-                
+         
+        var fontHeight = 14;
         
         for (var i = 0; i < 7; i++) {
-            //ctx.moveTo(fBoxX + i * fBoxW / 7,  fBoxY);
-            //ctx.lineTo(fBoxX + i * fBoxW / 7, fBoxY + fBoxH);
-            
             if (daily.length >= 8) {
-            var source = new Image();
-            source.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon)].src;
-            // Render our SVG image to the canvas once it loads.
-            //source.onload = function(){
-            ctx.drawImage(source,fBoxX + i * fBoxW / 7 ,fBoxY - 10 ,fBoxW / 7,fBoxW / 7);
-            //}
-            ctx.save();
-            ctx.fillStyle    = colorTable.forecast_max_temp;
-            ctx.textAlign    = "left";
-            ctx.fillText(daily[i+1].temperatureMax.toFixed(1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 );
-            var metrics = ctx.measureText(daily[i+1].temperatureMax.toFixed(1));
-            //var width = metrics.width;
-            ctx.fillStyle    = colorTable.forecast_min_temp;
-            ctx.fillText(daily[i+1].temperatureMin.toFixed(1),fBoxX + i * fBoxW / 7 + metrics.width + 5, fBoxY + fBoxW / 7 - 10);
-            ctx.restore();
+                ctx.save();
+                var time = new Date(daily[i+1].time);
+                ctx.fillStyle    = '#ffff99';
+                ctx.textAlign    = "left";
+                ctx.fillText(days[time.getDay()] + ' ' + time.getDate() + '.' + time.getMonth(),fBoxX + i * fBoxW / 7 + 2, fBoxY + fontHeight / 2);
+                ctx.restore();
+                var forecastIconSource = new Image();
+                forecastIconSource.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon)].src;
+                // Render our SVG image to the canvas once it loads.
+                forecastIconSource.onload = (function(source,x,y,s){
+                    ctx.drawImage(source,x,y,s,s);
+                })(forecastIconSource,fBoxX + i * fBoxW / 7,fBoxY - 10 + fontHeight,fBoxW / 7);
+ 
+
+                ctx.save();
+                ctx.fillStyle    = colorTable.forecast_max_temp;
+                ctx.textAlign    = "left";
+                var metrics = ctx.measureText(daily[i+1].temperatureMax.toFixed(1));
+                ctx.fillText(daily[i+1].temperatureMax.toFixed(1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 + fontHeight);
+                
+                //var width = metrics.width;
+                ctx.fillStyle    = colorTable.forecast_min_temp;
+                ctx.fillText(daily[i+1].temperatureMin.toFixed(1),fBoxX + i * fBoxW / 7 + metrics.width + 5, fBoxY + fBoxW / 7 - 10 + fontHeight);
+                
+
+                ctx.fillStyle    = colorTable.forecast_max_temp;
+                ctx.textAlign    = "left";
+                metrics = ctx.measureText(parseInt(daily[i+1].pressure));
+                ctx.fillText(parseInt(daily[i+1].pressure),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 + 2  * fontHeight + 2);
+                
+                //var width = metrics.width;
+                ctx.textAlign    = "left";
+                ctx.fillText(parseInt(100 * daily[i+1].humidity),fBoxX + i * fBoxW / 7 + metrics.width + 10, fBoxY + fBoxW / 7 - 10 + 2 * fontHeight + 2);
+
+                ctx.restore();
+                
+                var moonPhaseIconSource = new Image();
+                moonPhaseIconSource.src = MoonPhaseIconEnum.properties[MoonPhaseIconEnum.getPhaseIconEnum(daily[i+1].moonPhase)].src;
+                moonPhaseIconSource.onload = (function(source,x,y,s){
+                    ctx.drawImage(source,x,y,s,s);
+                })(moonPhaseIconSource,fBoxX + i * fBoxW / 7 ,fBoxY + fBoxW / 7 - 20 + 2 * fontHeight,fBoxW / 7);
             }
         }
         
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#FF0000';
         ctx.stroke();
-        
-        //var source = new Image();
-        //source.src = ForecastIconEnum.properties[ForecastIconEnum.PARTLY_CLOUDY_DAY].src;
-        // Render our SVG image to the canvas once it loads.
-        //source.onload = function(){
-        //ctx.drawImage(source,forcastButtons.nextDaysButtonRect.x + forcastButtons.nextDaysButtonRect.w ,forcastButtons.nextDaysButtonRect.y,fBoxW / 6,fBoxW / 6);
-        //}
-        
+ 
         ctx.restore();
     }
 
@@ -712,7 +768,7 @@
 
         ctx.closePath();
         
-        var buttonGapY = y + (frame.smallSize + baseButton.height);
+        var buttonGapY = y + (frame.smallSize + baseButton.height- baseButton.space);
         var buttonPosX = x + w - frame.largeSize;
         var infoButtonPosX = buttonPosX - getLabeledInfoButtonWidth() - button.space;
         var buttonPosY = buttonGapY + baseButton.space;
@@ -963,20 +1019,11 @@
         var width  = step * Math.floor(w/step);
         var height = step * Math.floor(h/step) ;
         
-        var xZeroMS = x + w / 2 + width / 2;
-        var yZero = y + h / 2 + height / 2;
-                
-        ctx.beginPath();
-        ctx.moveTo(xZeroMS,  yZero);
-        ctx.lineTo(xZeroMS,yZero - height);
-        ctx.lineTo(xZeroMS - width,yZero - height);
-        ctx.lineTo(xZeroMS-width,yZero);
-        ctx.lineTo(xZeroMS,yZero);
-        
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#FF0000';
-        ctx.stroke();
-        
+        var xZeroMS  = x + w / 2 + width / 2;
+        var xMinMS   = xZeroMS - width;
+        var yZero    = y + h / 2 + height / 2;
+        var yMax     = yZero - height;
+                        
         ctx.beginPath();        
         for (var yAxis = 0; yAxis <= w / 2; yAxis += step) {
             ctx.moveTo(x + w / 2 + yAxis,y);
@@ -1015,13 +1062,34 @@
             maxValue = Math.ceil(maxValue);
             minValue = Math.floor(minValue);
         } 
-                
+          
+        // draw y - axis units
+        //ctx.beginPath();
         var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
         var pixelPerUnit = height / (maxValue  - minValue);
-         
         log.debug("drawGraphArea: maxValue     " + maxValue); 
         log.debug("drawGraphArea: minValue     " + minValue);
         log.debug("drawGraphArea: pixelPerUnit " + pixelPerUnit); 
+        
+        ctx.save();
+        ctx.textBaseline = "middle";
+        ctx.font         = "12pt LcarsGTJ3";
+        ctx.fillStyle    = colorTable.forecast_max_temp;
+        ctx.textAlign    = "center";
+
+        ctx.fillText(minValue,xMinMS - baseButton.space,  yZero);
+        ctx.fillText(maxValue,xMinMS - baseButton.space,  yMax);
+        
+        var i = 1;
+        for (var yPos = yZero - step; yPos > yMax; yPos -= step) {
+           ctx.fillText((minValue + step * i / pixelPerUnit).toFixed(1),xMinMS - baseButton.space,  yPos); 
+           i++;
+        }
+        ctx.restore();
+        
+        
+         
+ 
         var maxDate = new Date(graphData.data.sensorData[0].time);
         var maxTimeInMS = maxDate.getTime(); 
 

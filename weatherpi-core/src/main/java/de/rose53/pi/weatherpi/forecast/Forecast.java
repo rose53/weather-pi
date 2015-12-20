@@ -3,6 +3,7 @@ package de.rose53.pi.weatherpi.forecast;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,7 +74,6 @@ public class Forecast {
     }
 
     public LocalDateTime getTimeAsDateTime(long time) {
-
         return LocalDateTime.ofInstant(Instant.ofEpochSecond(time),getZoneId());
     }
 
@@ -117,8 +117,11 @@ public class Forecast {
         }
     }
 
-    public static LocalDateTime getTimeAsDateTime(long time, ZoneId zoneId) {
+    public static LocalTime getTime(long time) {
+        return LocalTime.ofSecondOfDay(time);
+    }
 
+    public static LocalDateTime getTimeAsDateTime(long time, ZoneId zoneId) {
         return LocalDateTime.ofInstant(Instant.ofEpochSecond(time),zoneId);
     }
 }

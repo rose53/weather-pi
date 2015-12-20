@@ -28,7 +28,7 @@
 
             log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevents");
 
-            var sensorWebSocket = new WebSocket("ws://munin.local:8080/websocket/sensorevents");
+            var sensorWebSocket = new WebSocket("ws://" + location.host + "/websocket/sensorevents");
 
             sensorWebSocket.onopen = function() {
             };
@@ -156,7 +156,8 @@ var handleGraphButtonEvent = function(event) {
 };
 
 
-var lastForecast = 0;
+var lastForecast  = 0;
+var lastGraphData = 0;
 
 var schedule = function() {
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
@@ -164,9 +165,23 @@ var schedule = function() {
     if (lastForecast <= new Date().getTime() - 5 * 60 * 1000 ) {
         lastForecast = new Date().getTime();
         forecastService.daily(
+            function(data){   
+                lcarsControlView.updateDailyForecast(data);
+            });
+        forecastService.currently(
+            function(data){   
+                lcarsControlView.updateCurrentlyForecast(data);
+            });
+    }
+    if (lastGraphData <= new Date().getTime() - 10 * 60 * 1000 ) {
+        lastGraphData = new Date().getTime();
+        var graphParams = lcarsControlView.getGraphDataParams();
+        sensordataService.doRestCall(graphParams.sensor,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
+        lcarsControlView.getMaxGraphData(),
         function(data){ 
-            log.debug("schedule: " + data.length);   
-            lcarsControlView.updateForecast(data);
-        });
+            if (data.sensorData.length > 0) {
+                lcarsControlView.updateGraphData(data,graphParams.sensor,graphParams.range);
+            }                    
+        }); 
     }
 };

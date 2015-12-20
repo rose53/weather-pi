@@ -25,6 +25,5 @@ public class ForecastTest {
         Forecastdata data = forecast.getForecastdata();
         assertNotNull(data);
     }
-
 }
 

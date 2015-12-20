@@ -107,6 +107,64 @@ var ForecastIconEnum = {
     } 
 };
 
+var MoonPhaseIconEnum = {
+    MOON_NEW   : 1,
+    MOON_WAXING_CRESCENT : 2,
+    MOON_FIRST_QUARTER : 3,
+    MOON_WAXING_GIBBOUS: 4,
+    MOON_FULL  : 5,
+    MOON_WANING_GIBBOUS : 6,
+    MOON_LAST_QUARTER   : 7,
+    MOON_WANING_CRESCENT : 8,
+
+    properties: {
+    1:  {name: "new moon", 
+         value: 1, 
+         src: "images/moon-new.svg"},  
+    2:  {name: "waxing crescent", 
+         value: 2, 
+         src: "images/moon-waxing-crescent.svg"},
+    3:  {name: "first quarter", 
+         value: 3, 
+         src: "images/moon-first-quarter.svg"},
+    4:  {name: "waxing gibbous", 
+         value: 4, 
+         src: "images/moon-waxing-gibbous.svg"},
+    5:  {name: "full moon", 
+         value: 5, 
+         src: "images/moon-full.svg"},
+    6:  {name: "waning gibbous", 
+         value: 6, 
+         src: "images/moon-waning-gibbous.svg"},
+    7:  {name: "last quarter", 
+         value: 7, 
+         src: "images/moon-last-quarter.svg"},
+    8:  {name: "waning crescent", 
+         value: 8, 
+         src: "images/moon-waning-crescent.svg"}
+    },
+  
+    getPhaseIconEnum : function(moonPhase) {
+        if (moonPhase <= 0.0) {
+            return this.MOON_NEW;
+        } else if (0.0 < moonPhase && moonPhase < 0.25) {
+            return this.MOON_WAXING_CRESCENT;
+        } else if (moonPhase === 0.25) {
+            return this.MOON_FIRST_QUARTER;
+        } else if (0.25 < moonPhase && moonPhase < 0.5) {
+            return this.MOON_WAXING_GIBBOUS;
+        } else if (moonPhase === 0.5) {
+            return this.MOON_FULL;
+        } else if (0.5 < moonPhase && moonPhase < 0.75) {
+            return this.MOON_WANING_GIBBOUS;
+        } else if (moonPhase === 0.75) {
+            return this.MOON_LAST_QUARTER;
+        } else if (moonPhase > 0.75) {
+            return this.MOON_WANING_CRESCENT;
+        } 
+    } 
+};
+
 /*
  * Converts degrees to radians
  */

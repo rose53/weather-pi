@@ -17,7 +17,12 @@ public class DataPoint extends BaseDataPoint {
     private long sunsetTime;
 
     /**
-     * (only defined on daily data points): A number representing the fractional part of the lunation number of the given day. This can be thought of as the “percentage complete” of the current lunar month: a value of 0 represents a new moon, a value of 0.25 represents a first quarter moon, a value of 0.5 represents a full moon, and a value of 0.75 represents a last quarter moon. (The ranges in between these represent waxing crescent, waxing gibbous, waning gibbous, and waning crescent moons, respectively.)
+     * (only defined on daily data points): A number representing the fractional part of the lunation number
+     * of the given day. This can be thought of as the “percentage complete” of the current lunar
+     * month: a value of 0 represents a new moon, a value of 0.25 represents a first quarter moon, a
+     * value of 0.5 represents a full moon, and a value of 0.75 represents a last quarter moon.
+     * (The ranges in between these represent waxing crescent, waxing gibbous, waning gibbous, and waning
+     * crescent moons, respectively.)
      */
     private double moonPhase;
 
@@ -86,9 +91,16 @@ public class DataPoint extends BaseDataPoint {
     private long   apparentTemperatureMaxTime;
 
     private double dewPoint;
-
+    /**
+     * A numerical value representing the wind speed in miles per hour.
+     */
     private double windSpeed;
 
+    /**
+     * A numerical value representing the direction that the wind is coming from in degrees, with
+     * true north at 0° and progressing clockwise.
+     * (If windSpeed is zero, then this value will not be defined.)
+     */
     private double windBearing;
 
     private double cloudCover;
