@@ -21,9 +21,9 @@ import com.pi4j.gpio.extension.mcp.MCP3008Pin;
 import com.pi4j.io.gpio.GpioPinAnalogInput;
 
 import de.rose53.pi.weatherpi.Display;
-import de.rose53.pi.weatherpi.ESensorPlace;
+import de.rose53.pi.weatherpi.common.ESensorPlace;
+import de.rose53.pi.weatherpi.common.configuration.IntegerConfiguration;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
-import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
 
 @ApplicationScoped
 public class LDRVT43N2 extends MCP3008Sensor implements Displayable, Sensor {

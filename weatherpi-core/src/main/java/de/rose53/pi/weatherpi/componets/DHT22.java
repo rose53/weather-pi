@@ -23,12 +23,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.Display;
-import de.rose53.pi.weatherpi.ESensorPlace;
+import de.rose53.pi.weatherpi.common.ESensorPlace;
+import de.rose53.pi.weatherpi.common.configuration.IntegerConfiguration;
+import de.rose53.pi.weatherpi.common.configuration.StringConfiguration;
 import de.rose53.pi.weatherpi.display.EBase;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
-import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
-import de.rose53.pi.weatherpi.utils.StringConfiguration;
 
 @ApplicationScoped
 public class DHT22 /*implements Displayable, Sensor*/ {

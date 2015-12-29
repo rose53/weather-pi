@@ -12,7 +12,7 @@ import com.pi4j.gpio.extension.mcp.MCP3008Pin;
 import com.pi4j.io.gpio.GpioPinAnalogInput;
 
 import de.rose53.pi.weatherpi.Display;
-import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
+import de.rose53.pi.weatherpi.common.configuration.IntegerConfiguration;
 
 @ApplicationScoped
 public class TGS2600 extends MCP3008Sensor implements Displayable, Sensor {

@@ -13,9 +13,12 @@
     <dependencies>
         <dependency>
             <groupId>de.rose53.pi</groupId>
-            <artifactId>weatherpi-core</artifactId>
+            <artifactId>weatherpi-db</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>de.rose53.pi</groupId>
+            <artifactId>weatherpi-forecast</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>

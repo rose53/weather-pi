@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-import de.rose53.pi.weatherpi.ESensorPlace;
-import de.rose53.pi.weatherpi.ESensorType;
+import de.rose53.pi.weatherpi.common.ESensorPlace;
+import de.rose53.pi.weatherpi.common.ESensorType;
 import de.rose53.pi.weatherpi.database.Database;
 import de.rose53.pi.weatherpi.database.ERange;
 import de.rose53.pi.weatherpi.database.SensorDataQueryResult;

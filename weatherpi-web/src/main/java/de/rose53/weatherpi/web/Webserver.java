@@ -16,7 +16,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
-import de.rose53.pi.weatherpi.utils.IntegerConfiguration;
+import de.rose53.pi.weatherpi.common.configuration.IntegerConfiguration;
 
 public class Webserver {
 
