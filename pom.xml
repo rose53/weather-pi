@@ -97,6 +97,12 @@
         <dependencies>
             <dependency>
                 <groupId>de.rose53.pi</groupId>
+                <artifactId>weatherpi-common-test</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -356,6 +362,7 @@
     </dependencies>
 
     <modules>
+        <module>weatherpi-common-test</module>
         <module>weatherpi-common</module>
         <module>weatherpi-core</module>
         <module>weatherpi-db</module>
