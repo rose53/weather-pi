@@ -82,5 +82,10 @@
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>de.rose53.pi</groupId>
+            <artifactId>weatherpi-common-test</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

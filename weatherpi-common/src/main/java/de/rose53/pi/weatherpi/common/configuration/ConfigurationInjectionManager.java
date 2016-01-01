@@ -2,6 +2,7 @@ package de.rose53.pi.weatherpi.common.configuration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,12 @@ public class ConfigurationInjectionManager {
             properties.load(file);
         } catch (IOException e) {
             logger.error("init:",e);
+            try (InputStream file = ConfigurationInjectionManager.class.getResource("/configuration.properties").openStream()) {
+                //load all the properties from this file
+                properties.load(file);
+            } catch (IOException e1) {
+                logger.error("init:",e1);
+            }
         }
     }
 

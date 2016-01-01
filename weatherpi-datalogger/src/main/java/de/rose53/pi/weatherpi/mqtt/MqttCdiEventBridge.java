@@ -1,15 +1,8 @@
 package de.rose53.pi.weatherpi.mqtt;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -50,8 +43,6 @@ public class MqttCdiEventBridge implements MqttCallback {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private Map<String, TemperatureEvent> temperatureSensorMap = new HashMap<>();
-
 
     @PostConstruct
     public void subscribe() {
@@ -63,63 +54,6 @@ public class MqttCdiEventBridge implements MqttCallback {
         } catch (MqttException e) {
             logger.error("subscribe",e);
         }
-    }
-
-    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
-        logger.debug("onReadTemperatureEvent: ");
-        temperatureSensorMap.put(event.getSensor(),event);
-        List<TemperatureEvent> sorted =  temperatureSensorMap.values()
-                                                             .parallelStream()
-                                                             .sorted(Comparator
-                                                             .comparingDouble(t -> t.getAccuracy()))
-                                                             .collect(Collectors.toList());
-        publish(sorted.get(0));
-    }
-
-    public void onReadPressureEvent(@Observes PressureEvent event) {
-        logger.debug("onReadPressureEvent: ");
-        publish(event);
-    }
-
-    public void onReadHumidityEvent(@Observes HumidityEvent event) {
-        logger.debug("onReadHumidityEvent: ");
-        publish(event);
-    }
-
-    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
-        logger.debug("onReadIlluminanceEvent: ");
-        publish(event);
-    }
-
-    synchronized private <T extends SensorEvent> void publish(T event) {
-        return;
-        /*
-        if (event == null) {
-            return;
-        }
-        // we only want to publish our own events
-        if (event.getPlace() == ESensorPlace.OUTDOOR) {
-            return;
-        }
-        try {
-            MqttMessage message = new MqttMessage(mapper.writeValueAsString(event).getBytes());
-            message.setQos(0);
-            client.publish(getTopic(event),message);
-        } catch (MqttException | JsonProcessingException e) {
-            logger.error("publish:",e);
-        }
-        */
-    }
-
-    static private <T extends SensorEvent> String getTopic(T event) {
-
-        StringBuilder builder = new StringBuilder("sensordata");
-
-        builder.append('/')
-               .append(event.getPlace())
-               .append('/')
-               .append(event.getType());
-        return builder.toString().toLowerCase();
     }
 
     @Override

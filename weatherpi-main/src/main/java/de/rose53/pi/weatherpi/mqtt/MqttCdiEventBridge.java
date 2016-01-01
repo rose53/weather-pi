@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -19,15 +19,17 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 
-@ApplicationScoped
+@Dependent
 public class MqttCdiEventBridge implements MqttCallback {
 
     @Inject
@@ -92,13 +94,11 @@ public class MqttCdiEventBridge implements MqttCallback {
     }
 
     synchronized private <T extends SensorEvent> void publish(T event) {
-        return;
-        /*
         if (event == null) {
             return;
         }
         // we only want to publish our own events
-        if (event.getPlace() == ESensorPlace.OUTDOOR) {
+        if (event.getPlace() != ESensorPlace.INDOOR) {
             return;
         }
         try {
@@ -108,7 +108,6 @@ public class MqttCdiEventBridge implements MqttCallback {
         } catch (MqttException | JsonProcessingException e) {
             logger.error("publish:",e);
         }
-        */
     }
 
     static private <T extends SensorEvent> String getTopic(T event) {
