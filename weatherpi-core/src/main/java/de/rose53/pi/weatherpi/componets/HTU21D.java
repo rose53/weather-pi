@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 
 import com.pi4j.io.i2c.I2CBus;
@@ -118,7 +119,7 @@ public class HTU21D implements Sensor,Displayable {
         int rawHumidity = ((msb << 8) + lsb) & 0xFFFC;
 
 
-        double humidity = -6 + (125 * rawHumidity) / 65536.0;
+        double humidity = Precision.round(-6 + (125 * rawHumidity) / 65536.0,1);
         logger.debug("readHumidity: humidity = >{}<",humidity);
         return humidity;
     }
@@ -139,8 +140,8 @@ public class HTU21D implements Sensor,Displayable {
         int crc = buf[2] & 0xFF;
         int rawTemperature = ((msb << 8) + lsb) & 0xFFFC;
 
-        double temp = -46.85F + (175.72 * rawTemperature) / 65536.0;
-
+        double temp = Precision.round(-46.85F + (175.72 * rawTemperature) / 65536.0,1);
+        logger.debug("readTemperature: temperature = >{}<",temp);
         return temp;
     }
 

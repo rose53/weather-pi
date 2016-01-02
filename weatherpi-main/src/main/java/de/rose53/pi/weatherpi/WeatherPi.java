@@ -3,10 +3,8 @@ package de.rose53.pi.weatherpi;
 import static java.util.Arrays.asList;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.Date;
@@ -31,9 +29,7 @@ import org.slf4j.Logger;
 import de.rose53.pi.weatherpi.common.configuration.StringConfiguration;
 import de.rose53.pi.weatherpi.componets.Sensor;
 import de.rose53.pi.weatherpi.database.Database;
-import de.rose53.pi.weatherpi.database.RowData;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
-import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.mqtt.MqttCdiEventBridge;
@@ -85,7 +81,6 @@ public class WeatherPi implements Runnable {
 
     private double pressureIndoor = 0;
     private double humidityIndoor = 0;
-    private double illuminance = 0;
 
     private Map<String, TemperatureValue> temperatureSensorMap = new HashMap<>();
 
@@ -140,22 +135,8 @@ public class WeatherPi implements Runnable {
     @Override
     public void run() {
         start();
-        int lastMinute = -1;
-        int actMinute;
         while (running) {
-            try {
-                actMinute = LocalDateTime.now().getMinute();
-                if (((actMinute > lastMinute) || (lastMinute == 59 && actMinute == 0) && (pressureIndoor > 0.0))) {
-                    lastMinute = actMinute;
-                    // read sensor and add to database
-                    List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
-
-                    database.insertSensorData(new RowData(sorted.isEmpty()?0.0:sorted.get(0).getTemperature(),pressureIndoor,humidityIndoor,illuminance,temperatureOutdoor,humidityOutdoor,temperatureBirdhouse,humidityBirdhouse));
-                }
-            } catch (SQLException e) {
-                logger.warn("run:",e);
-            }
-            Utils.delay(1000);
+            Utils.delay(2000);
         }
     }
 
@@ -205,11 +186,6 @@ public class WeatherPi implements Runnable {
         default:
             break;
         }
-    }
-
-    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
-        logger.debug("onReadIlluminanceEvent: ");
-        illuminance = event.getIlluminance();
     }
 
     private class TwitterTask implements Runnable {

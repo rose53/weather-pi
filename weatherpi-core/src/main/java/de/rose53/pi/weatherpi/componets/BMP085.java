@@ -14,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 
 import com.pi4j.io.i2c.I2CBus;
@@ -203,7 +204,7 @@ public class BMP085 implements Displayable, Sensor {
         int x2 = (mc << 11) / (x1 + md);
         b5 = x1 + x2;
 
-        float celsius = ((b5 + 8) >> 4) / 10.0f;
+        float celsius = Precision.round(((b5 + 8) >> 4) / 10.0f,1);
         logger.debug("readTemperature: temp = >{}<",celsius);
         return celsius;
     }
@@ -241,8 +242,13 @@ public class BMP085 implements Displayable, Sensor {
         return (int)p;
     }
 
+    /**
+     * The pressure normalized to sea level. The <code>heightAboveSeaLevel</code> must be set to the correct value.
+     * @return the pressure normalized to sea level
+     * @throws IOException
+     */
     public double readNormalizedPressure() throws IOException {
-        return readPressure() /  (100  * Math.pow((1 - heightAboveSeaLevel / 44330.0), 5.255));
+        return Precision.round(readPressure() / (100 * Math.pow((1 - heightAboveSeaLevel / 44330.0), 5.255)),1)  ;
     }
 
     private int readUncompensatedTemperature() throws IOException {
