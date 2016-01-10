@@ -695,7 +695,7 @@
                 var time = new Date(daily[i+1].time);
                 ctx.fillStyle    = '#ffff99';
                 ctx.textAlign    = "left";
-                ctx.fillText(days[time.getDay()] + ' ' + time.getDate() + '.' + time.getMonth(),fBoxX + i * fBoxW / 7 + 2, fBoxY + fontHeight / 2);
+                ctx.fillText(days[time.getDay()] + ' ' + time.getDate() + '.' + (time.getMonth() + 1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fontHeight / 2);
                 ctx.restore();
                 var forecastIconSource = new Image();
                 forecastIconSource.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon)].src;
