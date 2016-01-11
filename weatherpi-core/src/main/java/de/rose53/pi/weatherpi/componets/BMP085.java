@@ -109,7 +109,7 @@ public class BMP085 implements Displayable, Sensor {
     private EOSRS osrs = EOSRS.STANDARD;
 
 
-    private float  lastTemperature = 0.0f;
+    private double  lastTemperature = 0.0f;
     private double lastPressure = 0.0f;
 
     @Inject
@@ -195,7 +195,7 @@ public class BMP085 implements Displayable, Sensor {
 
     }
 
-    public synchronized float readTemperature() throws IOException {
+    public synchronized double readTemperature() throws IOException {
         device.write(BMP085_CONTROL, (byte)BMP085_READTEMPCMD);
         delay(5);
 
@@ -204,7 +204,7 @@ public class BMP085 implements Displayable, Sensor {
         int x2 = (mc << 11) / (x1 + md);
         b5 = x1 + x2;
 
-        float celsius = Precision.round(((b5 + 8) >> 4) / 10.0f,1);
+        double celsius = Precision.round((((b5 + 8) >> 4) / 10.0),1);
         logger.debug("readTemperature: temp = >{}<",celsius);
         return celsius;
     }
@@ -282,7 +282,7 @@ public class BMP085 implements Displayable, Sensor {
         @Override
         public void run() {
             try {
-                float temperature = readTemperature();
+                double temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
                     temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature,TEMPERATURE_ACCURACY));
