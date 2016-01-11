@@ -35,6 +35,12 @@ var RangeEnum = {
   }
 };
 
+var getImage = function(src) {
+    var retVal = new Image();
+    retVal.src = src;
+    return retVal;
+};
+    
 var ForecastIconEnum = {
     CLEAR_DAY   : 1,
     CLEAR_NIGHT : 2,
@@ -107,6 +113,20 @@ var ForecastIconEnum = {
     } 
 };
 
+var forecastImages = [];
+
+forecastImages.push(getImage("images/sun.svg"));
+forecastImages.push(getImage("images/moon.svg"));
+forecastImages.push(getImage("images/cloud-rain.svg"));
+forecastImages.push(getImage("images/cloud-snow.svg"));
+forecastImages.push(getImage("images/cloud-hail.svg"));
+forecastImages.push(getImage("images/wind.svg"));
+forecastImages.push(getImage("images/cloud-fog.svg"));
+forecastImages.push(getImage("images/cloud.svg"));
+forecastImages.push(getImage("images/cloud-sun.svg"));
+forecastImages.push(getImage("images/cloud-moon.svg"));
+
+
 var MoonPhaseIconEnum = {
     MOON_NEW   : 1,
     MOON_WAXING_CRESCENT : 2,
@@ -117,25 +137,27 @@ var MoonPhaseIconEnum = {
     MOON_LAST_QUARTER   : 7,
     MOON_WANING_CRESCENT : 8,
 
+
+    
     properties: {
     1:  {name: "new moon", 
          value: 1, 
          src: "images/moon-new.svg"},  
     2:  {name: "waxing crescent", 
          value: 2, 
-         src: "images/moon-waxing-crescent.svg"},
+         src: "images/moon-waxing-crescent.svg"},  
     3:  {name: "first quarter", 
          value: 3, 
-         src: "images/moon-first-quarter.svg"},
+         src: "images/moon-first-quarter.svg"},  
     4:  {name: "waxing gibbous", 
          value: 4, 
-         src: "images/moon-waxing-gibbous.svg"},
+         src: "images/moon-waxing-gibbous.svg"},  
     5:  {name: "full moon", 
          value: 5, 
-         src: "images/moon-full.svg"},
+         src: "images/moon-full.svg"},  
     6:  {name: "waning gibbous", 
          value: 6, 
-         src: "images/moon-waning-gibbous.svg"},
+         src: "images/moon-waning-gibbous.svg"},  
     7:  {name: "last quarter", 
          value: 7, 
          src: "images/moon-last-quarter.svg"},
@@ -143,7 +165,7 @@ var MoonPhaseIconEnum = {
          value: 8, 
          src: "images/moon-waning-crescent.svg"}
     },
-  
+
     getPhaseIconEnum : function(moonPhase) {
         if (moonPhase <= 0.0) {
             return this.MOON_NEW;
@@ -164,6 +186,23 @@ var MoonPhaseIconEnum = {
         } 
     } 
 };
+
+var moonPhaseImages = [];
+
+moonPhaseImages.push(getImage("images/moon-new.svg"));
+moonPhaseImages.push(getImage("images/moon-waxing-crescent.svg"));
+moonPhaseImages.push(getImage("images/moon-first-quarter.svg"));
+moonPhaseImages.push(getImage("images/moon-waxing-gibbous.svg"));
+moonPhaseImages.push(getImage("images/moon-full.svg"));
+moonPhaseImages.push(getImage("images/moon-waning-gibbous.svg"));
+moonPhaseImages.push(getImage("images/moon-last-quarter.svg"));
+moonPhaseImages.push(getImage("images/moon-waning-crescent.svg"));
+
+var sunriseIconSource = new Image();
+sunriseIconSource.src = 'images/sunrise.png';
+
+var sunsetIconSource = new Image();
+sunsetIconSource.src = 'images/sunset.png';
 
 /*
  * Converts degrees to radians

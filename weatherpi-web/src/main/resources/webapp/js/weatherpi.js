@@ -12,6 +12,10 @@
                 $.extend(settings, options);
             }
             log.trace("initControlPage: init ...");
+            preload([
+                'images/sunset.png',
+                'images/sunrise.png']);
+            
             var $page = $("#controlview");
             $("#controlcanvas").jLCARSControlView();
 
@@ -28,7 +32,7 @@
 
             log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/websocket/sensorevents");
 
-            var sensorWebSocket = new WebSocket("ws://" + location.host + "/websocket/sensorevents");
+            var sensorWebSocket = new WebSocket("ws://munin.local:8080/websocket/sensorevents");
 
             sensorWebSocket.onopen = function() {
             };
@@ -140,6 +144,12 @@
 $(document).ready(function() {
     $().initApp();
 });
+
+function preload(arrayOfImages) {
+  $(arrayOfImages).each(function (){
+    $('<img/>')[0].src = this;
+  });
+};
 
 var handleGraphButtonEvent = function(event) {
     log.debug("handleRangeButtonEvent: " + event.sensor);

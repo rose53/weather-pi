@@ -42,7 +42,7 @@
     var lastBirdhouseHumidity       = '0';
     var lastBirdhouseTemperature    = '0';
 
-    var lastTime                 = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});;
+    var lastTime                 = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});;
     
     var graphData = {
         data   : null,
@@ -260,7 +260,13 @@
         
         updateClock : function() {
             
-            var tt = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
+            var tt = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (tt.length > 5) {
+                tt = tt.substring(0,5);
+                
+            }
+            
             if (tt !== lastTime) {
                 lastTime = tt;
                 refresh(this.canvas);
@@ -435,7 +441,7 @@
         ctx.font      = "30pt LcarsGTJ3";
         ctx.fillStyle = colorTable.background;
         ctx.textBaseline = "middle";
-        
+                
         ctx.fillText(lastTime, x + frame.largeSize + header.space, y + header.size / 2);
         ctx.restore();
     }
@@ -647,22 +653,12 @@
             var sunriseTimeStr = daily[0].sunriseTime;
             var sunsetTimeStr  = daily[0].sunsetTime
             
-            ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 33);
-            ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 33);
+            ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 40);
+            ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 40);
             ctx.restore();
 
-            var sunriseIconSource = new Image();
-            sunriseIconSource.src = 'images/sunrise.svg';
-            sunriseIconSource.onload = (function(source,x,y,s){
-                ctx.drawImage(source,x,y,s,s);
-            })(sunriseIconSource,dBoxX,dBoxY - baseButton.height / 2,1.5 * baseButton.height);
-
-            var sunsetIconSource = new Image();
-            sunsetIconSource.src = 'images/sunset.svg';
-            sunsetIconSource.onload = (function(source,x,y,s){
-                ctx.drawImage(source,x,y,s,s);
-            })(sunsetIconSource,dBoxX + 1.5 * baseButton.height,dBoxY - baseButton.height / 2,1.5 * baseButton.height);
-
+            ctx.drawImage(sunriseIconSource,dBoxX + 1.5 * baseButton.height / 4,dBoxY,0.9 * baseButton.height,0.9 * baseButton.height);
+            ctx.drawImage(sunsetIconSource,dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 4,dBoxY,0.9 * baseButton.height,0.9 * baseButton.height);
             ctx.stroke();
         }
         buttonPosY = buttonPosY + baseButton.height + 2 * baseButton.space;
@@ -689,49 +685,41 @@
          
         var fontHeight = 14;
         
+        var dayBoxWidth = fBoxW / 7;
         for (var i = 0; i < 7; i++) {
             if (daily.length >= 8) {
                 ctx.save();
                 var time = new Date(daily[i+1].time);
                 ctx.fillStyle    = '#ffff99';
                 ctx.textAlign    = "left";
-                ctx.fillText(days[time.getDay()] + ' ' + time.getDate() + '.' + (time.getMonth() + 1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fontHeight / 2);
+                ctx.fillText(days[time.getDay()] + ' ' + time.getDate() + '.' + (time.getMonth() + 1),fBoxX + i * dayBoxWidth + 2, fBoxY + fontHeight / 2);
                 ctx.restore();
-                var forecastIconSource = new Image();
-                forecastIconSource.src = ForecastIconEnum.properties[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon)].src;
-                // Render our SVG image to the canvas once it loads.
-                forecastIconSource.onload = (function(source,x,y,s){
-                    ctx.drawImage(source,x,y,s,s);
-                })(forecastIconSource,fBoxX + i * fBoxW / 7,fBoxY - 10 + fontHeight,fBoxW / 7);
- 
+                
+                ctx.drawImage(forecastImages[ForecastIconEnum.getForecastIconEnumForName(daily[i+1].icon) - 1],fBoxX + i * fBoxW / 7,fBoxY - 10 + fontHeight, dayBoxWidth, dayBoxWidth);
 
                 ctx.save();
                 ctx.fillStyle    = colorTable.forecast_max_temp;
                 ctx.textAlign    = "left";
                 var metrics = ctx.measureText(daily[i+1].temperatureMax.toFixed(1));
-                ctx.fillText(daily[i+1].temperatureMax.toFixed(1),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 + fontHeight);
+                ctx.fillText(daily[i+1].temperatureMax.toFixed(1),fBoxX + i * dayBoxWidth + 2, fBoxY + dayBoxWidth - 10 + fontHeight);
                 
                 //var width = metrics.width;
                 ctx.fillStyle    = colorTable.forecast_min_temp;
-                ctx.fillText(daily[i+1].temperatureMin.toFixed(1),fBoxX + i * fBoxW / 7 + metrics.width + 5, fBoxY + fBoxW / 7 - 10 + fontHeight);
+                ctx.fillText(daily[i+1].temperatureMin.toFixed(1),fBoxX + i * dayBoxWidth + metrics.width + 5, fBoxY + dayBoxWidth - 10 + fontHeight);
                 
 
                 ctx.fillStyle    = colorTable.forecast_max_temp;
                 ctx.textAlign    = "left";
                 metrics = ctx.measureText(parseInt(daily[i+1].pressure));
-                ctx.fillText(parseInt(daily[i+1].pressure),fBoxX + i * fBoxW / 7 + 2, fBoxY + fBoxW / 7 - 10 + 2  * fontHeight + 2);
+                ctx.fillText(parseInt(daily[i+1].pressure),fBoxX + i * dayBoxWidth + 2, fBoxY + dayBoxWidth - 10 + 2  * fontHeight + 2);
                 
                 //var width = metrics.width;
                 ctx.textAlign    = "left";
-                ctx.fillText(parseInt(100 * daily[i+1].humidity),fBoxX + i * fBoxW / 7 + metrics.width + 10, fBoxY + fBoxW / 7 - 10 + 2 * fontHeight + 2);
+                ctx.fillText(parseInt(100 * daily[i+1].humidity),fBoxX + i * dayBoxWidth + metrics.width + 10, fBoxY + dayBoxWidth - 10 + 2 * fontHeight + 2);
 
                 ctx.restore();
                 
-                var moonPhaseIconSource = new Image();
-                moonPhaseIconSource.src = MoonPhaseIconEnum.properties[MoonPhaseIconEnum.getPhaseIconEnum(daily[i+1].moonPhase)].src;
-                moonPhaseIconSource.onload = (function(source,x,y,s){
-                    ctx.drawImage(source,x,y,s,s);
-                })(moonPhaseIconSource,fBoxX + i * fBoxW / 7 ,fBoxY + fBoxW / 7 - 20 + 2 * fontHeight,fBoxW / 7);
+                ctx.drawImage(moonPhaseImages[MoonPhaseIconEnum.getPhaseIconEnum(daily[i+1].moonPhase) - 1],fBoxX + i * dayBoxWidth ,fBoxY + dayBoxWidth - 20 + 2 * fontHeight,dayBoxWidth, dayBoxWidth);
             }
         }
         
