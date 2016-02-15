@@ -6,14 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -30,7 +27,7 @@ import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 
 @Dependent
-public class MqttCdiEventBridge implements MqttCallback {
+public class MqttCdiEventBridge {
 
     @Inject
     Logger logger;
@@ -54,18 +51,6 @@ public class MqttCdiEventBridge implements MqttCallback {
 
     private Map<String, TemperatureEvent> temperatureSensorMap = new HashMap<>();
 
-
-    @PostConstruct
-    public void subscribe() {
-        client.setCallback(this);
-        try {
-            client.subscribe(new String[]{"sensordata/outdoor/+",
-                                          "sensordata/birdhouse/temperature",
-                                          "sensordata/birdhouse/humidity"});
-        } catch (MqttException e) {
-            logger.error("subscribe",e);
-        }
-    }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: ");
@@ -119,40 +104,5 @@ public class MqttCdiEventBridge implements MqttCallback {
                .append('/')
                .append(event.getType());
         return builder.toString().toLowerCase();
-    }
-
-    @Override
-    public void connectionLost(Throwable e) {
-       logger.error("connectionLost:",e);
-    }
-
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        for (String topic : token.getTopics()) {
-            logger.debug("Message delivered successfully to topic : >{}<",topic);
-        }
-    }
-
-    @Override
-    public void messageArrived(String topic, MqttMessage message) throws Exception {
-        logger.debug("messageArrived: topic = >{}<, message = >{}<",topic,new String(message.getPayload()));
-        SensorEvent event = mapper.readValue(new String(message.getPayload()), SensorEvent.class);
-        if (event == null) {
-            return;
-        }
-        switch (event.getType()) {
-        case HUMIDITY:
-            humidityEvent.fire((HumidityEvent) event);
-            break;
-        case ILLUMINANCE:
-            illuminanceEvent.fire((IlluminanceEvent) event);
-            break;
-        case PRESSURE:
-            pressureEvent.fire((PressureEvent) event);
-            break;
-        case TEMPERATURE:
-            temperatureEvent.fire((TemperatureEvent) event);
-            break;
-        }
     }
 }

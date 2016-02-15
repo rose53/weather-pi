@@ -1,22 +1,8 @@
 package de.rose53.pi.weatherpi;
 
-import static java.util.Arrays.asList;
-
-import java.sql.Connection;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -26,18 +12,9 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 
-import de.rose53.pi.weatherpi.common.configuration.StringConfiguration;
 import de.rose53.pi.weatherpi.componets.Sensor;
-import de.rose53.pi.weatherpi.database.Database;
-import de.rose53.pi.weatherpi.events.HumidityEvent;
-import de.rose53.pi.weatherpi.events.PressureEvent;
-import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.pi.weatherpi.mqtt.MqttCdiEventBridge;
-import de.rose53.pi.weatherpi.twitter.TwitterPlublisher;
 import de.rose53.pi.weatherpi.utils.Utils;
-import de.rose53.weatherpi.web.TemperatureValue;
-import de.rose53.weatherpi.web.Webserver;
-import twitter4j.TwitterException;
 
 
 
@@ -54,62 +31,18 @@ public class WeatherPi implements Runnable {
     private boolean running;
 
     @Inject
-    @StringConfiguration(key="host.name",defaultValue="localhost")
-    String hostName;
-
-    @Inject
-    Display display;
-
-    @Inject
-    Webserver webServer;
-
-    @Inject
-    TwitterPlublisher twitter;
-
-    @Inject
     @Any
     Instance<Sensor> sensors;
 
     @Inject
-    Connection connection;
-
-    @Inject
-    Database database;
-
-    @Inject
     MqttCdiEventBridge mqttCdiEventBridge;
-
-    private double pressureIndoor = 0;
-    private double humidityIndoor = 0;
-
-    private Map<String, TemperatureValue> temperatureSensorMap = new HashMap<>();
-
-    private double humidityOutdoor = 0;
-    private double temperatureOutdoor = 0;
-
-    private double humidityBirdhouse = 0;
-    private double temperatureBirdhouse = 0;
-
-    final ScheduledExecutorService clientProcessingPool = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r,"Twitter");
-        t.setPriority(Thread.MIN_PRIORITY);
-        return t;
-    });
 
     public void start() {
 
         try {
-            System.out.print("Starting WebServer ...");
-            webServer.start();
-            System.out.println("\b\b\bdone.");
-
             System.out.println("Collecting Sensors ...");
             sensors.forEach(s -> System.out.println(s.getName()));
             System.out.println("done.");
-
-            System.out.print("Starting TwitterTask ...");
-            clientProcessingPool.scheduleAtFixedRate(new TwitterTask(), 30, 30, TimeUnit.SECONDS);
-            System.out.println("\b\b\bdone.");
         } catch (Exception e) {
             logger.error("start:",e);
         }
@@ -125,11 +58,6 @@ public class WeatherPi implements Runnable {
         if (running) {
             running = false;
         }
-        try {
-            webServer.stop();
-        } catch (Exception e) {
-            logger.error("stop: ",e);
-        }
     }
 
     @Override
@@ -140,91 +68,6 @@ public class WeatherPi implements Runnable {
         }
     }
 
-    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
-        logger.debug("onReadTemperatureEvent: ");
-        switch (event.getPlace()) {
-        case INDOOR:
-            temperatureSensorMap.put(event.getSensor(),new TemperatureValue(event.getTemperature(),event.getAccuracy()));
-            break;
-        case OUTDOOR:
-            temperatureOutdoor = event.getTemperature();
-            break;
-        case BIRDHOUSE:
-            temperatureBirdhouse = event.getTemperature();
-            break;
-        default:
-            break;
-        }
-    }
-
-    public void onReadPressureEvent(@Observes PressureEvent event) {
-        logger.debug("onReadPressureEvent: ");
-        switch (event.getPlace()) {
-        case INDOOR:
-            pressureIndoor = event.getPressure();
-            break;
-        case OUTDOOR:
-        case BIRDHOUSE:
-            break;
-        default:
-            break;
-        }
-    }
-
-    public void onReadHumidityEvent(@Observes HumidityEvent event) {
-        logger.debug("onReadHumidityEvent: ");
-        switch (event.getPlace()) {
-        case INDOOR:
-            humidityIndoor = event.getHumidity();
-            break;
-        case OUTDOOR:
-            humidityOutdoor = event.getHumidity();
-            break;
-        case BIRDHOUSE:
-            humidityBirdhouse = event.getHumidity();
-            break;
-        default:
-            break;
-        }
-    }
-
-    private class TwitterTask implements Runnable {
-
-        List<LocalTime> twitterTimes = asList(LocalTime.of(6, 0),LocalTime.of(12, 0),LocalTime.of(18, 0), LocalTime.of(0, 0));
-
-        DecimalFormat tempFormat = new DecimalFormat("#.0");
-        DecimalFormat humidityFormat = new DecimalFormat("#.0");
-        DecimalFormat pressureFormat = new DecimalFormat("#");
-
-        LocalTime lastTweet = null;
-
-        @Override
-        public void run() {
-            try {
-                LocalTime now = LocalTime.now();
-                for (LocalTime twitterTime : twitterTimes) {
-                    if (now.getHour() == twitterTime.getHour() && now.getMinute() == twitterTime.getMinute() && lastTweet != twitterTime) {
-
-                        lastTweet = twitterTime;
-                        List<TemperatureValue> sorted =  temperatureSensorMap.values().parallelStream().sorted(Comparator.comparingDouble(t -> t.getAccuracy())).collect(Collectors.toList());
-
-                        StringBuilder status = new StringBuilder();
-
-                        status.append("Indoor:").append('\n')
-                              .append("Temp.   : ").append(tempFormat.format(sorted.isEmpty()?0.0:sorted.get(0).getTemperature())).append("°C").append('\n')
-                              .append("Humidity: ").append(humidityFormat.format(humidityIndoor)).append("%").append('\n')
-                              .append("Pressure: ").append(pressureFormat.format(pressureIndoor)).append("hPa").append('\n')
-                              .append("Birdhouse:").append('\n')
-                              .append("Temp.   : ").append(tempFormat.format(temperatureBirdhouse)).append("°C").append('\n')
-                              .append("Humidity: ").append(humidityFormat.format(humidityBirdhouse)).append("%").append('\n');
-                        twitter.updateStatus(status.toString());
-                    }
-                }
-            } catch (TwitterException e) {
-                logger.warn("run:",e);
-            }
-        }
-    }
 
     public static void main(String[] args) {
         System.out.println("Starting ...");

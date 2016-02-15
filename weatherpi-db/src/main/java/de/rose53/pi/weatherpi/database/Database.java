@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
 
-@ApplicationScoped
+@Dependent
 public class Database {
 
     static private final String SENSOR_DATA_INSERT = "insert into SENSOR_DATA (TIME,TEMPERATURE,PRESSURE,HUMIDITY,ILLUMINATION,TEMPERATURE_OUT,HUMIDITY_OUT,TEMPERATURE_BIRD,HUMIDITY_BIRD) values (SYSDATE(),?,?,?,?,?,?,?,?)";
@@ -105,7 +105,7 @@ public class Database {
         insertStatement.executeUpdate();
     }
 
-    public SensorDataQueryResult[] getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) throws SQLException {
+    public synchronized SensorDataQueryResult[] getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) throws SQLException {
 
         if (range == null) {
             range = ERange.ACTUAL;

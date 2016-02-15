@@ -24,7 +24,7 @@
         <jmock.version>2.6.0</jmock.version>
         <pi4j.version>1.0</pi4j.version>
         <weld.version>2.2.14.Final</weld.version>
-        <jetty.version>9.3.1.v20150714</jetty.version>
+        <jetty.version>9.3.7.v20160115</jetty.version>
         <resteasy.version>3.0.13.Final</resteasy.version>
         <jackson.version>2.6.2</jackson.version>
         <paho.version>1.0.2</paho.version>
@@ -50,30 +50,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>3.4</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.5.5</version>
-                    <executions>
-                        <execution>
-                            <id>jar-with-dependencies</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <configuration>
-                                <finalName>marvin</finalName>
-                                <descriptor>src/main/assembly/assembly.xml</descriptor>
-                                <appendAssemblyId>false</appendAssemblyId>
-                                <archive>
-                                    <manifest>
-                                        <mainClass>de.rose53.pi.PCD8544Example</mainClass>
-                                    </manifest>
-                                </archive>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -368,8 +344,8 @@
         <module>weatherpi-db</module>
         <module>weatherpi-forecast</module>
         <module>weatherpi-main</module>
-        <module>weatherpi-web</module>
         <module>weatherpi-datalogger</module>
+        <module>weatherpi-war</module>
     </modules>
 
 </project>
