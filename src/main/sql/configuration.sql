@@ -3,5 +3,5 @@ CREATE TABLE `CONFIGURATION` (
   `KEY` varchar(256) NOT NULL COMMENT 'The configuration key.',
   `VALUE` varchar(1024) NULL COMMENT 'The configuration value.',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY (`KEY`)
+  UNIQUE KEY `UK1_CONFIGURATION` (`KEY`)
 );
