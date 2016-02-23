@@ -3,9 +3,11 @@ package de.rose53.weatherpi.sensordata.boundary;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,6 +17,12 @@ import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
+import de.rose53.pi.weatherpi.events.HumidityEvent;
+import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.events.PressureEvent;
+import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.weatherpi.sensordata.entity.DataBean;
+import de.rose53.weatherpi.sensordata.entity.SensorBean;
 import de.rose53.weatherpi.sensordata.entity.SensorDataBean;
 
 @Stateless
@@ -98,5 +106,38 @@ public class SensorDataService {
         } else {
             return resultList;
         }
+    }
+
+
+
+    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
+        logger.debug("onReadIlluminanceEvent: got event");
+    }
+
+    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
+        logger.debug("onReadTemperatureEvent: got event");
+        List<SensorBean> resultList = em.createNamedQuery(SensorBean.findByPlaceTypeName, SensorBean.class)
+                                          .setParameter("place", event.getPlace())
+                                          .setParameter("type", event.getType())
+                                          .setParameter("name", event.getSensor())
+                                          .getResultList();
+        if (resultList.isEmpty()) {
+            logger.debug("onReadTemperatureEvent: no sensor found");
+            return;
+        }
+        DataBean data = new DataBean();
+        data.setDevice(resultList.get(0));
+        data.setTime(new Date());
+        data.setValue(event.getTemperature());
+
+        em.persist(data);
+    }
+
+    public void onReadPressureEvent(@Observes PressureEvent event) {
+        logger.debug("onReadPressureEvent: got event");
+    }
+
+    public void onReadHumidityEvent(@Observes HumidityEvent event) {
+        logger.debug("onReadHumidityEvent: got event");
     }
 }

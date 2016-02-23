@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -34,18 +33,6 @@ public class MqttCdiEventBridge {
 
     @Inject
     MqttClient client;
-
-    @Inject
-    Event<TemperatureEvent> temperatureEvent;
-
-    @Inject
-    Event<PressureEvent> pressureEvent;
-
-    @Inject
-    Event<IlluminanceEvent> illuminanceEvent;
-
-    @Inject
-    Event<HumidityEvent> humidityEvent;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 

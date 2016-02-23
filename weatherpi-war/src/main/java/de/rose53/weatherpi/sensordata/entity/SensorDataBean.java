@@ -1,5 +1,6 @@
 package de.rose53.weatherpi.sensordata.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -36,7 +37,9 @@ import javax.persistence.TemporalType;
                  query= "SELECT new de.rose53.weatherpi.sensordata.boundary.SensorDataQueryResult(s.time,s.illumination) FROM SensorDataBean s WHERE s.time  BETWEEN :pastTime AND :actualTime order by s.time DESC ")
 
 })
-public class SensorDataBean {
+public class SensorDataBean implements Serializable {
+
+    private static final long serialVersionUID = 4988494460990539534L;
 
     public static final String findRange                     = "SensorDataBean.findRange";
     public static final String findHumidityIndoorRange       = "SensorDataBean.findHumidityIndoorRange";
