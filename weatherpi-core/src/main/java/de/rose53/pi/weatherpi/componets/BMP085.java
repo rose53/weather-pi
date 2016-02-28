@@ -285,7 +285,7 @@ public class BMP085 implements Displayable, Sensor {
                 double temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
-                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature,TEMPERATURE_ACCURACY));
+                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature));
                 }
                 double pressure = readNormalizedPressure();
                 if (lastPressure != pressure) {

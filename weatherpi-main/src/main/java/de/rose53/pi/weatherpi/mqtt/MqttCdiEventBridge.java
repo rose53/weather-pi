@@ -1,11 +1,5 @@
 package de.rose53.pi.weatherpi.mqtt;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -36,18 +30,9 @@ public class MqttCdiEventBridge {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private Map<String, TemperatureEvent> temperatureSensorMap = new HashMap<>();
-
-
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: ");
-        temperatureSensorMap.put(event.getSensor(),event);
-        List<TemperatureEvent> sorted =  temperatureSensorMap.values()
-                                                             .parallelStream()
-                                                             .sorted(Comparator
-                                                             .comparingDouble(t -> t.getAccuracy()))
-                                                             .collect(Collectors.toList());
-        publish(sorted.get(0));
+        publish(event);
     }
 
     public void onReadPressureEvent(@Observes PressureEvent event) {

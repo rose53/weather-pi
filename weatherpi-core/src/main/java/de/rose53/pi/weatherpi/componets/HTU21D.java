@@ -153,7 +153,7 @@ public class HTU21D implements Sensor,Displayable {
                 double temperature = readTemperature();
                 if (lastTemperature != temperature) {
                     lastTemperature = temperature;
-                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature,TEMPERATURE_ACCURACY));
+                    temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,getName(), temperature));
                 }
                 double humidity = readHumidity();
                 if (lastHumidity != humidity) {

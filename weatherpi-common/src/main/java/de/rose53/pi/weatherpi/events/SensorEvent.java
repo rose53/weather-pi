@@ -1,5 +1,6 @@
 package de.rose53.pi.weatherpi.events;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
@@ -17,27 +18,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = HumidityEvent.class, name = "HUMIDITY"),
         @Type(value = PressureEvent.class, name = "PRESSURE"),
         @Type(value = IlluminanceEvent.class, name = "ILLUMINANCE")})
+@JsonIgnoreProperties({"accuracy"})
 public class SensorEvent {
 
     private String sensor;
     private ESensorType type;
     private ESensorPlace place;
 
-    private double accuracy = 0.0;
-
     public SensorEvent(ESensorType type) {
         this.type = type;
     }
 
     public SensorEvent(ESensorType type, ESensorPlace place, String sensor) {
-        this(type,place,sensor,0.0);
-    }
-
-    public SensorEvent(ESensorType type, ESensorPlace place, String sensor, double accuracy) {
         this.type = type;
         this.sensor = sensor;
         this.place = place;
-        this.accuracy = accuracy;
     }
 
     public ESensorType getType() {
@@ -52,7 +47,4 @@ public class SensorEvent {
         return sensor;
     }
 
-    public double getAccuracy() {
-        return accuracy;
-    }
 }

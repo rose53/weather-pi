@@ -169,7 +169,7 @@ public class DHT22 /*implements Displayable, Sensor*/ {
                 if (values != null && values.length == 2) {
                     if (temperature != values[0]) {
                         temperature = values[0];
-                        temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"DHT22", temperature, TEMPERATURE_ACCURACY));
+                        temperatureEvent.fire(new TemperatureEvent(ESensorPlace.INDOOR,"DHT22", temperature));
                     }
                     if (humidity != values[1]) {
                         humidity = values[1];

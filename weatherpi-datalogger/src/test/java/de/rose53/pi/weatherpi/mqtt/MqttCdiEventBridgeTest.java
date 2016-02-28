@@ -32,7 +32,6 @@ public class MqttCdiEventBridgeTest {
         assertEquals("DHT22", temeratureEvent.getSensor());
         assertEquals(ESensorType.TEMPERATURE, temeratureEvent.getType());
         assertEquals(ESensorPlace.OUTDOOR, temeratureEvent.getPlace());
-        assertEquals(0.5, temeratureEvent.getAccuracy(),0.1);
         assertEquals(21.5, temeratureEvent.getTemperature(),0.1);
     }
 
