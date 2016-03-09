@@ -3,7 +3,6 @@ package de.rose53.weatherpi.sensordata.boundary;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -20,6 +19,7 @@ import de.rose53.pi.weatherpi.common.ESensorType;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
+import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.sensordata.entity.SensorBean;
@@ -108,26 +108,44 @@ public class SensorDataService {
         }
     }
 
-
+    private SensorBean getSensor(SensorEvent sensorEvent) {
+    	List<SensorBean> resultList = em.createNamedQuery(SensorBean.findByPlaceTypeName, SensorBean.class)
+                .setParameter("place", sensorEvent.getPlace())
+                .setParameter("type", sensorEvent.getType())
+                .setParameter("name", sensorEvent.getSensor())
+                .getResultList();
+    	if (resultList.isEmpty()) {
+            logger.debug("onReadTemperatureEvent: no sensor found");
+            return null;
+        }
+    	return resultList.get(0);
+    }
 
     public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
         logger.debug("onReadIlluminanceEvent: got event");
+        SensorBean sensor = getSensor(event); 
+        if (sensor == null) {
+            logger.debug("onReadIlluminanceEvent: no sensor found");
+            return;
+        }
+        DataBean data = new DataBean();
+        data.setDevice(sensor);
+        data.setTime(event.getTimeAsDate());
+        data.setValue(event.getIlluminance());
+
+        em.persist(data);        
     }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: got event");
-        List<SensorBean> resultList = em.createNamedQuery(SensorBean.findByPlaceTypeName, SensorBean.class)
-                                          .setParameter("place", event.getPlace())
-                                          .setParameter("type", event.getType())
-                                          .setParameter("name", event.getSensor())
-                                          .getResultList();
-        if (resultList.isEmpty()) {
+        SensorBean sensor = getSensor(event); 
+        if (sensor == null) {
             logger.debug("onReadTemperatureEvent: no sensor found");
             return;
         }
         DataBean data = new DataBean();
-        data.setDevice(resultList.get(0));
-        data.setTime(new Date());
+        data.setDevice(sensor);
+        data.setTime(event.getTimeAsDate());
         data.setValue(event.getTemperature());
 
         em.persist(data);
@@ -135,9 +153,31 @@ public class SensorDataService {
 
     public void onReadPressureEvent(@Observes PressureEvent event) {
         logger.debug("onReadPressureEvent: got event");
+        SensorBean sensor = getSensor(event); 
+        if (sensor == null) {
+            logger.debug("onReadPressureEvent: no sensor found");
+            return;
+        }
+        DataBean data = new DataBean();
+        data.setDevice(sensor);
+        data.setTime(event.getTimeAsDate());
+        data.setValue(event.getPressure());
+
+        em.persist(data);         
     }
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: got event");
+        SensorBean sensor = getSensor(event); 
+        if (sensor == null) {
+            logger.debug("onReadHumidityEvent: no sensor found");
+            return;
+        }
+        DataBean data = new DataBean();
+        data.setDevice(sensor);
+        data.setTime(event.getTimeAsDate());
+        data.setValue(event.getHumidity());
+
+        em.persist(data);         
     }
 }

@@ -42,6 +42,10 @@ public class SensorEventEndpoint {
     }
 
     private synchronized <T> void send(T event) {
+        if (sessions.isEmpty()) {
+            logger.debug("send: no websocket session active, nothing to do");
+            return;
+        }
         String message;
         try {
             message = mapper.writeValueAsString(event);
