@@ -1,5 +1,8 @@
 package de.rose53.pi.weatherpi.events;
 
+import java.time.Instant;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -21,18 +24,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonIgnoreProperties({"accuracy"})
 public class SensorEvent {
 
-    private String sensor;
-    private ESensorType type;
+    private String       sensor;
+    private ESensorType  type;
     private ESensorPlace place;
+    private long         time = Instant.now().getEpochSecond();
 
     public SensorEvent(ESensorType type) {
         this.type = type;
     }
 
     public SensorEvent(ESensorType type, ESensorPlace place, String sensor) {
+        this(type,place,sensor,Instant.now().getEpochSecond());
+    }
+
+    public SensorEvent(ESensorType type, ESensorPlace place, String sensor, long time) {
         this.type = type;
         this.sensor = sensor;
         this.place = place;
+        this.time = time;
     }
 
     public ESensorType getType() {
@@ -47,4 +56,11 @@ public class SensorEvent {
         return sensor;
     }
 
+    public long getTime() {
+        return time;
+    }
+
+    public Date getTimeAsDate() {
+        return Date.from(Instant.ofEpochSecond(getTime()));
+    }
 }

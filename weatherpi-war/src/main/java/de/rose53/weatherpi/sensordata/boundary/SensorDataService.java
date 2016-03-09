@@ -3,7 +3,6 @@ package de.rose53.weatherpi.sensordata.boundary;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -127,7 +126,7 @@ public class SensorDataService {
         }
         DataBean data = new DataBean();
         data.setDevice(resultList.get(0));
-        data.setTime(new Date());
+        data.setTime(event.getTimeAsDate());
         data.setValue(event.getTemperature());
 
         em.persist(data);

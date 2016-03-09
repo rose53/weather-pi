@@ -20,7 +20,7 @@ public class MqttCdiEventBridgeTest {
     @Test
     public void testStringToJson() throws JsonParseException, JsonMappingException, IOException {
 
-        String jsonString = "{\"sensor\":\"DHT22\",\"type\":\"TEMPERATURE\",\"place\":\"OUTDOOR\",\"accuracy\":0.5,\"temperature\":21.5}";
+        String jsonString = "{\"sensor\":\"DHT22\",\"type\":\"TEMPERATURE\",\"place\":\"OUTDOOR\",\"time\":1456734000,\"temperature\":21.5}";
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -33,6 +33,7 @@ public class MqttCdiEventBridgeTest {
         assertEquals(ESensorType.TEMPERATURE, temeratureEvent.getType());
         assertEquals(ESensorPlace.OUTDOOR, temeratureEvent.getPlace());
         assertEquals(21.5, temeratureEvent.getTemperature(),0.1);
+        assertEquals(1456734000, temeratureEvent.getTime());
     }
 
 }
