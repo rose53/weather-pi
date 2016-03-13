@@ -2,7 +2,6 @@ package de.rose53.weatherpi.sensordata.boundary;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -10,7 +9,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 
@@ -23,7 +21,6 @@ import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.sensordata.entity.SensorBean;
-import de.rose53.weatherpi.sensordata.entity.SensorDataBean;
 
 @Stateless
 public class SensorDataService {
@@ -34,72 +31,39 @@ public class SensorDataService {
     @PersistenceContext
     EntityManager em;
 
-
-    public List<SensorDataBean> getSensorData(ERange range) {
-
-        return em.createNamedQuery(SensorDataBean.findRange,SensorDataBean.class)
-                 .setParameter("pastTime",Timestamp.valueOf(range.getPastTime()))
-                 .setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()))
-                 .getResultList();
-    }
-
     public List<SensorDataQueryResult> getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) {
 
         if (range == null) {
             range = ERange.ACTUAL;
         }
 
-        TypedQuery<SensorDataQueryResult> q = null;
-        switch (sensorType) {
-        case HUMIDITY:
-            switch (place) {
-            case INDOOR:
-                q = em.createNamedQuery(SensorDataBean.findHumidityIndoorRange, SensorDataQueryResult.class);
-                break;
-            case OUTDOOR:
-                q = em.createNamedQuery(SensorDataBean.findHumidityOutdoorRange, SensorDataQueryResult.class);
-                break;
-            case BIRDHOUSE:
-                q = em.createNamedQuery(SensorDataBean.findHumidityBirdhouseRange, SensorDataQueryResult.class);
-                break;
-            default:
-                break;
-            }
-            break;
-        case ILLUMINANCE:
-            q = em.createNamedQuery(SensorDataBean.findIlluminationRange, SensorDataQueryResult.class);
-            break;
-        case PRESSURE:
-            q = em.createNamedQuery(SensorDataBean.findPressureRange, SensorDataQueryResult.class);
-            break;
-        case TEMPERATURE:
-            switch (place) {
-            case INDOOR:
-                q = em.createNamedQuery(SensorDataBean.findTemperatureIndoorRange, SensorDataQueryResult.class);
-                break;
-            case OUTDOOR:
-                q = em.createNamedQuery(SensorDataBean.findTemperatureOutdoorRange, SensorDataQueryResult.class);
-                break;
-            case BIRDHOUSE:
-                q = em.createNamedQuery(SensorDataBean.findTemperatureBirdhouseRange, SensorDataQueryResult.class);
-                break;
-            default:
-                break;
-            }
-            break;
-        default:
-            break;
+        List<SensorDataQueryResult> resultList = em.createNamedQuery(DataBean.findByTimeTypePlace,SensorDataQueryResult.class)
+                                                   .setParameter("pastTime",Timestamp.valueOf(range.getPastTime()))
+                                                   .setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()))
+                                                   .setParameter("type", sensorType)
+                                                   .setParameter("place", place)
+                                                   .getResultList();
+
+        if (range == ERange.ACTUAL && resultList.size() > 0) {
+            return resultList.subList(0, 1);
+        } else {
+            return resultList;
         }
-        if (q == null) {
-            logger.error("getSensorData: no statement found for sensorType = >{}<",sensorType);
-            return Collections.emptyList();
+    }
+
+    public List<DataBean> getSensorData(String name, ESensorType sensorType, ESensorPlace place, ERange range) {
+
+        if (range == null) {
+            range = ERange.ACTUAL;
         }
 
-        q.setParameter("pastTime",Timestamp.valueOf(range.getPastTime()));
-        q.setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()));
-
-
-        List<SensorDataQueryResult> resultList = q.getResultList();
+        List<DataBean> resultList = em.createNamedQuery(DataBean.findByTimeNameTypePlace,DataBean.class)
+                                      .setParameter("pastTime",Timestamp.valueOf(range.getPastTime()))
+                                      .setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()))
+                                      .setParameter("name", name)
+                                      .setParameter("type", sensorType)
+                                      .setParameter("place", place)
+                                      .getResultList();
 
         if (range == ERange.ACTUAL && resultList.size() > 0) {
             return resultList.subList(0, 1);
@@ -109,21 +73,21 @@ public class SensorDataService {
     }
 
     private SensorBean getSensor(SensorEvent sensorEvent) {
-    	List<SensorBean> resultList = em.createNamedQuery(SensorBean.findByPlaceTypeName, SensorBean.class)
+        List<SensorBean> resultList = em.createNamedQuery(SensorBean.findByPlaceTypeName, SensorBean.class)
                 .setParameter("place", sensorEvent.getPlace())
                 .setParameter("type", sensorEvent.getType())
                 .setParameter("name", sensorEvent.getSensor())
                 .getResultList();
-    	if (resultList.isEmpty()) {
+        if (resultList.isEmpty()) {
             logger.debug("onReadTemperatureEvent: no sensor found");
             return null;
         }
-    	return resultList.get(0);
+        return resultList.get(0);
     }
 
     public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
         logger.debug("onReadIlluminanceEvent: got event");
-        SensorBean sensor = getSensor(event); 
+        SensorBean sensor = getSensor(event);
         if (sensor == null) {
             logger.debug("onReadIlluminanceEvent: no sensor found");
             return;
@@ -133,12 +97,12 @@ public class SensorDataService {
         data.setTime(event.getTimeAsDate());
         data.setValue(event.getIlluminance());
 
-        em.persist(data);        
+        em.persist(data);
     }
 
     public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
         logger.debug("onReadTemperatureEvent: got event");
-        SensorBean sensor = getSensor(event); 
+        SensorBean sensor = getSensor(event);
         if (sensor == null) {
             logger.debug("onReadTemperatureEvent: no sensor found");
             return;
@@ -153,7 +117,7 @@ public class SensorDataService {
 
     public void onReadPressureEvent(@Observes PressureEvent event) {
         logger.debug("onReadPressureEvent: got event");
-        SensorBean sensor = getSensor(event); 
+        SensorBean sensor = getSensor(event);
         if (sensor == null) {
             logger.debug("onReadPressureEvent: no sensor found");
             return;
@@ -163,12 +127,12 @@ public class SensorDataService {
         data.setTime(event.getTimeAsDate());
         data.setValue(event.getPressure());
 
-        em.persist(data);         
+        em.persist(data);
     }
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: got event");
-        SensorBean sensor = getSensor(event); 
+        SensorBean sensor = getSensor(event);
         if (sensor == null) {
             logger.debug("onReadHumidityEvent: no sensor found");
             return;
@@ -178,6 +142,6 @@ public class SensorDataService {
         data.setTime(event.getTimeAsDate());
         data.setValue(event.getHumidity());
 
-        em.persist(data);         
+        em.persist(data);
     }
 }
