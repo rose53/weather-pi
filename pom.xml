@@ -24,7 +24,6 @@
         <jmock.version>2.6.0</jmock.version>
         <pi4j.version>1.0</pi4j.version>
         <weld.version>2.2.14.Final</weld.version>
-        <jetty.version>9.3.7.v20160115</jetty.version>
         <resteasy.version>3.0.13.Final</resteasy.version>
         <jackson.version>2.6.2</jackson.version>
         <paho.version>1.0.2</paho.version>
@@ -89,27 +88,7 @@
             </dependency>
             <dependency>
                 <groupId>de.rose53.pi</groupId>
-                <artifactId>weatherpi-db</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-forecast</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.rose53.pi</groupId>
-                <artifactId>weatherpi-main</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.rose53.pi</groupId>
-                <artifactId>weatherpi-web</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.rose53.pi</groupId>
-                <artifactId>weatherpi-datalogger</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -158,41 +137,6 @@
                 <artifactId>cdi-api</artifactId>
                 <version>1.0</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-webapp</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-jsp</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-plus</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty.cdi</groupId>
-                <artifactId>cdi-core</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty.websocket</groupId>
-                <artifactId>websocket-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlets</artifactId>
-                <version>${jetty.version}</version>
             </dependency>
 
             <dependency>
@@ -342,7 +286,6 @@
         <module>weatherpi-common</module>
         <module>weatherpi-core</module>
         <module>weatherpi-forecast</module>
-        <module>weatherpi-main</module>
         <module>weatherpi-war</module>
     </modules>
 

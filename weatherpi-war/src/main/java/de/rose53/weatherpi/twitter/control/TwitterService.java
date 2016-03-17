@@ -92,5 +92,6 @@ public class TwitterService {
         } catch (TwitterException e) {
             logger.error("updateTimer:",e);
         }
+
     }
 }
