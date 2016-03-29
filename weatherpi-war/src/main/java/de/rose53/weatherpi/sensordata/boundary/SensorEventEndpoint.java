@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
+import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
 
 @ApplicationScoped
@@ -41,7 +42,7 @@ public class SensorEventEndpoint {
         sessions.remove(session);
     }
 
-    private synchronized <T> void send(T event) {
+    private synchronized <T extends SensorEvent> void send(T event) {
         if (sessions.isEmpty()) {
             logger.debug("send: no websocket session active, nothing to do");
             return;

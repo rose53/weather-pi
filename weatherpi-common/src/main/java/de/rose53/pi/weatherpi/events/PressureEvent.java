@@ -19,4 +19,9 @@ public class PressureEvent extends SensorEvent {
     public double getPressure() {
         return pressure;
     }
+
+    @Override
+    public double getValue() {
+        return getPressure();
+    }
 }

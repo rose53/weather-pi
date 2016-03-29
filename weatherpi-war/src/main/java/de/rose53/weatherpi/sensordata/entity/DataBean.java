@@ -1,6 +1,9 @@
 package de.rose53.weatherpi.sensordata.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -15,6 +18,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 /**
  * Entity implementation class for Entity: DeviceBean
@@ -27,14 +31,20 @@ import javax.persistence.TemporalType;
                 query= "SELECT new de.rose53.weatherpi.sensordata.boundary.SensorDataQueryResult(d.time,d.value) FROM DataBean d "
                         + "WHERE d.time  BETWEEN :pastTime AND :actualTime AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
     @NamedQuery(name = DataBean.findByTimeNameTypePlace,
-                query= "SELECT d FROM DataBean d WHERE d.time BETWEEN :pastTime AND :actualTime AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC ")
+                query= "SELECT d FROM DataBean d WHERE d.time BETWEEN :pastTime AND :actualTime AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
+    @NamedQuery(name = DataBean.findByTimeNameTypePlaceL,
+                query= "SELECT d FROM DataBean d WHERE d.time <= :time AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
+    @NamedQuery(name = DataBean.findByTimeNameTypePlaceH,
+                query= "SELECT d FROM DataBean d WHERE d.time >= :time AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC ")
 })
 public class DataBean implements Serializable {
 
     private static final long serialVersionUID = -6828632135642482038L;
 
-    public static final String findByTimeTypePlace     = "DataBean.findByTimeTypePlace";
-    public static final String findByTimeNameTypePlace = "DataBean.findByTimeNameTypePlace";
+    public static final String findByTimeTypePlace      = "DataBean.findByTimeTypePlace";
+    public static final String findByTimeNameTypePlace  = "DataBean.findByTimeNameTypePlace";
+    public static final String findByTimeNameTypePlaceL = "DataBean.findByTimeNameTypePlaceL";
+    public static final String findByTimeNameTypePlaceH = "DataBean.findByTimeNameTypePlaceH";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -67,6 +77,11 @@ public class DataBean implements Serializable {
         this.time = time;
     }
 
+    @Transient
+    public LocalDateTime getLocalDateTime() {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(time.getTime()), ZoneId.systemDefault());
+    }
+
     public double getValue() {
         return value;
     }
@@ -79,7 +94,7 @@ public class DataBean implements Serializable {
         return sensor;
     }
 
-    public void setDevice(SensorBean sensor) {
+    public void setSensor(SensorBean sensor) {
         this.sensor = sensor;
     }
 

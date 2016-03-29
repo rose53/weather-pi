@@ -19,4 +19,9 @@ public class TemperatureEvent extends SensorEvent {
     public double getTemperature() {
         return temperature;
     }
+
+    @Override
+    public double getValue() {
+        return getTemperature();
+    }
 }

@@ -1,11 +1,13 @@
 package de.rose53.weatherpi.twitter.control;
 
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import static de.rose53.pi.weatherpi.common.ESensorType.*;
 import static de.rose53.weatherpi.sensordata.boundary.ERange.*;
 import de.rose53.weatherpi.sensordata.boundary.SensorDataService;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
+import de.rose53.weatherpi.statistics.control.DayStatisticEvent;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -91,6 +94,34 @@ public class TwitterService {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
             logger.error("updateTimer:",e);
+        }
+    }
+
+    public void onDayStatisticEvent(@Observes DayStatisticEvent event) {
+
+        DecimalFormat tempFormat = new DecimalFormat("#.0");
+
+        StringBuilder status = new StringBuilder();
+
+
+        status.append("Day statistics: ").append(event.getDay().format(DateTimeFormatter.ISO_DATE)).append('\n');
+        if (event.gettMin() != null) {
+            status.append("Tmin          : ").append(tempFormat.format(event.gettMin())).append("°C").append('\n');
+        }
+        if (event.gettMax() != null) {
+            status.append("Tmax          : ").append(tempFormat.format(event.gettMax())).append("°C").append('\n');
+        }
+        if (event.gettMed() != null) {
+            status.append("Tmed          : ").append(tempFormat.format(event.gettMed())).append("°C").append('\n');
+        }
+
+        logger.debug("onDayStatisticEvent: status for twitter = >{}<",status);
+        StatusUpdate statusUpdate = new StatusUpdate(status.toString());
+
+        try {
+            twitter.updateStatus(statusUpdate);
+        } catch (TwitterException e) {
+            logger.error("onDayStatisticEvent:",e);
         }
 
     }

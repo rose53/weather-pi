@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = PressureEvent.class, name = "PRESSURE"),
         @Type(value = IlluminanceEvent.class, name = "ILLUMINANCE")})
 @JsonIgnoreProperties({"accuracy"})
-public class SensorEvent {
+public abstract class SensorEvent {
 
     private String       sensor;
     private ESensorType  type;
@@ -63,4 +63,6 @@ public class SensorEvent {
     public Date getTimeAsDate() {
         return Date.from(Instant.ofEpochSecond(getTime()));
     }
+
+    abstract public double getValue();
 }

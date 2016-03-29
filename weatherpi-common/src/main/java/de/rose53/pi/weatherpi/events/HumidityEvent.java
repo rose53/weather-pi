@@ -19,4 +19,9 @@ public class HumidityEvent extends SensorEvent {
     public double getHumidity() {
         return humidity;
     }
+
+    @Override
+    public double getValue() {
+        return getHumidity();
+    }
 }

@@ -19,4 +19,9 @@ public class IlluminanceEvent extends SensorEvent {
     public double getIlluminance() {
         return illuminance;
     }
+
+    @Override
+    public double getValue() {
+        return getIlluminance();
+    }
 }

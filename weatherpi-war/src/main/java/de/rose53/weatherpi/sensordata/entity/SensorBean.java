@@ -24,6 +24,8 @@ import de.rose53.pi.weatherpi.common.ESensorType;
 @Entity
 @Table(name="SENSOR")
 @NamedQueries({
+    @NamedQuery(name = SensorBean.findAll,
+                query= "SELECT s FROM SensorBean s"),
     @NamedQuery(name = SensorBean.findByPlaceTypeName,
                 query= "SELECT s FROM SensorBean s WHERE s.type = :type AND s.name = :name AND s.device.place = :place")
 })
@@ -31,7 +33,8 @@ public class SensorBean implements Serializable {
 
     private static final long serialVersionUID = -8749309434246595197L;
 
-    public static final String findByPlaceTypeName = "DeviceBean.findByPlaceTypeName";
+    public static final String findAll             = "SensorBean.findAll";
+    public static final String findByPlaceTypeName = "SensorBean.findByPlaceTypeName";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
