@@ -18,6 +18,7 @@ import static de.rose53.weatherpi.sensordata.boundary.ERange.*;
 import de.rose53.weatherpi.sensordata.boundary.SensorDataService;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.statistics.control.DayStatisticEvent;
+import de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -113,6 +114,9 @@ public class TwitterService {
         }
         if (event.gettMed() != null) {
             status.append("Tmed          : ").append(tempFormat.format(event.gettMed())).append("°C").append('\n');
+        }
+        if (!event.getClassificationDay().isEmpty()) {
+            status.append("Clim.classf.D.: ").append(EClimatologicClassificationDay.getTwitterFeed(event.getClassificationDay())).append('\n');
         }
 
         logger.debug("onDayStatisticEvent: status for twitter = >{}<",status);

@@ -29,6 +29,9 @@ public class DayStatisticsCalculatorService {
     @Inject
     Event<DayStatisticEvent> dayStatisticEvent;
 
+    @Inject
+    ClimatologicClassificationDayCalculator climatologicClassificationDayCalculator;
+
     @PostConstruct
     public void calculateMissing() {
         if (dayStatisticsService.count() == 0) {
@@ -59,7 +62,9 @@ public class DayStatisticsCalculatorService {
 
         DayStatisticBean dayStatisticBean = dayStatisticsService.create(yesterday);
         if (dayStatisticBean != null) {
-            dayStatisticEvent.fire(new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),dayStatisticBean.gettMax(),dayStatisticBean.gettMed()));
+            dayStatisticEvent.fire(new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),
+                                                         dayStatisticBean.gettMax(),dayStatisticBean.gettMed(),
+                                                         climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(dayStatisticBean)));
         }
     }
 }

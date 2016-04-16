@@ -22,11 +22,14 @@ import javax.persistence.Transient;
 @Table(name="DAY_STATISTIC")
 @NamedQueries({
     @NamedQuery(name = DayStatisticBean.COUNT,
-                query= "SELECT count(d) FROM DayStatisticBean d")
+                query= "SELECT count(d) FROM DayStatisticBean d"),
+    @NamedQuery(name = DayStatisticBean.FIND_BY_DAY,
+                query= "SELECT d FROM DayStatisticBean d WHERE d.day = :day")
 })
 public class DayStatisticBean {
 
-    public static final String COUNT = "DayStatisticBean.count";
+    public static final String COUNT       = "DayStatisticBean.count";
+    public static final String FIND_BY_DAY = "DayStatisticBean.findByDay";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

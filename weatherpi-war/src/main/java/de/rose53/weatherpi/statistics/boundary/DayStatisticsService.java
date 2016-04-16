@@ -5,16 +5,21 @@ import static de.rose53.pi.weatherpi.common.ESensorType.TEMPERATURE;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TemporalType;
 
 import org.slf4j.Logger;
 
 import de.rose53.weatherpi.sensordata.boundary.SensorDataService;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
+import de.rose53.weatherpi.statistics.control.ClimatologicClassificationDayCalculator;
+import de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 
 
@@ -30,6 +35,8 @@ public class DayStatisticsService {
     @Inject
     SensorDataService sensorDataService;
 
+    @Inject
+    ClimatologicClassificationDayCalculator climatologicClassificationDayCalculator;
     public long count() {
         return em.createNamedQuery(DayStatisticBean.COUNT, Long.class).getSingleResult();
     }
@@ -40,7 +47,7 @@ public class DayStatisticsService {
     }
 
     public DayStatisticBean create(LocalDate date) {
-        logger.debug("updateTimer: calculating statistics for {}",date);
+        logger.debug("create: calculating statistics for {}",date);
 
         DataBean sensorData = null;
 
@@ -56,5 +63,16 @@ public class DayStatisticsService {
         return hasTempData?create(bean):null;
     }
 
+    public List<EClimatologicClassificationDay> getClimatologicClassification(LocalDate date) {
+        logger.debug("getClimatologicClassification: get classification for {}",date);
 
+        List<DayStatisticBean> resultList = em.createNamedQuery(DayStatisticBean.FIND_BY_DAY,DayStatisticBean.class)
+                                              .setParameter("day", Date.valueOf(date), TemporalType.DATE)
+                                              .getResultList();
+        if (resultList.isEmpty()) {
+            logger.debug("getClimatologicClassification: no data found for {}",date);
+            return Collections.emptyList();
+        }
+        return climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(resultList.get(0));
+    }
 }
