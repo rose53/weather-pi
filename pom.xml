@@ -291,10 +291,13 @@
             <groupId>org.jmock</groupId>
             <artifactId>jmock-legacy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jglue.cdi-unit</groupId>
+            <artifactId>cdi-unit</artifactId>
+        </dependency>
     </dependencies>
 
     <modules>
-        <module>weatherpi-common-test</module>
         <module>weatherpi-common</module>
         <module>weatherpi-core</module>
         <module>weatherpi-forecast</module>

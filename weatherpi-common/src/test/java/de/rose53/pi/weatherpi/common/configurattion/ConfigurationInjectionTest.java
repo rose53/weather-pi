@@ -1,18 +1,23 @@
 package de.rose53.pi.weatherpi.common.configurattion;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.jglue.cdiunit.AdditionalClasses;
+import org.jglue.cdiunit.CdiRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import de.rose53.pi.weatherpi.common.LoggerExposer;
+import de.rose53.pi.weatherpi.common.configuration.ConfigurationInjectionManager;
 import de.rose53.pi.weatherpi.common.configuration.StringListConfiguration;
-import de.rose53.pi.weatherpi.common.junit.WeldJUnit4Runner;
 
-@RunWith(WeldJUnit4Runner.class)
+@RunWith(CdiRunner.class)
+@AdditionalClasses({LoggerExposer.class,ConfigurationInjectionManager.class})
 public class ConfigurationInjectionTest {
 
     @Inject

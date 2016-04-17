@@ -36,9 +36,5 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
-        <dependency>
-            <groupId>de.rose53.pi</groupId>
-            <artifactId>weatherpi-common-test</artifactId>
-        </dependency>
     </dependencies>
 </project>
