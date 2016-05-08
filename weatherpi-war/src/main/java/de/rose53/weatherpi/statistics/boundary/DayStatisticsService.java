@@ -37,6 +37,7 @@ public class DayStatisticsService {
 
     @Inject
     ClimatologicClassificationDayCalculator climatologicClassificationDayCalculator;
+    
     public long count() {
         return em.createNamedQuery(DayStatisticBean.COUNT, Long.class).getSingleResult();
     }
@@ -74,5 +75,13 @@ public class DayStatisticsService {
             return Collections.emptyList();
         }
         return climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(resultList.get(0));
+    }
+
+    public List<DayStatisticBean> getRangeStatistics(LocalDate start, LocalDate end) {
+        logger.debug("getRangeStatistics: get statistics from {} to {}",start, end);
+        return em.createNamedQuery(DayStatisticBean.FIND_RANGE,DayStatisticBean.class)
+                 .setParameter("startDate", Date.valueOf(start), TemporalType.DATE)
+                 .setParameter("endDate", Date.valueOf(end), TemporalType.DATE)
+                 .getResultList();
     }
 }

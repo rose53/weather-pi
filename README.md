@@ -48,3 +48,29 @@ Actual weather data is pushed via the [Twitter REST API](https://dev.twitter.com
 
 ## ForecastIO
 Reading weather forecast from [ForecastIO](http://forecast.io) using their [API](https://developer.forecast.io/docs/v2). The data is queried each hour and cached internally. The icons used for displaying some weather informations are from [Adam Whitcroft](http://adamwhitcroft.com/climacons/)
+
+## Constraints
+
+WeatherPi shall be:
+* easily extendable with new sensors
+* based on the JavaEE standard
+* a network of loosely coupled sensors (temperature, humidity, pressure, ...)
+* offering interfaces for weather data retrieval
+
+
+## Context
+
+## Building Block View
+
+## Runtime View
+
+## Deployment View
+A description of the software and hardware components.
+
+![](./src/main/resources/images/deployment.png "Deployment")
+
+| Node / Artifact | Description  |
+| ------------- |:-------------:|
+| col 3 is      | right-aligned |
+| col 2 is      | centered      |
+| zebra stripes | are neat      |

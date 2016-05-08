@@ -1,10 +1,7 @@
 package de.rose53.weatherpi.statistics.control;
 
-import static java.util.Arrays.stream;
-
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -39,9 +36,6 @@ public class ClimatologicClassificationDayCalculator {
 
     public List<EClimatologicClassificationDay> calculateClimatologicClassificationDay(double tMin, double tMax, double tMed) {
         logger.debug("calculateClimatologicClassificationDay: calculating for tMin = {}, tMax = {}, tMed = {}",tMin,tMax,tMed);
-
-        return stream(EClimatologicClassificationDay.values()).filter(c -> c.equals(tMin, tMax, tMed))
-                                                  .sorted((o1, o2)-> Integer.compare(o1.getPriority(), o2.getPriority()))
-                                                  .collect(Collectors.toList());
+        return EClimatologicClassificationDay.calculateClimatologicClassificationDay(tMin, tMax, tMed);
     }
 }

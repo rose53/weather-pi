@@ -57,6 +57,7 @@ public class DayStatisticsCalculatorService {
     @Schedule(second="0", minute="0",hour="1", persistent=false)
     public void statisticsCalculate(){
 
+    	// calculate statistics for yesterday
         LocalDate yesterday = LocalDate.now().minusDays(1);
         logger.debug("statisticsCalculate: calculating statistics for {}",yesterday);
 
@@ -65,6 +66,6 @@ public class DayStatisticsCalculatorService {
             dayStatisticEvent.fire(new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),
                                                          dayStatisticBean.gettMax(),dayStatisticBean.gettMed(),
                                                          climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(dayStatisticBean)));
-        }
+        }        
     }
 }

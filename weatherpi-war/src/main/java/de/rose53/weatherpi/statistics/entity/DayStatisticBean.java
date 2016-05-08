@@ -24,12 +24,15 @@ import javax.persistence.Transient;
     @NamedQuery(name = DayStatisticBean.COUNT,
                 query= "SELECT count(d) FROM DayStatisticBean d"),
     @NamedQuery(name = DayStatisticBean.FIND_BY_DAY,
-                query= "SELECT d FROM DayStatisticBean d WHERE d.day = :day")
+                query= "SELECT d FROM DayStatisticBean d WHERE d.day = :day"),
+    @NamedQuery(name = DayStatisticBean.FIND_RANGE,
+                query= "SELECT d FROM DayStatisticBean d WHERE d.day BETWEEN :startDate AND :endDate ORDER BY d.day ASC")
 })
 public class DayStatisticBean {
 
     public static final String COUNT       = "DayStatisticBean.count";
     public static final String FIND_BY_DAY = "DayStatisticBean.findByDay";
+    public static final String FIND_RANGE  = "DayStatisticBean.findRange";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

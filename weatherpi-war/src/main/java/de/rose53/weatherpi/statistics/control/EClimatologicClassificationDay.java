@@ -1,6 +1,9 @@
 package de.rose53.weatherpi.statistics.control;
 
+import static java.util.Arrays.stream;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -58,16 +61,28 @@ public enum EClimatologicClassificationDay {
             return tMin < 0.0;
         }
     },
-    ICE_DAY(8,"icy") {
+    WINTER_DAY(8,"winter") {
+        @Override
+        public boolean equals(double tMin, double tMax, double tMed) {
+            return tMed < 0.0;
+        }
+    },
+    ICE_DAY(9,"icy") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMax < 0.0;
         }
     },
-    COLD_DAY(9,"cold") {
+    WARM_DAY(10,"warm") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
-            return tMax < -10.0;
+            return tMax > 20.0;
+        }
+    },
+    COLD_DAY(11,"cold") {
+        @Override
+        public boolean equals(double tMin, double tMax, double tMed) {
+            return tMax < 10.0;
         }
     };
 
@@ -95,5 +110,11 @@ public enum EClimatologicClassificationDay {
             return "";
         }
         return list.stream().map(o -> o.twitterFeed).reduce((t,u) -> t + "," + u).get();
+    }
+
+    static List<EClimatologicClassificationDay> calculateClimatologicClassificationDay(double tMin, double tMax, double tMed) {
+        return stream(values()).filter(c -> c.equals(tMin, tMax, tMed))
+                               .sorted((o1, o2)-> Integer.compare(o1.getPriority(), o2.getPriority()))
+                               .collect(Collectors.toList());
     }
 }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.4.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0 http://maven.apache.org/xsd/decoration-1.4.0.xsd"
+    name="WeatherPi">
+
+    <!-- <publishDate position=.. format=.. /> <version position=.. /> -->
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.5</version>
+    </skin>
+
+
+    <body>
+        <head>
+            <script src="http://www.w3schools.com/lib/w3data.js"></script>
+        </head>
+        <!-- <links> <item name=.. href=.. img=.. position=.. alt=.. border=..
+            width=.. height=.. target=.. title=.. /> </links> <breadcrumbs> <item name=..
+            href=.. img=.. position=.. alt=.. border=.. width=.. height=.. target=..
+            title=.. /> </breadcrumbs> <menu name=.. inherit=.. inheritAsRef=.. ref=..
+            img=.. alt=.. position=.. border=.. width=.. height=.. title=.. > <item collapse=..
+            ref=.. name=.. href=.. img=.. position=.. alt=.. border=.. width=.. height=..
+            target=.. title=.. > <description/> <item>...recursion...<item> </item> </menu> -->
+
+        <menu name="Klimadaten">
+            <item name="2015" href="data_2015.html" />
+            <item name="2016" href="data_2016.html" />
+        </menu>
+        <!-- menu ref="reports" / -->
+        <!--  footer / -->
+    </body>
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>true</topBarEnabled>
+            <topBarIcon>
+                <name>Maven Fluido Skin</name>
+                <alt>Maven Fluido Skin</alt>
+                <src>/images/logos/weather_pi_logo.png</src>
+                <href>/index.html</href>
+            </topBarIcon>
+            <sideBarEnabled>true</sideBarEnabled>
+            <twitter>
+                <user>WeatherPi_53</user>
+                <showUser>false</showUser>
+                <showFollowers>false</showFollowers>
+            </twitter>
+        </fluidoSkin>
+    </custom>
+
+</project>

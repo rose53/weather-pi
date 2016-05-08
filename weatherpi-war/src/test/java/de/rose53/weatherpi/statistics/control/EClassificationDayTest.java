@@ -1,11 +1,14 @@
 package de.rose53.weatherpi.statistics.control;
 
-import static org.junit.Assert.*;
-
-import static java.util.Collections.*;
-import static java.util.Arrays.*;
-import static org.hamcrest.CoreMatchers.*;
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.*;
+import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.DESERT_DAY;
+import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.MAIN_VEGETATION_DAY;
+import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.TROPICAL_NIGHT;
+import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.getTwitterFeed;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 

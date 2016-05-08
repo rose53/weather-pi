@@ -6,7 +6,7 @@
     <artifactId>weatherpi</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>WeatherPi Parent</name>
+    <name>WeatherPi</name>
 
     <url>https://github.com/rose53/weather-pi</url>
 
@@ -29,6 +29,7 @@
         <paho.version>1.0.2</paho.version>
         <mysql.version>5.1.35</mysql.version>
         <twitter.version>[4.0,)</twitter.version>
+        <freemarker.version>2.3.24-incubating</freemarker.version>
     </properties>
 
     <build>
@@ -70,12 +71,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>de.rose53.pi</groupId>
-                <artifactId>weatherpi-common-test</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-common</artifactId>
@@ -202,7 +197,11 @@
                 <artifactId>commons-math3</artifactId>
                 <version>3.5</version>
             </dependency>
-
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>3.4</version>
+            </dependency>
             <dependency>
                 <groupId>org.eclipse.paho</groupId>
                 <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -213,7 +212,11 @@
                 <artifactId>twitter4j-core</artifactId>
                 <version>${twitter.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                 <version>${freemarker.version}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -296,6 +299,19 @@
             <artifactId>cdi-unit</artifactId>
         </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.8</version>
+                <configuration>
+                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <modules>
         <module>weatherpi-common</module>
