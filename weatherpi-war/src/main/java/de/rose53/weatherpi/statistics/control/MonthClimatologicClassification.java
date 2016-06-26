@@ -52,10 +52,6 @@ public class MonthClimatologicClassification {
         return getCountForClassification(WINTER_DAY);
     }
 
-    public long getCountCold() {
-        return getCountForClassification(COLD_DAY);
-    }
-
     public long getCountWarm() {
         return getCountForClassification(WARM_DAY);
     }
@@ -82,5 +78,9 @@ public class MonthClimatologicClassification {
 
     public long getCountMainVegetation() {
         return getCountForClassification(MAIN_VEGETATION_DAY);
+    }
+
+    public long getCountDesert() {
+        return getCountForClassification(DESERT_DAY);
     }
 }

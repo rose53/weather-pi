@@ -45,33 +45,6 @@ public class TwitterService {
 
         StringBuilder status = new StringBuilder();
 
-        status.append("Indoor:").append('\n');
-
-        status.append("Temp.   : ");
-        List<DataBean> indoorTemperature = sensorDataService.getSensorData("BMP085", TEMPERATURE, INDOOR, ACTUAL);
-        if (!indoorTemperature.isEmpty()) {
-            status.append(tempFormat.format(indoorTemperature.get(0).getValue())).append("°C").append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Humidity: ");
-        List<DataBean> indoorHumidity = sensorDataService.getSensorData("HTU21D", HUMIDITY, INDOOR, ACTUAL);
-        if (!indoorHumidity.isEmpty()) {
-            status.append(humidityFormat.format(indoorHumidity.get(0).getValue())).append('%').append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Pressure: ");
-        List<DataBean> indoorPressure = sensorDataService.getSensorData("BMP085", PRESSURE, INDOOR, ACTUAL);
-        if (!indoorPressure.isEmpty()) {
-            status.append(pressureFormat.format(indoorPressure.get(0).getValue())).append("hPa").append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Birdhouse:").append('\n');
         status.append("Temp.   : ");
         List<DataBean> birdhouseTemperature = sensorDataService.getSensorData("DHT22", TEMPERATURE, BIRDHOUSE, ACTUAL);
         if (!birdhouseTemperature.isEmpty()) {
@@ -84,6 +57,14 @@ public class TwitterService {
         List<DataBean> birdhouseHumidity = sensorDataService.getSensorData("DHT22", HUMIDITY, BIRDHOUSE, ACTUAL);
         if (!birdhouseHumidity.isEmpty()) {
             status.append(humidityFormat.format(birdhouseHumidity.get(0).getValue())).append('%').append('\n');
+        } else{
+            status.append("No actual data available.").append('\n');
+        }
+
+        status.append("Pressure: ");
+        List<DataBean> indoorPressure = sensorDataService.getSensorData("BMP085", PRESSURE, INDOOR, ACTUAL);
+        if (!indoorPressure.isEmpty()) {
+            status.append(pressureFormat.format(indoorPressure.get(0).getValue())).append("hPa").append('\n');
         } else{
             status.append("No actual data available.").append('\n');
         }

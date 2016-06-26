@@ -22,6 +22,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
+import de.rose53.weatherpi.sensordata.entity.DataBean;
 
 @Stateless
 @Path("/sensordata")
@@ -66,6 +67,27 @@ public class SensorDataResource {
             }  else {
                 retVal = mapper.writeValueAsString(new SensorDataQueryResponse(sensorData));
             }
+        } catch (JsonProcessingException e) {
+            return Response.serverError().build();
+        }
+        return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("/{device}/{sensor}/{type}")
+    public Response data(@PathParam("device") String device, @PathParam("sensor") String sensor, @PathParam("type") String type) {
+
+        DataBean dataBean = sensorDataService.getLatestSensorData(device,sensor,ESensorType.fromString(type));
+        if (dataBean == null) {
+            return Response.noContent().build();
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        String retVal = null;
+        try {
+            retVal = mapper.writeValueAsString(new SensorDataQueryResult(dataBean));
         } catch (JsonProcessingException e) {
             return Response.serverError().build();
         }

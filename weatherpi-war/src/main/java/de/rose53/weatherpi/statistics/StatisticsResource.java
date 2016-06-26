@@ -56,11 +56,12 @@ public class StatisticsResource {
     }
 
     @GET
-    @Path("/generate")
-    public Response generate() {
+    @Path("/generate/{year}")
+    @Produces(MediaType.APPLICATION_SVG_XML)
+    public Response generate(@PathParam("year") int year) {
 
-        statisticsCalculatorService.statisticsCalculate();
+        String retVal = statisticsCalculatorService.graph(year);
 
-        return Response.ok().build();
+        return Response.ok(retVal,MediaType.APPLICATION_SVG_XML).build();
     }
 }

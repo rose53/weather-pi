@@ -117,6 +117,20 @@ public class SensorDataService {
         }
     }
 
+    public DataBean getLatestSensorData(String deviceName, String sensorName, ESensorType sensorType) {
+        logger.debug("getLatestSensorData: retrieving data for device >{}<, sensor >{}< and type >{}<",deviceName,sensorName,sensorType);
+
+        List<DataBean> resultList = em.createNamedQuery(DataBean.findByDeviceSensorType,DataBean.class)
+                                      .setParameter("deviceName",deviceName)
+                                      .setParameter("sensorName",sensorName)
+                                      .setParameter("sensorType", sensorType)
+                                      .setFirstResult(0)
+                                      .setMaxResults(1)
+                                      .getResultList();
+
+        return resultList.isEmpty()?null:resultList.get(0);
+    }
+
     private <T extends SensorEvent> void persistData(T event) {
 
         SensorBean sensor = sensorService.getSensor(event.getSensor(),event.getPlace(),event.getType());

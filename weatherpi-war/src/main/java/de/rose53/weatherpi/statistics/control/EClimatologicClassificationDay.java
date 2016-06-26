@@ -37,52 +37,53 @@ public enum EClimatologicClassificationDay {
             return tMax >= 25.0;
         }
     },
-    HEATING_DAY(4,"heating") {
+
+    WARM_DAY(4,"warm") {
+        @Override
+        public boolean equals(double tMin, double tMax, double tMed) {
+            return tMax > 20.0;
+        }
+    },
+
+    HEATING_DAY(5,"heating") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMed < 12.0;
         }
     },
-    VEGETATION_DAY(5,"vegetation") {
-        @Override
-        public boolean equals(double tMin, double tMax, double tMed) {
-            return tMin >= 5.0;
-        }
-    },
+
     MAIN_VEGETATION_DAY(6,"main vegetation") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMin >= 10.0;
         }
     },
-    FROST_DAY(7,"frost") {
+
+    VEGETATION_DAY(7,"vegetation") {
+        @Override
+        public boolean equals(double tMin, double tMax, double tMed) {
+            return tMin >= 5.0;
+        }
+    },
+
+    FROST_DAY(8,"frost") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMin < 0.0;
         }
     },
-    WINTER_DAY(8,"winter") {
+
+    WINTER_DAY(9,"winter") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMed < 0.0;
         }
     },
-    ICE_DAY(9,"icy") {
+
+    ICE_DAY(10,"icy") {
         @Override
         public boolean equals(double tMin, double tMax, double tMed) {
             return tMax < 0.0;
-        }
-    },
-    WARM_DAY(10,"warm") {
-        @Override
-        public boolean equals(double tMin, double tMax, double tMed) {
-            return tMax > 20.0;
-        }
-    },
-    COLD_DAY(11,"cold") {
-        @Override
-        public boolean equals(double tMin, double tMax, double tMed) {
-            return tMax < 10.0;
         }
     };
 

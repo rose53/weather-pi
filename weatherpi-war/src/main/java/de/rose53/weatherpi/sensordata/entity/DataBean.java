@@ -32,6 +32,8 @@ import javax.persistence.Transient;
                         + "WHERE d.time  BETWEEN :pastTime AND :actualTime AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
     @NamedQuery(name = DataBean.findByTimeNameTypePlace,
                 query= "SELECT d FROM DataBean d WHERE d.time BETWEEN :pastTime AND :actualTime AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
+    @NamedQuery(name = DataBean.findByDeviceSensorType,
+                query= "SELECT d FROM DataBean d WHERE d.sensor.name = :sensorName AND d.sensor.type = :sensorType AND d.sensor.device.name = :deviceName  order by d.time DESC "),
     @NamedQuery(name = DataBean.findByTimeNameTypePlaceL,
                 query= "SELECT d FROM DataBean d WHERE d.time <= :time AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
     @NamedQuery(name = DataBean.findByTimeNameTypePlaceH,
@@ -41,10 +43,11 @@ public class DataBean implements Serializable {
 
     private static final long serialVersionUID = -6828632135642482038L;
 
-    public static final String findByTimeTypePlace      = "DataBean.findByTimeTypePlace";
-    public static final String findByTimeNameTypePlace  = "DataBean.findByTimeNameTypePlace";
-    public static final String findByTimeNameTypePlaceL = "DataBean.findByTimeNameTypePlaceL";
-    public static final String findByTimeNameTypePlaceH = "DataBean.findByTimeNameTypePlaceH";
+    public static final String findByTimeTypePlace          = "DataBean.findByTimeTypePlace";
+    public static final String findByTimeNameTypePlace      = "DataBean.findByTimeNameTypePlace";
+    public static final String findByTimeNameTypePlaceL     = "DataBean.findByTimeNameTypePlaceL";
+    public static final String findByTimeNameTypePlaceH     = "DataBean.findByTimeNameTypePlaceH";
+    public static final String findByDeviceSensorType       = "DataBean.findByDeviceSensorType";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
