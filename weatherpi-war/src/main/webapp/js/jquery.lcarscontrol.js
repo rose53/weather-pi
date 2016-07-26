@@ -7,7 +7,7 @@
 ;
 (function($) {
 
-    var FRAME_INSET = 20;
+    var FRAME_INSET = 15;
     
     var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
 
@@ -62,8 +62,7 @@
     var graphButtonRangeGroup = {
         dayButtonRect      : {text : 'DAY',  range: RangeEnum.DAY,   x : 0, y : 0, w : 0, h : 0, selected : true  },
         weekButtonRect     : {text : 'WEEK', range: RangeEnum.WEEK,  x : 0, y : 0, w : 0, h : 0, selected : false },
-        monthButtonRect    : {text : 'MONTH',range: RangeEnum.MONTH, x : 0, y : 0, w : 0, h : 0, selected : false },        
-        yearButtonRect     : {text : 'YEAR', range: RangeEnum.YEAR,  x : 0, y : 0, w : 0, h : 0, selected : false }        
+        monthButtonRect    : {text : 'MONTH',range: RangeEnum.MONTH, x : 0, y : 0, w : 0, h : 0, selected : false }      
     };
     
     var graphButtonSensorGroup = {
@@ -104,14 +103,15 @@
     };
 
     var baseButton = {
-        width  : 100,
-        height : 40,
-        space  : 5
+        width  : 70,
+        height : 30,
+        space  : 5,
+        labelFont   : "16pt LcarsGTJ3"
     };
 
     var header = {
-            size : 40,
-            radius : 20,
+            size : 30,
+            radius : 15,
             space : baseButton.space
         };
 
@@ -119,15 +119,16 @@
             size : baseButton.height,
             radius : baseButton.height / 2,
             labelWidth : baseButton.width - baseButton.height / 2,
-            textWidth : 50,
+            textWidth : 30,
             space : baseButton.space,
-            seperatorBoxWidth : baseButton.space
+            seperatorBoxWidth : baseButton.space,
+            font : baseButton.labelFont
             //labeledInfoButtonWidth : baseButton.height / 2 + button.labelWidth + button.textWidth 
         };
         
     var frame = {
-        smallSize : 20,
-        thinSize  : 10,
+        smallSize : 15,
+        thinSize  : 8,
         largeSize : baseButton.width
     };
 
@@ -381,11 +382,11 @@
         historyFrameRect.x = FRAME_INSET;
         historyFrameRect.y = header.size + 2 * baseButton.space;
         historyFrameRect.w = windowWidth - 2 * FRAME_INSET;
-        historyFrameRect.h = 228;
+        historyFrameRect.h = 160;
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
-        sensorFrameRect.w = 0.49 * windowWidth;
+        sensorFrameRect.w = 0.47 * windowWidth;
         sensorFrameRect.h = windowHeight - historyFrameRect.y - historyFrameRect.h - 2 * baseButton.space;
 
         forecastFrameRect.x = sensorFrameRect.w + baseButton.space + sensorFrameRect.x;
@@ -419,7 +420,7 @@
         ctx.closePath();
         
         ctx.fillStyle = "#3366CC";
-        ctx.font      = "40pt LcarsGTJ3";
+        ctx.font      = "30pt LcarsGTJ3";
         var metrics = ctx.measureText("WeatherPi");
         var width = metrics.width;
         ctx.fillText("WeatherPi",x + w - 2 * header.radius - header.size - width - header.space, y + header.size);
@@ -438,7 +439,7 @@
         ctx.closePath();
 
         // Draw label text
-        ctx.font      = "30pt LcarsGTJ3";
+        ctx.font      = "20pt LcarsGTJ3";
         ctx.fillStyle = colorTable.background;
         ctx.textBaseline = "middle";
                 
@@ -578,17 +579,6 @@
         
         buttonPosY = buttonGapY + baseButton.space;
 
-        graphButtonRangeGroup.yearButtonRect.x = buttonPosX;
-        graphButtonRangeGroup.yearButtonRect.y = buttonPosY;
-        graphButtonRangeGroup.yearButtonRect.w = frame.largeSize;
-        graphButtonRangeGroup.yearButtonRect.h = baseButton.height;
-
-        //drawToggleButton(ctx,graphButtonRangeGroup.weekButtonRect);
-  
-        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
-
-        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
-        
         // draw the button groups
         drawToggleButtonGroup(ctx,graphButtonRangeGroup);
         drawToggleButtonGroup(ctx,graphButtonSensorGroup);
@@ -647,7 +637,7 @@
 
             ctx.save();
             ctx.textBaseline = "middle";
-            ctx.font         = "14pt LcarsGTJ3";
+            ctx.font         = "12pt LcarsGTJ3";
             ctx.fillStyle    = colorTable.forecast_max_temp;
             ctx.textAlign    = "center";
             var sunriseTimeStr = daily[0].sunriseTime;
@@ -681,9 +671,9 @@
         ctx.beginPath();
         
         ctx.textBaseline = "middle";
-        ctx.font         = "14pt LcarsGTJ3";
+        ctx.font         = "12pt LcarsGTJ3";
          
-        var fontHeight = 14;
+        var fontHeight = 12;
         
         var dayBoxWidth = fBoxW / 7;
         for (var i = 0; i < 7; i++) {
@@ -834,7 +824,7 @@
         ctx.closePath();
         
         // Draw label text
-        ctx.font      = "20pt LcarsGTJ3";
+        ctx.font      = button.font;
         ctx.fillStyle = colorTable.background;
         ctx.textAlign = "left";
         ctx.fillText(labelText, leftHalfCirclePosX, y + button.size / 2);
@@ -855,7 +845,7 @@
         // Draw info text
         var infoBoxPosX = seperatorBoxPosX + button.seperatorBoxWidth + baseButton.space;
         
-        ctx.font         = "30pt LcarsGTJ3";
+        ctx.font         = "20pt LcarsGTJ3";
         ctx.textAlign    = "right";
         
         ctx.fillText(infoText, infoBoxPosX + button.textWidth, y + button.size / 2);
@@ -903,7 +893,7 @@
         ctx.closePath();
         
         // Draw label text
-        ctx.font      = "30pt LcarsGTJ3";
+        ctx.font      = button.font;
         ctx.fillStyle = colorTable.background;
         ctx.textAlign = "center";
         
@@ -924,7 +914,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        ctx.font         = "20pt LcarsGTJ3";
+        ctx.font         = baseButton.labelFont;
         ctx.textAlign    = "right";
         ctx.textBaseline = "top";
         ctx.fillStyle    = colorTable.background;
@@ -948,7 +938,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        ctx.font         = "20pt LcarsGTJ3";
+        ctx.font         = baseButton.labelFont;
         ctx.textAlign    = "right";
         ctx.textBaseline = "top";
         ctx.fillStyle    = colorTable.background;

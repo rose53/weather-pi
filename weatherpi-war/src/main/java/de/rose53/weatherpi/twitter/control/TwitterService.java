@@ -46,7 +46,7 @@ public class TwitterService {
         StringBuilder status = new StringBuilder();
 
         status.append("Temp.   : ");
-        List<DataBean> birdhouseTemperature = sensorDataService.getSensorData("DHT22", TEMPERATURE, BIRDHOUSE, ACTUAL);
+        List<DataBean> birdhouseTemperature = sensorDataService.getSensorData("BME280", TEMPERATURE, BIRDHOUSE, ACTUAL);
         if (!birdhouseTemperature.isEmpty()) {
             status.append(tempFormat.format(birdhouseTemperature.get(0).getValue())).append("°C").append('\n');
         } else{
@@ -54,7 +54,7 @@ public class TwitterService {
         }
 
         status.append("Humidity: ");
-        List<DataBean> birdhouseHumidity = sensorDataService.getSensorData("DHT22", HUMIDITY, BIRDHOUSE, ACTUAL);
+        List<DataBean> birdhouseHumidity = sensorDataService.getSensorData("BME280", HUMIDITY, BIRDHOUSE, ACTUAL);
         if (!birdhouseHumidity.isEmpty()) {
             status.append(humidityFormat.format(birdhouseHumidity.get(0).getValue())).append('%').append('\n');
         } else{
@@ -62,7 +62,7 @@ public class TwitterService {
         }
 
         status.append("Pressure: ");
-        List<DataBean> indoorPressure = sensorDataService.getSensorData("BMP085", PRESSURE, INDOOR, ACTUAL);
+        List<DataBean> indoorPressure = sensorDataService.getSensorData("BME280", PRESSURE, BIRDHOUSE, ACTUAL);
         if (!indoorPressure.isEmpty()) {
             status.append(pressureFormat.format(indoorPressure.get(0).getValue())).append("hPa").append('\n');
         } else{
@@ -88,16 +88,16 @@ public class TwitterService {
 
         status.append("Day statistics: ").append(event.getDay().format(DateTimeFormatter.ISO_DATE)).append('\n');
         if (event.gettMin() != null) {
-            status.append("Tmin          : ").append(tempFormat.format(event.gettMin())).append("°C").append('\n');
+            status.append("Tmin: ").append(tempFormat.format(event.gettMin())).append("°C").append('\n');
         }
         if (event.gettMax() != null) {
-            status.append("Tmax          : ").append(tempFormat.format(event.gettMax())).append("°C").append('\n');
+            status.append("Tmax: ").append(tempFormat.format(event.gettMax())).append("°C").append('\n');
         }
         if (event.gettMed() != null) {
-            status.append("Tmed          : ").append(tempFormat.format(event.gettMed())).append("°C").append('\n');
+            status.append("Tmed: ").append(tempFormat.format(event.gettMed())).append("°C").append('\n');
         }
         if (!event.getClassificationDay().isEmpty()) {
-            status.append("Clim.classf.D.: ").append(EClimatologicClassificationDay.getTwitterFeed(event.getClassificationDay())).append('\n');
+            status.append("CCD : ").append(EClimatologicClassificationDay.getTwitterFeed(event.getClassificationDay())).append('\n');
         }
 
         logger.debug("onDayStatisticEvent: status for twitter = >{}<",status);
@@ -107,6 +107,7 @@ public class TwitterService {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
             logger.error("onDayStatisticEvent:",e);
+            logger.error("onDayStatisticEvent: message = {}",status.toString());
         }
 
     }

@@ -109,7 +109,7 @@ public class StatisticsCalculatorService {
 
     public String graph(int year) {
 
-        List<DayStatisticBean> statistics = dayStatisticsService.getRangeStatistics(LocalDate.of(year, Month.JANUARY.getValue(), 1), LocalDate.of(2016, Month.DECEMBER.getValue(), 31));
+        List<DayStatisticBean> statistics = dayStatisticsService.getRangeStatistics(LocalDate.of(year, Month.JANUARY.getValue(), 1), LocalDate.of(year, Month.DECEMBER.getValue(), 31));
 
         List<MonthClimatologicClassification> months = asList(Month.values()).stream()
                 .map(m -> MonthClimatologicClassification.build(m, statistics))

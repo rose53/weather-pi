@@ -57,7 +57,7 @@ public class DayStatisticsService {
         bean.setDay(Date.valueOf(date));
         boolean hasTempData = false;
         for (int hour = 0; hour <= 23; hour++) {
-            sensorData = sensorDataService.getSensorData("DHT22", TEMPERATURE, BIRDHOUSE, date.atTime(hour, 0));
+            sensorData = sensorDataService.getSensorData("BME280", TEMPERATURE, BIRDHOUSE, date.atTime(hour, 0));
             bean.setT(hour,sensorData != null?sensorData.getValue():null);
             hasTempData |= sensorData != null;
         }

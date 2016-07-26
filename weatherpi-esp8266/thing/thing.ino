@@ -6,9 +6,10 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_TSL2591.h>
 #include <Adafruit_MCP9808.h>
+#include <Adafruit_BME280.h>
 #include <DHT.h>
-#include <TimeLib.h>
-#include <DS1307RTC.h>
+#include <Time.h>
+#include <RtcDS3231.h>
 #include <RingBuffer.h>
 
 #define DHTTYPE DHT22
@@ -19,17 +20,18 @@
 
 #define BUFFER_PAGE_SIZE 20
 
-const char* ssid     = "xxx";
-const char* password = "xxx";
-const char* mqttServer = "xxx";
-const char* mqttUser = "xxx";
-const char* mqttPassword = "xxx";
+const char* ssid         = "xxxxxxxx";
+const char* password     = "xxxxxxxx";
+const char* mqttServer   = "xxxxxxxx";
+const char* mqttUser     = "xxxxxxxx";
+const char* mqttPassword = "xxxxxxxx";
 
 const String place = "BIRDHOUSE";
 const String sensordata = "sensordata";
 const String typeTemperature = "TEMPERATURE";
 const String typeHumidity    = "HUMIDITY";
 const String typeIlluminance = "ILLUMINANCE";
+const String typePressure    = "PRESSURE";
 const String typeSolarCharge = "SOLAR_CHARGE";
 
 const unsigned int deepSleepTimeNormal       = 2 * 60000000; // 
@@ -46,10 +48,18 @@ union bufferpage_t {
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+RtcDS3231        Rtc;
+
 Adafruit_TSL2591 tsl     = Adafruit_TSL2591(4711);
 Adafruit_MCP9808 mcp9808 = Adafruit_MCP9808();
 DHT              dht(DHTPIN, DHTTYPE, 11);
+Adafruit_BME280  bme;
 RingBuffer       ringBuffer = RingBuffer();   
+
+time_t getCurrentTime() {
+  RtcDateTime now = Rtc.GetDateTime();
+  return now.Epoch32Time() - 7200;
+}
 
 void displayWifiError() {
   for (int i = 0; i < 10; i++) {
@@ -109,15 +119,13 @@ bufferpage_t getPage() {
   sensors_event_t event;
   tsl.getEvent(&event);
   
-  page.t[0] = now();
-  page.f[1] = mcp9808.readTempC();
+  page.t[0] = getCurrentTime();
+  page.f[1] = bme.readSealevelPressure(335.0) / 100.0F;
   page.f[2] = event.light;
   page.f[3] = dht.readTemperature();
   page.f[4] = dht.readHumidity();
   return page;
 }
-
-
 
 
 /**************************************************************************/
@@ -164,7 +172,7 @@ void sendMCP9808Temperature(JsonObject& jsonObject, time_t t, float temperature)
 
 
 void sendMCP9808Temperature(JsonObject& jsonObject) {
-  sendMCP9808Temperature(jsonObject,now(),mcp9808.readTempC());
+  sendMCP9808Temperature(jsonObject,getCurrentTime(),mcp9808.readTempC());
 }
 
 void sendTSL2591Luminosity(JsonObject& jsonObject, time_t t, float light) {
@@ -201,12 +209,13 @@ void sendTSL2591Luminosity(JsonObject& jsonObject, time_t t, float light) {
   delay(250);
 }
 
+
 void sendTSL2591Luminosity(JsonObject& jsonObject) {
 
   sensors_event_t event;
   tsl.getEvent(&event);
 
-  sendTSL2591Luminosity(jsonObject, now(),event.light);
+  sendTSL2591Luminosity(jsonObject, getCurrentTime(),event.light);
 }
 
 void sendDHTTemperatureHumidity(JsonObject& jsonObject, time_t t, float temperature, float humidity) {
@@ -250,7 +259,75 @@ void sendDHTTemperatureHumidity(JsonObject& jsonObject) {
   float humidity    = dht.readHumidity();
   float temperature = dht.readTemperature();
 
-  sendDHTTemperatureHumidity(jsonObject, now(), temperature, humidity);
+  sendDHTTemperatureHumidity(jsonObject, getCurrentTime(), temperature, humidity);
+}
+
+void sendBMETemperatureHumidityPressure(JsonObject& jsonObject, time_t t, float temperature, float humidity, float pressure) {
+    
+  String topic = sensordata + "/" + place + "/" + typeTemperature;
+  topic.toLowerCase();
+  
+  jsonObject.set("sensor", "BME280");
+  jsonObject.set("type", typeTemperature);
+  jsonObject.set("temperature", temperature, 2);  
+  jsonObject.set("time", t);
+    
+  jsonObject.printTo(json, sizeof(json));
+  client.publish(topic.c_str(), json);
+  jsonObject.remove("temperature");
+
+  topic = sensordata + "/" + place + "/" + typeHumidity;
+  topic.toLowerCase();
+    
+  jsonObject.set("type", typeHumidity);
+  jsonObject.set("humidity", humidity, 2);
+  jsonObject.printTo(json, sizeof(json));
+  client.publish(topic.c_str(), json);
+  jsonObject.remove("humidity");
+
+  topic = sensordata + "/" + place + "/" + typePressure;
+  topic.toLowerCase();
+    
+  jsonObject.set("type", typePressure);
+  jsonObject.set("pressure", float_with_n_digits(pressure, 6));
+  jsonObject.printTo(json, sizeof(json));
+  client.publish(topic.c_str(), json);
+  jsonObject.remove("pressure");
+    
+  jsonObject.remove("time");
+  jsonObject.remove("type");
+  jsonObject.remove("sensor");
+  
+  delay(250);
+}
+
+void sendBMEPressure(JsonObject& jsonObject, time_t t, float pressure) {
+    
+  String topic = sensordata + "/" + place + "/" + typePressure;
+  topic.toLowerCase();
+  
+  jsonObject.set("sensor", "BME280");
+  jsonObject.set("type", typePressure);
+  jsonObject.set("time", t);
+  jsonObject.set("pressure", float_with_n_digits(pressure, 6));
+    
+  jsonObject.printTo(json, sizeof(json));
+  client.publish(topic.c_str(), json);
+  jsonObject.remove("pressure");
+    
+  jsonObject.remove("time");
+  jsonObject.remove("type");
+  jsonObject.remove("sensor");
+  
+  delay(250);
+}
+
+void sendBMETemperatureHumidityPressure(JsonObject& jsonObject) {
+  
+  float humidity    = bme.readHumidity();
+  float temperature = bme.readTemperature();
+  float pressure    = bme.readSealevelPressure(335.0) / 100.0F;
+  sendBMETemperatureHumidityPressure(jsonObject, getCurrentTime(), temperature, humidity, pressure);
 }
 
 void addPageToBufferAndSleep() {
@@ -266,7 +343,7 @@ void sendBuffer(JsonObject& jsonObject) {
   boolean result;
   while (ringBuffer.read(page.byte,sizeof(page))) {
     // send the buffer via MQTT
-    sendMCP9808Temperature(jsonObject,page.t[0],page.f[1]);
+    sendBMEPressure(jsonObject,page.t[0],page.f[1]);
     sendTSL2591Luminosity(jsonObject,page.t[0],page.f[2]);
     sendDHTTemperatureHumidity(jsonObject,page.t[0],page.f[3],page.f[4]);
   }      
@@ -274,32 +351,44 @@ void sendBuffer(JsonObject& jsonObject) {
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(57600);
 
   // the function to get the time from the RTC
-  setSyncProvider(RTC.get);   
+  Serial.println("init clock...");
+  Rtc.Begin();
 
+  Serial.println("init ring buffer...");
   ringBuffer.begin();
 
+  Serial.println("init tsl...");
   tsl.begin();
   /* Configure the sensor */
   configureTSL();
 
+  Serial.println("init mcp...");
   mcp9808.begin();
 
+  Serial.println("init dht...");
   dht.begin();
 
-  pinMode(WIFI_ERROR_PIN, OUTPUT);
+  Serial.println("init bme...");
+  bme.begin();
   
+  pinMode(WIFI_ERROR_PIN, OUTPUT);
+
+  Serial.println("check and init buffer...");
   // check and init buffer
   boolean initialized = ringBuffer.isInitialized();
   if (!initialized || ringBuffer.getPageSize() != BUFFER_PAGE_SIZE) {
     ringBuffer.format(BUFFER_PAGE_SIZE);
   }
+  Serial.println("connect to WIFI...");
   // connect to Wifi
   if (!wifiConnect()) {
     addPageToBufferAndSleep();
   }
+
+  Serial.println("connect to MQTT...");
 
   if (mqttConnect()) {
     //StaticJsonBuffer<256> jsonBuffer;
@@ -310,20 +399,23 @@ void setup()
 
     // check, if we have to send data from the ring buffer
 
-    
+    Serial.println("sending data...");
     // send temperature
     sendMCP9808Temperature(obj);
     // send illumination
     sendTSL2591Luminosity(obj);
     // send DHT data
     sendDHTTemperatureHumidity(obj);
-
+    // send BME data
+    sendBMETemperatureHumidityPressure(obj);
+    
     sendBuffer(obj);
   } else {
     addPageToBufferAndSleep();
   }
   Serial.println("going to sleep");
   ESP.deepSleep(deepSleepTimeNormal, WAKE_RF_DEFAULT);
+
 }
 
 void loop(){}
