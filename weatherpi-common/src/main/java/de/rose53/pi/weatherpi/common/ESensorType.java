@@ -4,7 +4,8 @@ public enum ESensorType {
     TEMPERATURE,
     HUMIDITY,
     PRESSURE,
-    ILLUMINANCE;
+    ILLUMINANCE,
+    WINDSPEED;
 
     public static ESensorType fromString(String text) {
         for (ESensorType b : ESensorType.values()) {

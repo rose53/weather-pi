@@ -3,7 +3,8 @@ package de.rose53.pi.weatherpi.common;
 public enum ESensorPlace {
     INDOOR,
     OUTDOOR,
-    BIRDHOUSE;
+    BIRDHOUSE,
+    ANEMOMETER;
 
     public static ESensorPlace fromString(String text) {
         for (ESensorPlace b : ESensorPlace.values()) {
@@ -11,6 +12,6 @@ public enum ESensorPlace {
                 return b;
             }
         }
-        return ESensorPlace.INDOOR;
+        return ESensorPlace.BIRDHOUSE;
     }
 }

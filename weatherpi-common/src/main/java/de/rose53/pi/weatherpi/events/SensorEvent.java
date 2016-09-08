@@ -20,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = TemperatureEvent.class, name = "TEMPERATURE"),
         @Type(value = HumidityEvent.class, name = "HUMIDITY"),
         @Type(value = PressureEvent.class, name = "PRESSURE"),
-        @Type(value = IlluminanceEvent.class, name = "ILLUMINANCE")})
+        @Type(value = IlluminanceEvent.class, name = "ILLUMINANCE"),
+        @Type(value = WindspeedEvent.class, name = "WINDSPEED")})
 @JsonIgnoreProperties({"accuracy"})
 public abstract class SensorEvent {
 
