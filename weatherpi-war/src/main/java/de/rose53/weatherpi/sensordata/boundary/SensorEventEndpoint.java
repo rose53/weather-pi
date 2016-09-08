@@ -21,6 +21,7 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.events.WindspeedEvent;
 
 @ApplicationScoped
 @ServerEndpoint("/sensorevents")
@@ -87,6 +88,10 @@ public class SensorEventEndpoint {
     }
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
+        send(event);
+    }
+    
+    public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
         send(event);
     }
 }
