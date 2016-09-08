@@ -21,6 +21,7 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.events.WindspeedEvent;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.sensordata.entity.SensorBean;
 
@@ -163,6 +164,11 @@ public class SensorDataService {
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: got event");
+        persistData(event);
+    }
+    
+    public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
+        logger.debug("onReadWindspeedEvent: got event");
         persistData(event);
     }
 }
