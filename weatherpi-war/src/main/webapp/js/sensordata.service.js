@@ -35,6 +35,9 @@ function SensordataService(){
         self.doRestCall('humidity',rangeParam, placeParam, samplesParam, cb);
     };
 
+    self.getWindspeed = function(rangeParam, placeParam, samplesParam, cb){        
+        self.doRestCall('windspeed',rangeParam, placeParam, samplesParam, cb);
+    };
 }
 
 var sensordataService = new SensordataService();
