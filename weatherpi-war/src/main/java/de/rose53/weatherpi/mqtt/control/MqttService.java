@@ -22,6 +22,7 @@ import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
+import de.rose53.pi.weatherpi.events.WindspeedEvent;
 import de.rose53.weatherpi.configuration.StringListConfiguration;
 
 @Singleton
@@ -51,6 +52,9 @@ public class MqttService implements MqttCallback {
 
     @Inject
     Event<HumidityEvent> humidityEvent;
+
+    @Inject
+    Event<WindspeedEvent> windspeedEvent;
 
     @PostConstruct
     public void subscribe() {
@@ -92,6 +96,9 @@ public class MqttService implements MqttCallback {
             break;
         case TEMPERATURE:
             temperatureEvent.fire((TemperatureEvent) event);
+            break;
+        case WINDSPEED:
+            windspeedEvent.fire((WindspeedEvent)event);
             break;
         }
     }
