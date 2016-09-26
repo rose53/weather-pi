@@ -77,6 +77,7 @@ public class SensorDataService {
         return minutesL < minutesH?resultListL.get(0):resultListH.get(0);
     }
 
+    @Deprecated
     public List<SensorDataQueryResult> getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) {
 
         if (range == null) {
@@ -97,6 +98,14 @@ public class SensorDataService {
         }
     }
 
+    /**
+     * 
+     * @param name the name of the sensor
+     * @param sensorType the {@linkplain ESensorType }
+     * @param place the {@linkplain ESensorPlace }
+     * @param range the {@linkplain ERange }
+     * @return 
+     */
     public List<DataBean> getSensorData(String name, ESensorType sensorType, ESensorPlace place, ERange range) {
 
         if (range == null) {

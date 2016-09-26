@@ -1,4 +1,4 @@
-/* global RangeEnum, log, ForecastIconEnum, MoonPhaseIconEnum */
+/* global RangeEnum, log, ForecastIconEnum, MoonPhaseIconEnum, moonPhaseImages */
 
 /**
  *
@@ -32,15 +32,11 @@
     
     var lastLuminanceFront      = '0';
 
-    var lastIndoorHumidity       = '0';
-    var lastIndoorTemperature    = '0';
-    var lastIndoorPressure       = '0';
-    
-    var lastOutdoorHumidity       = '0';
-    var lastOutdoorTemperature    = '0';
-
+    var lastAnemometerWindspeed  = '0';
+ 
     var lastBirdhouseHumidity       = '0';
     var lastBirdhouseTemperature    = '0';
+    var lastBirdhousePressure       = '0';
 
     var lastTime                 = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});;
     
@@ -54,9 +50,8 @@
     var currently;
     
     var buttons = {
-        indoorButtonRect     : {text : 'INDOOR',  x : 0, y : 0, w : 0, h : 0, color : colorTable.frame },
         birdhouseButtonRect   : {text : 'BIRDHOUSE', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame},
-        outdoorButtonRect   : {text : 'OUTDOOR', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
+        anemometerButtonRect   : {text : 'WINDGAUGE', x : 0, y : 0, w : 0, h : 0 , color : colorTable.frame}
     };
 
     var graphButtonRangeGroup = {
@@ -66,15 +61,15 @@
     };
     
     var graphButtonSensorGroup = {
-        temperatureButtonRect : {text : 'TEMP.',    sensor: "temperature", x : 0, y : 0, w : 0, h : 0, selected : true },
-        humidityButtonRect    : {text : 'HUMIDITY', sensor: "humidity",  x : 0, y : 0, w : 0, h : 0, selected : false },
-        pressureButtonRect    : {text : 'PRESSURE', sensor: "pressure", x : 0, y : 0, w : 0, h : 0, selected : false }        
+        temperatureButtonRect : {text : 'TEMP.',     name: "bme280",   sensor: "temperature", x : 0, y : 0, w : 0, h : 0, selected : true },
+        humidityButtonRect    : {text : 'HUMIDITY',  name: "bme280",   sensor: "humidity",  x : 0, y : 0, w : 0, h : 0, selected : false },
+        pressureButtonRect    : {text : 'PRESSURE',  name: "bme280",   sensor: "pressure", x : 0, y : 0, w : 0, h : 0, selected : false },
+        windspeedButtonRect   : {text : 'WINDSPEED', name: "eltako_ws",sensor: "windspeed", x : 0, y : 0, w : 0, h : 0, selected : false }
     };
 
     var graphButtonPlaceGroup = {
-        indoorButtonRect   : {text : 'INDOOR',  place: 'indoor',  x : 0, y : 0, w : 0, h : 0, selected : false },
         birdhouseButtonRect : {text : 'BIRDHOUSE', place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : true }, 
-        outdoor1ButtonRect : {text : 'OUTDOOR', place: 'outdoor', x : 0, y : 0, w : 0, h : 0, selected : false }       
+        anemometerButtonRect : {text : 'WINDGAUGE', place: 'anemometer', x : 0, y : 0, w : 0, h : 0, selected : false }       
     };
 
     var forcastButtons = {
@@ -187,48 +182,21 @@
             refresh(this.canvas);
         },
 
-        updateIndoorTemperature : function(temperature) {
-            if (temperature === lastIndoorTemperature) {
+        updateBirdhousePressure : function(pressure) {
+            if (pressure === lastBirdhousePressure) {
                 // no change, nothing to do
                 return;
             }
-            lastIndoorTemperature = temperature;
+            lastBirdhousePressure = pressure;
             refresh(this.canvas);
         },
 
-        updateIndoorHumidity : function(humidity) {
-            if (humidity === lastIndoorHumidity) {
+        updateAnemometerWindspeed : function(windspeed) {
+            if (windspeed === lastAnemometerWindspeed) {
                 // no change, nothing to do
                 return;
             }
-            lastIndoorHumidity = humidity;
-            refresh(this.canvas);
-        },
-
-        updateIndoorPressure : function(pressure) {
-            if (pressure === lastIndoorPressure) {
-                // no change, nothing to do
-                return;
-            }
-            lastIndoorPressure = pressure;
-            refresh(this.canvas);
-        },
-
-        updateOutdoorTemperature : function(temperature) {
-            if (temperature === lastOutdoorTemperature) {
-                // no change, nothing to do
-                return;
-            }
-            lastOutdoorTemperature = temperature;
-            refresh(this.canvas);
-        },
-
-        updateOutdoorHumidity : function(humidity) {
-            if (humidity === lastOutdoorHumidity) {
-                // no change, nothing to do
-                return;
-            }
-            lastOutdoorHumidity = humidity;
+            lastAnemometerWindspeed = windspeed;
             refresh(this.canvas);
         },
 
@@ -332,22 +300,25 @@
             }
         } 
 
-        var place;
+        var place;        
         for (var name in graphButtonPlaceGroup) {
             if (graphButtonPlaceGroup[name].selected){
-                place = graphButtonPlaceGroup[name].place;
+                place = graphButtonPlaceGroup[name].place;                
             }
         } 
 
         var sensor;
+        var sensorName;
         for (var name in graphButtonSensorGroup) {
             if (graphButtonSensorGroup[name].selected){
                 sensor = graphButtonSensorGroup[name].sensor;
+                sensorName = graphButtonSensorGroup[name].name;
             }
         } 
         
         return {    
             type   :"graphbuttontouch",
+            name   : sensorName,
             range  : range,
             place  : place,
             sensor : sensor
@@ -382,7 +353,7 @@
         historyFrameRect.x = FRAME_INSET;
         historyFrameRect.y = header.size + 2 * baseButton.space;
         historyFrameRect.w = windowWidth - 2 * FRAME_INSET;
-        historyFrameRect.h = 160;
+        historyFrameRect.h = 190;
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
@@ -528,10 +499,10 @@
         graphButtonSensorGroup.temperatureButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.temperatureButtonRect.h = baseButton.height;
 
-        graphButtonPlaceGroup.indoorButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.indoorButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.indoorButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.indoorButtonRect.h = baseButton.height;
+        graphButtonPlaceGroup.birdhouseButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.birdhouseButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.birdhouseButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.birdhouseButtonRect.h = baseButton.height;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
 
@@ -547,10 +518,10 @@
         graphButtonSensorGroup.pressureButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.pressureButtonRect.h = baseButton.height;
 
-        graphButtonPlaceGroup.birdhouseButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.birdhouseButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.birdhouseButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.birdhouseButtonRect.h = baseButton.height;
+        graphButtonPlaceGroup.anemometerButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.anemometerButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.anemometerButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.anemometerButtonRect.h = baseButton.height;
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -567,18 +538,29 @@
         graphButtonSensorGroup.humidityButtonRect.y = buttonPosY;
         graphButtonSensorGroup.humidityButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.humidityButtonRect.h = baseButton.height;  
-        
-        graphButtonPlaceGroup.outdoor1ButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.outdoor1ButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.outdoor1ButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.outdoor1ButtonRect.h = baseButton.height;
-        
+/*        
+        graphButtonPlaceGroup.anemometerButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
+        graphButtonPlaceGroup.anemometerButtonRect.y = buttonPosY;
+        graphButtonPlaceGroup.anemometerButtonRect.w = frame.largeSize;
+        graphButtonPlaceGroup.anemometerButtonRect.h = baseButton.height;
+*/        
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
         
         buttonPosY = buttonGapY + baseButton.space;
+        
+        graphButtonSensorGroup.windspeedButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.windspeedButtonRect.y = buttonPosY;
+        graphButtonSensorGroup.windspeedButtonRect.w = frame.largeSize;
+        graphButtonSensorGroup.windspeedButtonRect.h = baseButton.height; 
 
+        buttonGapY = buttonGapY + baseButton.height + baseButton.space;
+
+        drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
+        
+        buttonPosY = buttonGapY + baseButton.space;
+        
         // draw the button groups
         drawToggleButtonGroup(ctx,graphButtonRangeGroup);
         drawToggleButtonGroup(ctx,graphButtonSensorGroup);
@@ -643,12 +625,12 @@
             var sunriseTimeStr = daily[0].sunriseTime;
             var sunsetTimeStr  = daily[0].sunsetTime
             
-            ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 40);
-            ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 40);
+            ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 30);
+            ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 30);
             ctx.restore();
 
-            ctx.drawImage(sunriseIconSource,dBoxX + 1.5 * baseButton.height / 4,dBoxY,0.9 * baseButton.height,0.9 * baseButton.height);
-            ctx.drawImage(sunsetIconSource,dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 4,dBoxY,0.9 * baseButton.height,0.9 * baseButton.height);
+            ctx.drawImage(sunriseIconSource,dBoxX + 1.5 * baseButton.height / 4,dBoxY - 3,0.9 * baseButton.height,0.9 * baseButton.height);
+            ctx.drawImage(sunsetIconSource,dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 4,dBoxY - 3,0.9 * baseButton.height,0.9 * baseButton.height);
             ctx.stroke();
         }
         buttonPosY = buttonPosY + baseButton.height + 2 * baseButton.space;
@@ -753,18 +735,18 @@
 
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
 
-        buttons.indoorButtonRect.x = buttonPosX;
-        buttons.indoorButtonRect.y = buttonPosY;
-        buttons.indoorButtonRect.w = frame.largeSize;
-        buttons.indoorButtonRect.h = 2 * baseButton.height + baseButton.space;
+        buttons.birdhouseButtonRect.x = buttonPosX;
+        buttons.birdhouseButtonRect.y = buttonPosY;
+        buttons.birdhouseButtonRect.w = frame.largeSize;
+        buttons.birdhouseButtonRect.h = 2 * baseButton.height + baseButton.space;
 
-        drawButton(ctx,buttons.indoorButtonRect);
+        drawButton(ctx,buttons.birdhouseButtonRect);
         
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastIndoorHumidity,"#FFCC66");
-        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastIndoorTemperature,"#FFCC66");
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastBirdhouseHumidity,"#FFCC66");
+        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastBirdhouseTemperature,"#FFCC66");
 
         buttonPosY = buttonPosY + baseButton.height + baseButton.space;
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastIndoorPressure,"#FFCC66");
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastBirdhousePressure,"#FFCC66");
 
         buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
         
@@ -772,15 +754,14 @@
         
         buttonPosY = buttonGapY + baseButton.space;
         
-        buttons.birdhouseButtonRect.x = buttonPosX;
-        buttons.birdhouseButtonRect.y = buttonPosY;
-        buttons.birdhouseButtonRect.w = frame.largeSize;
-        buttons.birdhouseButtonRect.h = baseButton.height;
+        buttons.anemometerButtonRect.x = buttonPosX;
+        buttons.anemometerButtonRect.y = buttonPosY;
+        buttons.anemometerButtonRect.w = frame.largeSize;
+        buttons.anemometerButtonRect.h = baseButton.height;
 
-        drawButton(ctx,buttons.birdhouseButtonRect);
+        drawButton(ctx,buttons.anemometerButtonRect);
         
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastBirdhouseHumidity,"#3366CC");
-        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastBirdhouseTemperature,"#3366CC");
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"WS",lastAnemometerWindspeed,"#3366CC");
         
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
         
@@ -788,15 +769,13 @@
         
         buttonPosY = buttonGapY + baseButton.space;
         
-        buttons.outdoorButtonRect.x = buttonPosX;
-        buttons.outdoorButtonRect.y = buttonPosY;
-        buttons.outdoorButtonRect.w = frame.largeSize;
-        buttons.outdoorButtonRect.h = baseButton.height;
+        buttons.anemometerButtonRect.x = buttonPosX;
+        buttons.anemometerButtonRect.y = buttonPosY;
+        buttons.anemometerButtonRect.w = frame.largeSize;
+        buttons.anemometerButtonRect.h = baseButton.height;
 
-        drawButton(ctx,buttons.outdoorButtonRect);
-
-        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastOutdoorHumidity,"#3366CC");
-        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastOutdoorTemperature,"#3366CC");
+        
+ //       drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastOutdoorTemperature,"#3366CC");
 
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
@@ -1039,6 +1018,9 @@
         } else if (graphData.sensor === 'pressure') {
             maxValue = Math.ceil(maxValue);
             minValue = Math.floor(minValue);
+        } else if (graphData.sensor === 'windspeed') {
+            maxValue = Math.ceil(maxValue / 10) * 10;
+            minValue = 0;
         } 
           
         // draw y - axis units

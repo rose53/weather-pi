@@ -40,62 +40,38 @@
                 var sensorevent = jQuery.parseJSON(message.data);
                 log.debug("onmessage: type = " + sensorevent.type + ", place = " + sensorevent.place);
                 if ("TEMPERATURE" === sensorevent.type) {
-                    if ("INDOOR" === sensorevent.place) {
-                        lcarsControlView.updateIndoorTemperature(sensorevent.temperature.toFixed(1));
-                    } else if ("OUTDOOR" === sensorevent.place) {
-                        lcarsControlView.updateOutdoorTemperature(sensorevent.temperature.toFixed(1));
-                    } else if ("BIRDHOUSE" === sensorevent.place) {
+                    if ("BIRDHOUSE" === sensorevent.place) {
                         lcarsControlView.updateBirdhouseTemperature(sensorevent.temperature.toFixed(1));
                     }
                 } else if ("HUMIDITY" === sensorevent.type) {
-                    if ("INDOOR" === sensorevent.place) {
-                        lcarsControlView.updateIndoorHumidity(parseInt(sensorevent.humidity));
-                    } else if ("OUTDOOR" === sensorevent.place) {
-                        lcarsControlView.updateOutdoorHumidity(parseInt(sensorevent.humidity));
-                    } else if ("BIRDHOUSE" === sensorevent.place) {
+                    if ("BIRDHOUSE" === sensorevent.place) {
                         lcarsControlView.updateBirdhouseHumidity(parseInt(sensorevent.humidity));
                     }
                 } else if ("PRESSURE" === sensorevent.type) {
-                    if ("INDOOR" === sensorevent.place) {
-                        lcarsControlView.updateIndoorPressure(parseInt(sensorevent.pressure));
+                    if ("BIRDHOUSE" === sensorevent.place) {
+                        lcarsControlView.updateBirdhousePressure(parseInt(sensorevent.pressure));
+                    }
+                } else if ("WINDSPEED" === sensorevent.type) {
+                    if ("ANEMOMETER" === sensorevent.place) {
+                        lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(2));
                     }
                 }
             };
 
-            sensordataService.getTemperature("actual","indoor",1,
+            sensordataService.getPressure("actual","birdhouse",1,
                 function(data){
                     if (data.sensorData.length > 0) {
-                        lcarsControlView.updateIndoorTemperature(data.sensorData[0].value.toFixed(1));
+                        lcarsControlView.updateBirdhousePressure(parseInt(data.sensorData[0].value));
                     }
                 });
 
-            sensordataService.getPressure("actual","indoor",1,
+            sensordataService.getTemperature("actual","anemometer",1,
                 function(data){
                     if (data.sensorData.length > 0) {
-                        lcarsControlView.updateIndoorPressure(parseInt(data.sensorData[0].value));
+                        lcarsControlView.updateAnemometerWindspeed(parseInt(sensorevent.windspeed.toFixed(2)));
                     }
                 });
 
-            sensordataService.getHumidity("actual","indoor",1,
-                function(data){
-                    if (data.sensorData.length > 0) {
-                        lcarsControlView.updateIndoorHumidity(parseInt(data.sensorData[0].value));
-                    }
-                });
-
-            sensordataService.getTemperature("actual","outdoor",1,
-                function(data){
-                    if (data.sensorData.length > 0) {
-                        lcarsControlView.updateOutdoorTemperature(data.sensorData[0].value.toFixed(1));
-                    }
-                });
-
-            sensordataService.getHumidity("actual","outdoor",1,
-                function(data){
-                    if (data.sensorData.length > 0) {
-                        lcarsControlView.updateOutdoorHumidity(parseInt(data.sensorData[0].value));
-                    }
-                });
 
             sensordataService.getTemperature("actual","birdhouse",1,
                 function(data){
@@ -111,6 +87,13 @@
                     }
                 });
 
+            sensordataService.getWindspeed("actual","anemometer",1,
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(2));
+                    }
+                });
+                
             setInterval(function(){ schedule(); }, 5000);
         },
         initAll: function(options) {
@@ -156,7 +139,7 @@ var handleGraphButtonEvent = function(event) {
     log.debug("                        " + RangeEnum.properties[event.range].name);
     log.debug("                        " + event.place);
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    sensordataService.doRestCall(event.sensor,RangeEnum.properties[event.range].queryvalue,event.place,
+    sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
         lcarsControlView.getMaxGraphData(),
         function(data){
             if (data.sensorData.length > 0) {
@@ -186,7 +169,7 @@ var schedule = function() {
     if (lastGraphData <= new Date().getTime() - 10 * 60 * 1000 ) {
         lastGraphData = new Date().getTime();
         var graphParams = lcarsControlView.getGraphDataParams();
-        sensordataService.doRestCall(graphParams.sensor,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
+        sensordataService.doRestCall(graphParams.sensor,graphParams.name,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
         lcarsControlView.getMaxGraphData(),
         function(data){
             if (data.sensorData.length > 0) {

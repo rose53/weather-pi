@@ -1,6 +1,8 @@
 package de.rose53.weatherpi.sensordata.boundary;
 
-import java.util.Arrays;
+import static java.util.stream.Collectors.*;
+import static java.util.Arrays.*;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,6 +26,7 @@ import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 
+
 @Stateless
 @Path("/sensordata")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,15 +35,20 @@ public class SensorDataResource {
     @Inject
     SensorDataService sensorDataService;
 
+ 
     @GET
-    @Path("/{sensor}")
-    public Response getSensorData(@PathParam("sensor") String sensor,
-                                  @QueryParam("place") @DefaultValue("indoor") String place,
-                                  @QueryParam("range") String range,
+    @Path("/{place}/{name}/{type}/{range}")
+    public Response getSensorData(@PathParam("place") String place, 
+                                  @PathParam("name") String name, 
+                                  @PathParam("type") String type,
+                                  @PathParam("range") String range,
                                   @QueryParam("samples") Integer samples) {
 
-        List<SensorDataQueryResult> sensorData = sensorDataService.getSensorData(ESensorType.fromString(sensor),ESensorPlace.fromString(place),ERange.fromString(range));
+        List<DataBean> sensorData = sensorDataService.getSensorData(name,ESensorType.fromString(type),ESensorPlace.fromString(place),ERange.fromString(range));
+        
 
+        List<SensorDataQueryResult> ensorDataQueryResultList = sensorData.stream().map(s -> new SensorDataQueryResult(s)).collect(toList());
+        
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -48,7 +56,7 @@ public class SensorDataResource {
         try {
             if (samples != null && samples > 0 && sensorData.size() > samples) {
 
-                SensorDataQueryResult[] data = sensorData.toArray(new SensorDataQueryResult[sensorData.size()]);
+                SensorDataQueryResult[] data = ensorDataQueryResultList.toArray(new SensorDataQueryResult[ensorDataQueryResultList.size()]);
                 // reduce the number of samples
                 int window = data.length / samples;
                 if ((window & 1) == 0) {
@@ -59,13 +67,13 @@ public class SensorDataResource {
 
                 SensorDataQueryResult[] windowData;
                 for (int i = 1; i + window < data.length; i+= window) {
-                    windowData = Arrays.copyOfRange(data,i,i+window);
-                    Arrays.sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));
+                    windowData = copyOfRange(data,i,i+window);
+                    sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));
                     reducedData.add(windowData[window/2]);
                 }
                 retVal = mapper.writeValueAsString(new SensorDataQueryResponse(reducedData));
             }  else {
-                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(sensorData));
+                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(ensorDataQueryResultList));
             }
         } catch (JsonProcessingException e) {
             return Response.serverError().build();
@@ -73,6 +81,7 @@ public class SensorDataResource {
         return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
     }
 
+ 
     @GET
     @Path("/{device}/{sensor}/{type}")
     public Response data(@PathParam("device") String device, @PathParam("sensor") String sensor, @PathParam("type") String type) {
