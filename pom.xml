@@ -368,10 +368,9 @@
         <module>weatherpi-common</module>
         <module>configuration-war</module>
         <module>commons-configuration</module>
-        <!-- <module>weatherpi-core</module>  -->
-        <module>weatherpi-forecast</module>
-        <module>weatherpi-war</module>
         <module>forecast-war</module>
+        <!-- <module>weatherpi-core</module>  -->
+        <module>weatherpi-war</module>
     </modules>
 
 </project>

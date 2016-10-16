@@ -1,7 +1,7 @@
-package de.rose53.pi.weatherpi.forecast;
+package de.rose53.weatherpi.forecast;
 
 
-public class Daily extends BaseDataPoint  {
+public class Hourly extends BaseDataPoint  {
 
     private DataPoint[] data;
 

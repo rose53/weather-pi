@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.rose53.weatherpi.forecast.Forecastdata;
+
 public class ForecastdataTest {
 
 

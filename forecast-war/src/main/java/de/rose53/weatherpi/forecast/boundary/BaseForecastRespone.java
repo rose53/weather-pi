@@ -3,8 +3,8 @@ package de.rose53.weatherpi.forecast.boundary;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import de.rose53.pi.weatherpi.forecast.DataPoint;
-import de.rose53.pi.weatherpi.forecast.Forecast;
+import de.rose53.weatherpi.forecast.DataPoint;
+import de.rose53.weatherpi.forecast.Forecast;
 
 public class BaseForecastRespone {
 

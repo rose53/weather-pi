@@ -13,11 +13,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-import de.rose53.pi.weatherpi.forecast.Currently;
-import de.rose53.pi.weatherpi.forecast.Daily;
-import de.rose53.pi.weatherpi.forecast.ForecastIO;
-import de.rose53.pi.weatherpi.forecast.Forecastdata;
 import de.rose53.weatherpi.configuration.StringConfiguration;
+import de.rose53.weatherpi.forecast.Currently;
+import de.rose53.weatherpi.forecast.Daily;
+import de.rose53.weatherpi.forecast.ForecastIO;
+import de.rose53.weatherpi.forecast.Forecastdata;
 
 @Singleton
 @Startup

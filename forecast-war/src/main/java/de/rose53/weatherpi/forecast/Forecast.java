@@ -1,4 +1,4 @@
-package de.rose53.pi.weatherpi.forecast;
+package de.rose53.weatherpi.forecast;
 
 import java.io.IOException;
 import java.time.Instant;

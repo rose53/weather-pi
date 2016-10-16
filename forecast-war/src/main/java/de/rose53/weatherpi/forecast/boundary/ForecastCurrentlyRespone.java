@@ -2,7 +2,7 @@ package de.rose53.weatherpi.forecast.boundary;
 
 import java.time.ZoneId;
 
-import de.rose53.pi.weatherpi.forecast.DataPoint;
+import de.rose53.weatherpi.forecast.DataPoint;
 
 public class ForecastCurrentlyRespone extends BaseForecastRespone {
 
