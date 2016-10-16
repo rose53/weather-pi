@@ -59,7 +59,7 @@ public class ForecastIO {
 
         Client clientBuilder = ClientBuilder.newClient();
 
-        UriBuilder uriBuilder = UriBuilder.fromUri("https://api.forecast.io/");
+        UriBuilder uriBuilder = UriBuilder.fromUri("https://api.darksky.net/");
 
         uriBuilder.segment("forecast",apiKey,latitude + "," + longitude);
 

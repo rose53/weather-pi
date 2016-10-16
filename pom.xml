@@ -25,7 +25,7 @@
         <pi4j.version>1.0</pi4j.version>
         <weld.version>2.2.14.Final</weld.version>
         <resteasy.version>3.0.13.Final</resteasy.version>
-        <jackson.version>2.6.2</jackson.version>
+        <jackson.version>2.7.4</jackson.version>
         <paho.version>1.0.2</paho.version>
         <mysql.version>5.1.35</mysql.version>
         <twitter.version>[4.0,)</twitter.version>
@@ -72,9 +72,20 @@
 
     <dependencyManagement>
         <dependencies>
+        <dependency>
+            <groupId>javax</groupId>
+                <artifactId>javaee-api</artifactId>
+                <version>7.0</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.rose53.pi</groupId>
+                <artifactId>commons-configuration</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -102,6 +113,7 @@
                 <artifactId>pi4j-device</artifactId>
                 <version>${pi4j.version}</version>
             </dependency>
+<!--
             <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se</artifactId>
@@ -160,20 +172,25 @@
                 <artifactId>resteasy-client</artifactId>
                 <version>${resteasy.version}</version>
             </dependency>
+
+             -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
                 <version>${jackson.version}</version>
+                <scope>provided</scope>
             </dependency>
 
 
@@ -181,7 +198,10 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
+                <scope>provided</scope>
             </dependency>
+
+
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
@@ -279,6 +299,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
@@ -342,9 +366,12 @@
 
     <modules>
         <module>weatherpi-common</module>
+        <module>configuration-war</module>
+        <module>commons-configuration</module>
         <!-- <module>weatherpi-core</module>  -->
         <module>weatherpi-forecast</module>
         <module>weatherpi-war</module>
+        <module>forecast-war</module>
     </modules>
 
 </project>
