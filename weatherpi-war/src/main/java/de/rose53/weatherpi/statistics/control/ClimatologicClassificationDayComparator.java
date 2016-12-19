@@ -2,6 +2,8 @@ package de.rose53.weatherpi.statistics.control;
 
 import java.util.Comparator;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
+
 public class ClimatologicClassificationDayComparator implements Comparator<EClimatologicClassificationDay> {
 
     @Override

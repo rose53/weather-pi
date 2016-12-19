@@ -14,8 +14,9 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
 import de.rose53.weatherpi.statistics.boundary.DayStatisticsService;
-import de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay;
+import de.rose53.weatherpi.statistics.control.DayStatisticsCalculatorService;
 import de.rose53.weatherpi.statistics.control.StatisticsCalculatorService;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 
@@ -31,6 +32,9 @@ public class StatisticsResource {
 
     @Inject
     StatisticsCalculatorService statisticsCalculatorService;
+
+    @Inject
+    DayStatisticsCalculatorService dayStatisticsCalculatorService;
 
     @GET
     @Path("/calc/{year}/{month}/{day}")
@@ -63,5 +67,15 @@ public class StatisticsResource {
         String retVal = statisticsCalculatorService.graph(year);
 
         return Response.ok(retVal,MediaType.APPLICATION_SVG_XML).build();
+    }
+
+    @GET
+    @Path("/message")
+    @Produces(MediaType.APPLICATION_SVG_XML)
+    public Response messagetest() {
+
+        dayStatisticsCalculatorService.test();
+
+        return Response.ok().build();
     }
 }

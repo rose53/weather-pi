@@ -3,32 +3,32 @@
 
 function ForecastService(){
     var self = this;
-    var servicePath = WEATHERPI_REST_FORCAST + '/';
-    
+    var servicePath = location.protocol + '//' + location.host + '/forecast/' + WEATHERPI_REST_FORCAST + '/';
+
     self.daily = function(cb) {
-            
+
         var serviceUrl = servicePath + 'daily';
-	$.ajax({
+    $.ajax({
             type : 'GET',
             url : serviceUrl,
         dataType : 'json',
         contentType : 'application/json'
         }).done(function(data) {
             cb(data);
-        });       
+        });
     };
-    
+
     self.currently = function(cb) {
-            
+
         var serviceUrl = servicePath + 'currently';
-	$.ajax({
+    $.ajax({
             type : 'GET',
             url :  serviceUrl,
-	    dataType : 'json',
-	    contentType : 'application/json'
+        dataType : 'json',
+        contentType : 'application/json'
         }).done(function(data) {
             cb(data);
-        });        
+        });
     };
 }
 

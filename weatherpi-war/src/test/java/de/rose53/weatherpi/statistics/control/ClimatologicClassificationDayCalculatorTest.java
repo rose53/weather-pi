@@ -11,6 +11,7 @@ import org.jglue.cdiunit.CdiRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
 import de.rose53.pi.weatherpi.common.LoggerExposer;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 

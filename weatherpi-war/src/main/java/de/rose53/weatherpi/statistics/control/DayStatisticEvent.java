@@ -6,6 +6,8 @@ import static java.util.Collections.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
+
 public class DayStatisticEvent {
 
     private final LocalDate                day;

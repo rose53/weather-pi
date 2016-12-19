@@ -1,9 +1,9 @@
 package de.rose53.weatherpi.statistics.control;
 
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.DESERT_DAY;
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.MAIN_VEGETATION_DAY;
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.TROPICAL_NIGHT;
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.getTwitterFeed;
+import static de.rose53.pi.weatherpi.common.EClimatologicClassificationDay.DESERT_DAY;
+import static de.rose53.pi.weatherpi.common.EClimatologicClassificationDay.MAIN_VEGETATION_DAY;
+import static de.rose53.pi.weatherpi.common.EClimatologicClassificationDay.TROPICAL_NIGHT;
+import static de.rose53.pi.weatherpi.common.EClimatologicClassificationDay.getTwitterFeed;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.equalTo;

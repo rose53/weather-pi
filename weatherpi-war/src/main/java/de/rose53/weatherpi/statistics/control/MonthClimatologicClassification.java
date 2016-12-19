@@ -1,6 +1,6 @@
 package de.rose53.weatherpi.statistics.control;
 
-import static de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay.*;
+import static de.rose53.pi.weatherpi.common.EClimatologicClassificationDay.*;
 
 import java.time.Instant;
 import java.time.Month;
@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 
 public class MonthClimatologicClassification {

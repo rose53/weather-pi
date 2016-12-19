@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 
 /**

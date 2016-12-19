@@ -16,10 +16,10 @@ import javax.persistence.TemporalType;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.common.EClimatologicClassificationDay;
 import de.rose53.weatherpi.sensordata.boundary.SensorDataService;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.statistics.control.ClimatologicClassificationDayCalculator;
-import de.rose53.weatherpi.statistics.control.EClimatologicClassificationDay;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
 
 

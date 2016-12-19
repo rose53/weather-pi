@@ -5,13 +5,19 @@ import java.time.LocalDate;
 import java.time.Month;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSContext;
+import javax.jms.Topic;
 
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.rose53.weatherpi.statistics.boundary.DayStatisticsService;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
@@ -32,6 +38,14 @@ public class DayStatisticsCalculatorService {
     @Inject
     ClimatologicClassificationDayCalculator climatologicClassificationDayCalculator;
 
+    @Resource(mappedName = "java:/jms/topic/DayStatisticTopic")
+    private Topic topic;
+
+    @Inject
+    JMSContext context;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @PostConstruct
     public void calculateMissing() {
         if (dayStatisticsService.count() == 0) {
@@ -47,7 +61,9 @@ public class DayStatisticsCalculatorService {
                                 logger.debug("calculateMissing: calculating for {}",calcDate);
                                 dayStatisticsService.create(calcDate);
                             }
-                        } catch (DateTimeException e) {}
+                        } catch (DateTimeException e) {
+                            logger.error("calculateMissing: ",e);
+                        }
                     }
                 }
             }
@@ -57,15 +73,35 @@ public class DayStatisticsCalculatorService {
     @Schedule(second="0", minute="0",hour="1", persistent=false)
     public void statisticsCalculate(){
 
-    	// calculate statistics for yesterday
+        // calculate statistics for yesterday
         LocalDate yesterday = LocalDate.now().minusDays(1);
         logger.debug("statisticsCalculate: calculating statistics for {}",yesterday);
 
         DayStatisticBean dayStatisticBean = dayStatisticsService.create(yesterday);
         if (dayStatisticBean != null) {
-            dayStatisticEvent.fire(new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),
-                                                         dayStatisticBean.gettMax(),dayStatisticBean.gettMed(),
-                                                         climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(dayStatisticBean)));
-        }        
+            DayStatisticEvent event = new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),dayStatisticBean.gettMax(),dayStatisticBean.gettMed(),
+                                                            climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(dayStatisticBean));
+            dayStatisticEvent.fire(event);
+            try {
+                context.createProducer().send(topic, mapper.writeValueAsString(event));
+            } catch (JsonProcessingException e) {
+                logger.error("statisticsCalculate: ",e);
+            }
+        }
+    }
+
+
+    public void test(){
+
+        // calculate statistics for yesterday
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        logger.debug("statisticsCalculate: calculating statistics for {}",yesterday);
+
+            DayStatisticEvent event = new DayStatisticEvent(yesterday,0.0,42.0,10.0,null);
+            try {
+                context.createProducer().send(topic, mapper.writeValueAsString(event));
+            } catch (JsonProcessingException e) {
+                logger.error("statisticsCalculate: ",e);
+            }
     }
 }

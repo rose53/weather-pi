@@ -15,7 +15,6 @@ import java.util.List;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -59,9 +58,6 @@ public class StatisticsCalculatorService {
 
     @Inject
     DayStatisticsService dayStatisticsService;
-
-    @Inject
-    Event<DayStatisticEvent> dayStatisticEvent;
 
     @Schedule(second="0", minute="30",hour="1", persistent=false)
     public void statisticsCalculate(){
