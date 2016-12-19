@@ -12,3 +12,12 @@ weatherpi-main/weatherpi.log
 weatherpi-main/.settings/org.eclipse.core.resources.prefs
 weatherpi-main/.settings/org.eclipse.m2e.core.prefs
 weatherpi-core/.settings/org.eclipse.jdt.core.prefs
+/commons-configuration/.classpath
+/.settings
+/configuration-war/.classpath
+/commons-configuration/.settings
+/configuration-war/.settings
+/forecast-war/.settings
+/twitter-war/.settings
+/forecast-war/.classpath
+/twitter-war/.classpath
