@@ -3,6 +3,7 @@ package de.rose53.weatherpi.statistics.control;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -13,11 +14,11 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
 import javax.jms.Topic;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.rose53.weatherpi.statistics.boundary.DayStatisticsService;
 import de.rose53.weatherpi.statistics.entity.DayStatisticBean;
@@ -43,8 +44,6 @@ public class DayStatisticsCalculatorService {
 
     @Inject
     JMSContext context;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     public void calculateMissing() {
@@ -82,26 +81,28 @@ public class DayStatisticsCalculatorService {
             DayStatisticEvent event = new DayStatisticEvent(yesterday,dayStatisticBean.gettMin(),dayStatisticBean.gettMax(),dayStatisticBean.gettMed(),
                                                             climatologicClassificationDayCalculator.calculateClimatologicClassificationDay(dayStatisticBean));
             dayStatisticEvent.fire(event);
-            try {
-                context.createProducer().send(topic, mapper.writeValueAsString(event));
-            } catch (JsonProcessingException e) {
-                logger.error("statisticsCalculate: ",e);
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder()
+                                                  .add("day", event.getDay().format(DateTimeFormatter.ISO_DATE));
+            if (event.gettMin() != null) {
+                objectBuilder.add("tMin", event.gettMin());
+            } else {
+                objectBuilder.addNull("tMin");
             }
+
+            if (event.gettMax() != null) {
+                objectBuilder.add("tMax", event.gettMax());
+            } else {
+                objectBuilder.addNull("tMax");
+            }
+            if (event.gettMed() != null) {
+                objectBuilder.add("tMed", event.gettMed());
+            } else {
+                objectBuilder.addNull("tMed");
+            }
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            event.getClassificationDay().forEach(c -> arrayBuilder.add(c.toString()));
+            objectBuilder.add("classificationDay", arrayBuilder);
+            context.createProducer().send(topic, objectBuilder.build().toString());
         }
-    }
-
-
-    public void test(){
-
-        // calculate statistics for yesterday
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        logger.debug("statisticsCalculate: calculating statistics for {}",yesterday);
-
-            DayStatisticEvent event = new DayStatisticEvent(yesterday,0.0,42.0,10.0,null);
-            try {
-                context.createProducer().send(topic, mapper.writeValueAsString(event));
-            } catch (JsonProcessingException e) {
-                logger.error("statisticsCalculate: ",e);
-            }
     }
 }

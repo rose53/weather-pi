@@ -68,14 +68,4 @@ public class StatisticsResource {
 
         return Response.ok(retVal,MediaType.APPLICATION_SVG_XML).build();
     }
-
-    @GET
-    @Path("/message")
-    @Produces(MediaType.APPLICATION_SVG_XML)
-    public Response messagetest() {
-
-        dayStatisticsCalculatorService.test();
-
-        return Response.ok().build();
-    }
 }
