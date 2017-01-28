@@ -21,3 +21,4 @@ weatherpi-core/.settings/org.eclipse.jdt.core.prefs
 /twitter-war/.settings
 /forecast-war/.classpath
 /twitter-war/.classpath
+target
