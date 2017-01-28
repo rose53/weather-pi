@@ -116,41 +116,4 @@ public class TwitterService {
             logger.error("updateTimer:",e);
         }
     }
-
-
-
-    /*
-    public void onDayStatisticEvent(@Observes DayStatisticEvent event) {
-
-        DecimalFormat tempFormat = new DecimalFormat("#.0");
-
-        StringBuilder status = new StringBuilder();
-
-
-        status.append("Day statistics: ").append(event.getDay().format(DateTimeFormatter.ISO_DATE)).append('\n');
-        if (event.gettMin() != null) {
-            status.append("Tmin: ").append(tempFormat.format(event.gettMin())).append("°C").append('\n');
-        }
-        if (event.gettMax() != null) {
-            status.append("Tmax: ").append(tempFormat.format(event.gettMax())).append("°C").append('\n');
-        }
-        if (event.gettMed() != null) {
-            status.append("Tmed: ").append(tempFormat.format(event.gettMed())).append("°C").append('\n');
-        }
-        if (!event.getClassificationDay().isEmpty()) {
-            status.append("CCD : ").append(EClimatologicClassificationDay.getTwitterFeed(event.getClassificationDay())).append('\n');
-        }
-
-        logger.debug("onDayStatisticEvent: status for twitter = >{}<",status);
-        StatusUpdate statusUpdate = new StatusUpdate(status.toString());
-
-        try {
-            twitter.updateStatus(statusUpdate);
-        } catch (TwitterException e) {
-            logger.error("onDayStatisticEvent:",e);
-            logger.error("onDayStatisticEvent: message = {}",status.toString());
-        }
-
-    }
-    */
 }
