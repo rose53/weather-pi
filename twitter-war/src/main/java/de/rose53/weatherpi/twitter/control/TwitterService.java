@@ -55,20 +55,25 @@ public class TwitterService {
                                          .request(MediaType.APPLICATION_JSON_TYPE)
                                          .get();
 
-        JsonObject object = Json.createReader(new StringReader(response.readEntity(String.class)))
-                                    .readObject();
-
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getSensorData: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
+        } else {
+            object = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+        }
         response.close();
 
         if (object == null || object.isNull("sensorData")) {
+            logger.error("getSensorData: JSON object is null or does not contain sensor data");
             return null;
         }
-
 
         JsonArray sensorData = object.getJsonArray("sensorData");
         if (sensorData.isEmpty() || sensorData.getJsonObject(0).isNull("value")) {
+            logger.error("getSensorData: sensorData is empty");
             return null;
         }
+        logger.debug("getSensorData: returning value = >{}<",sensorData.getJsonObject(0).getJsonNumber("value").doubleValue());
         return sensorData.getJsonObject(0).getJsonNumber("value").doubleValue();
     }
 
