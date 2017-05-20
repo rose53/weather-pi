@@ -25,7 +25,6 @@
         <pi4j.version>1.0</pi4j.version>
         <weld.version>2.2.14.Final</weld.version>
         <resteasy.version>3.0.13.Final</resteasy.version>
-        <jackson.version>2.7.4</jackson.version>
         <paho.version>1.1.0</paho.version>
         <mysql.version>5.1.35</mysql.version>
         <twitter.version>[4.0,)</twitter.version>
@@ -176,7 +175,6 @@
                 <version>${resteasy.version}</version>
             </dependency>
 
-             -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
@@ -204,6 +202,7 @@
                 <scope>provided</scope>
             </dependency>
 
+             -->
 
             <dependency>
                 <groupId>mysql</groupId>
@@ -299,6 +298,12 @@
                 </exclusions>
                  -->
             </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.json</artifactId>
+                <version>1.0.4</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -377,6 +382,7 @@
         <module>twitter-war</module>
         <!-- <module>weatherpi-core</module>  -->
         <module>weatherpi-war</module>
+        <module>touch-war</module>
     </modules>
 
 </project>

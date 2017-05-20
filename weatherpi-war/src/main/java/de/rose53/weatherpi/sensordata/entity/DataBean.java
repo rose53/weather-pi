@@ -27,9 +27,6 @@ import javax.persistence.Transient;
 @Entity
 @Table(name="DATA")
 @NamedQueries({
-    @NamedQuery(name = DataBean.findByTimeTypePlace,
-                query= "SELECT new de.rose53.weatherpi.sensordata.boundary.SensorDataQueryResult(d.time,d.value) FROM DataBean d "
-                        + "WHERE d.time  BETWEEN :pastTime AND :actualTime AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
     @NamedQuery(name = DataBean.findByTimeNameTypePlace,
                 query= "SELECT d FROM DataBean d WHERE d.time BETWEEN :pastTime AND :actualTime AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC "),
     @NamedQuery(name = DataBean.findByDeviceSensorType,

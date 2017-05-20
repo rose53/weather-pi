@@ -1,5 +1,9 @@
 package de.rose53.pi.weatherpi.events;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
 
@@ -23,5 +27,11 @@ public class HumidityEvent extends SensorEvent {
     @Override
     public double getValue() {
         return getHumidity();
+    }
+
+    @Override
+    protected void addtoJsonObject(JsonObjectBuilder objectBuilder) {
+        super.addtoJsonObject(objectBuilder);
+        objectBuilder.add("humidity", getHumidity());
     }
 }

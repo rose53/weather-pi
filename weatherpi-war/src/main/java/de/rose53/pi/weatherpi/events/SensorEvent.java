@@ -3,26 +3,13 @@ package de.rose53.pi.weatherpi.events;
 import java.time.Instant;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
-    @JsonSubTypes({
-        @Type(value = TemperatureEvent.class, name = "TEMPERATURE"),
-        @Type(value = HumidityEvent.class, name = "HUMIDITY"),
-        @Type(value = PressureEvent.class, name = "PRESSURE"),
-        @Type(value = IlluminanceEvent.class, name = "ILLUMINANCE"),
-        @Type(value = WindspeedEvent.class, name = "WINDSPEED")})
-@JsonIgnoreProperties({"accuracy"})
 public abstract class SensorEvent {
 
     private String       sensor;
@@ -45,6 +32,53 @@ public abstract class SensorEvent {
         this.time = time;
     }
 
+    public static SensorEvent build(JsonObject json) {
+        ESensorType  type = ESensorType.fromString(json.getString("type"));
+        ESensorPlace place = ESensorPlace.fromString(json.getString("place"));
+        long         time = json.isNull("time")?Instant.now().getEpochSecond():json.getJsonNumber("time").longValue();
+        String       sensor = json.getString("sensor");
+        SensorEvent  retVal = null;
+
+        switch (type) {
+        case HUMIDITY:
+            if (!json.isNull("humidity")) {
+                double humidity = json.getJsonNumber("humidity").doubleValue();
+                retVal = new HumidityEvent(place, sensor, humidity);
+            }
+            break;
+        case ILLUMINANCE:
+            if (!json.isNull("illuminance")) {
+                double illuminance = json.getJsonNumber("illuminance").doubleValue();
+                retVal = new IlluminanceEvent(place, sensor, illuminance);
+            }
+            break;
+        case PRESSURE:
+            if (!json.isNull("pressure")) {
+                double pressure = json.getJsonNumber("pressure").doubleValue();
+                retVal = new PressureEvent(place, sensor, pressure);
+            }
+            break;
+        case TEMPERATURE:
+            if (!json.isNull("temperature")) {
+                double temperature = json.getJsonNumber("temperature").doubleValue();
+                retVal = new TemperatureEvent(place, sensor, temperature);
+            }
+            break;
+        case WINDSPEED:
+               if (!json.isNull("windspeed")) {
+                double windspeed = json.getJsonNumber("windspeed").doubleValue();
+                retVal = new WindspeedEvent(place, sensor, windspeed);
+            }
+            break;
+
+        }
+        if (retVal != null) {
+            retVal.time = time;
+        }
+        return retVal;
+    }
+
+
     public ESensorType getType() {
         return type;
     }
@@ -66,4 +100,17 @@ public abstract class SensorEvent {
     }
 
     abstract public double getValue();
+
+    protected void addtoJsonObject(JsonObjectBuilder objectBuilder) {
+        objectBuilder.add("sensor", sensor);
+        objectBuilder.add("type", type.toString());
+        objectBuilder.add("place", place.toString());
+        objectBuilder.add("time", time);
+    }
+
+    public JsonObject toJson() {
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        addtoJsonObject(objectBuilder);
+        return objectBuilder.build();
+    }
 }

@@ -7,9 +7,6 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import de.rose53.weatherpi.forecast.ForecastIO;
 import de.rose53.weatherpi.forecast.Forecastdata;
 
@@ -17,7 +14,7 @@ public class ForecastTest {
 
     @Test
     @Ignore
-    public void testGetForecastdata() throws JsonParseException, JsonMappingException, IOException {
+    public void testGetForecastdata() throws IOException {
 
         ForecastIO.Builder builder = new ForecastIO.Builder("apikey","lat","long");
 

@@ -30,33 +30,9 @@
 
             lcarsControlView.refresh();
 
-            log.debug("initControlPage: using websocket at " + "ws://" + location.host + "/weatherpi/sensorevents");
 
-            var sensorWebSocket = new WebSocket("ws://" + location.host + "/weatherpi/sensorevents");
 
-            sensorWebSocket.onopen = function() {
-            };
-            sensorWebSocket.onmessage = function(message) {
-                var sensorevent = jQuery.parseJSON(message.data);
-                log.debug("onmessage: type = " + sensorevent.type + ", place = " + sensorevent.place);
-                if ("TEMPERATURE" === sensorevent.type) {
-                    if ("BIRDHOUSE" === sensorevent.place) {
-                        lcarsControlView.updateBirdhouseTemperature(sensorevent.temperature.toFixed(1));
-                    }
-                } else if ("HUMIDITY" === sensorevent.type) {
-                    if ("BIRDHOUSE" === sensorevent.place) {
-                        lcarsControlView.updateBirdhouseHumidity(parseInt(sensorevent.humidity));
-                    }
-                } else if ("PRESSURE" === sensorevent.type) {
-                    if ("BIRDHOUSE" === sensorevent.place) {
-                        lcarsControlView.updateBirdhousePressure(parseInt(sensorevent.pressure));
-                    }
-                } else if ("WINDSPEED" === sensorevent.type) {
-                    if ("ANEMOMETER" === sensorevent.place) {
-                        lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(2));
-                    }
-                }
-            };
+            connect();
 
             sensordataService.getPressure("actual","birdhouse",1,
                 function(data){
@@ -93,7 +69,7 @@
                         lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(2));
                     }
                 });
-                
+
             setInterval(function(){ schedule(); }, 5000);
         },
         initAll: function(options) {
@@ -177,4 +153,47 @@ var schedule = function() {
             }
         });
     }
+};
+
+var connect = function () {
+
+      log.debug("connect: using websocket at " + "ws://" + location.host + "/weatherpi/sensorevents");
+      var ws = new WebSocket("ws://" + location.host + "/weatherpi/sensorevents");
+      ws.onopen = function() {
+      };
+
+      ws.onmessage = function(message) {
+          var sensorevent      = jQuery.parseJSON(message.data);
+          var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
+          log.debug("onmessage: type = " + sensorevent.type + ", place = " + sensorevent.place);
+          if ("TEMPERATURE" === sensorevent.type) {
+              if ("BIRDHOUSE" === sensorevent.place) {
+                  lcarsControlView.updateBirdhouseTemperature(sensorevent.temperature.toFixed(1));
+              }
+          } else if ("HUMIDITY" === sensorevent.type) {
+              if ("BIRDHOUSE" === sensorevent.place) {
+                  lcarsControlView.updateBirdhouseHumidity(parseInt(sensorevent.humidity));
+              }
+          } else if ("PRESSURE" === sensorevent.type) {
+              if ("BIRDHOUSE" === sensorevent.place) {
+                  lcarsControlView.updateBirdhousePressure(parseInt(sensorevent.pressure));
+              }
+          } else if ("WINDSPEED" === sensorevent.type) {
+              if ("ANEMOMETER" === sensorevent.place) {
+                  lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(2));
+              }
+          }
+      };
+
+      ws.onclose = function(e) {
+          log.debug('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+          setTimeout(function() {
+          connect();
+        }, 1000)
+      };
+
+      ws.onerror = function(err) {
+          log.debug('Socket encountered error: ', err.message, 'Closing socket')
+          ws.close()
+      };
 };

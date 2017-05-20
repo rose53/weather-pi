@@ -77,34 +77,13 @@ public class SensorDataService {
         return minutesL < minutesH?resultListL.get(0):resultListH.get(0);
     }
 
-    @Deprecated
-    public List<SensorDataQueryResult> getSensorData(ESensorType sensorType, ESensorPlace place, ERange range) {
-
-        if (range == null) {
-            range = ERange.ACTUAL;
-        }
-
-        List<SensorDataQueryResult> resultList = em.createNamedQuery(DataBean.findByTimeTypePlace,SensorDataQueryResult.class)
-                                                   .setParameter("pastTime",Timestamp.valueOf(range.getPastTime()))
-                                                   .setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()))
-                                                   .setParameter("type", sensorType)
-                                                   .setParameter("place", place)
-                                                   .getResultList();
-
-        if (range == ERange.ACTUAL && resultList.size() > 0) {
-            return resultList.subList(0, 1);
-        } else {
-            return resultList;
-        }
-    }
-
     /**
-     * 
+     *
      * @param name the name of the sensor
      * @param sensorType the {@linkplain ESensorType }
      * @param place the {@linkplain ESensorPlace }
      * @param range the {@linkplain ERange }
-     * @return 
+     * @return
      */
     public List<DataBean> getSensorData(String name, ESensorType sensorType, ESensorPlace place, ERange range) {
 
@@ -175,7 +154,7 @@ public class SensorDataService {
         logger.debug("onReadHumidityEvent: got event");
         persistData(event);
     }
-    
+
     public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
         logger.debug("onReadWindspeedEvent: got event");
         persistData(event);
