@@ -1,14 +1,18 @@
 package de.rose53.weatherpi.sensordata.boundary;
 
-import static java.util.stream.Collectors.*;
+import java.time.format.DateTimeFormatter;
+
 import static java.util.Arrays.*;
+import static java.util.Comparator.comparingDouble;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -16,11 +20,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
@@ -35,53 +34,58 @@ public class SensorDataResource {
     @Inject
     SensorDataService sensorDataService;
 
- 
+
     @GET
     @Path("/{place}/{name}/{type}/{range}")
-    public Response getSensorData(@PathParam("place") String place, 
-                                  @PathParam("name") String name, 
+    public Response getSensorData(@PathParam("place") String place,
+                                  @PathParam("name") String name,
                                   @PathParam("type") String type,
                                   @PathParam("range") String range,
                                   @QueryParam("samples") Integer samples) {
 
         List<DataBean> sensorData = sensorDataService.getSensorData(name,ESensorType.fromString(type),ESensorPlace.fromString(place),ERange.fromString(range));
-        
 
-        List<SensorDataQueryResult> ensorDataQueryResultList = sensorData.stream().map(s -> new SensorDataQueryResult(s)).collect(toList());
-        
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String retVal = null;
-        try {
-            if (samples != null && samples > 0 && sensorData.size() > samples) {
 
-                SensorDataQueryResult[] data = ensorDataQueryResultList.toArray(new SensorDataQueryResult[ensorDataQueryResultList.size()]);
-                // reduce the number of samples
-                int window = data.length / samples;
-                if ((window & 1) == 0) {
-                    window--;
-                }
-                List<SensorDataQueryResult> reducedData = new LinkedList<>();
-                reducedData.add(data[0]); // add first element
+        if (samples != null && samples > 0 && sensorData.size() > samples) {
 
-                SensorDataQueryResult[] windowData;
-                for (int i = 1; i + window < data.length; i+= window) {
-                    windowData = copyOfRange(data,i,i+window);
-                    sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));
-                    reducedData.add(windowData[window/2]);
-                }
-                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(reducedData));
-            }  else {
-                retVal = mapper.writeValueAsString(new SensorDataQueryResponse(ensorDataQueryResultList));
+            DataBean[] data =  sensorData.toArray(new DataBean[sensorData.size()]);
+
+            // reduce the number of samples
+            int window = data.length / samples;
+            if ((window & 1) == 0) {
+                window--;
             }
-        } catch (JsonProcessingException e) {
-            return Response.serverError().build();
+            List<DataBean> reducedData = new LinkedList<>();
+            reducedData.add(data[0]); // add first element
+
+            DataBean[] windowData;
+            for (int i = 1; i + window < data.length; i+= window) {
+                windowData = copyOfRange(data,i,i+window);
+                sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));
+                reducedData.add(windowData[window/2]);
+            }
+            sensorData = reducedData;
         }
-        return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+
+        if (sensorData.isEmpty()) {
+            objectBuilder.add("maxValue", 0.0);
+            objectBuilder.add("minValue", 0.0);
+            objectBuilder.add("sensorData",Json.createArrayBuilder().build());
+        } else {
+            objectBuilder.add("maxValue", sensorData.stream().max(comparingDouble(data -> data.getValue())).get().getValue());
+            objectBuilder.add("minValue", sensorData.stream().min(comparingDouble(data -> data.getValue())).get().getValue());
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            sensorData.forEach(s -> arrayBuilder.add(Json.createObjectBuilder()
+                                                         .add("value", s.getValue())
+                                                         .add("time", s.getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
+            objectBuilder.add("sensorData",arrayBuilder);
+        }
+
+        return Response.ok(objectBuilder.build().toString(),MediaType.APPLICATION_JSON).build();
     }
 
- 
+
     @GET
     @Path("/{device}/{sensor}/{type}")
     public Response data(@PathParam("device") String device, @PathParam("sensor") String sensor, @PathParam("type") String type) {
@@ -90,16 +94,9 @@ public class SensorDataResource {
         if (dataBean == null) {
             return Response.noContent().build();
         }
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String retVal = null;
-        try {
-            retVal = mapper.writeValueAsString(new SensorDataQueryResult(dataBean));
-        } catch (JsonProcessingException e) {
-            return Response.serverError().build();
-        }
-        return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
+        return Response.ok(Json.createObjectBuilder()
+                               .add("value", dataBean.getValue())
+                               .add("time", dataBean.getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).build().toString(),
+                           MediaType.APPLICATION_JSON).build();
     }
 }

@@ -1,13 +1,13 @@
 package de.rose53.weatherpi.forecast;
 
 import java.io.IOException;
+import java.io.StringReader;
 
+import javax.json.Json;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ForecastIO {
 
@@ -73,8 +73,6 @@ public class ForecastIO {
                                      .request(MediaType.APPLICATION_JSON_TYPE)
                                      .get(String.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        return mapper.readValue(result, Forecastdata.class);
+        return new Forecastdata(Json.createReader(new StringReader(result)).readObject());
     }
 }

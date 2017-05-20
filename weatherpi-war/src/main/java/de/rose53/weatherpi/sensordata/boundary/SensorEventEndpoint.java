@@ -14,8 +14,6 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
@@ -31,7 +29,6 @@ public class SensorEventEndpoint {
     Logger logger;
 
     private static final Set<Session> sessions = new CopyOnWriteArraySet<>();
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     @OnOpen
     public void open(Session session) {
@@ -48,13 +45,8 @@ public class SensorEventEndpoint {
             logger.debug("send: no websocket session active, nothing to do");
             return;
         }
-        String message;
-        try {
-            message = mapper.writeValueAsString(event);
-        } catch (IOException e) {
-            logger.error("onReadIlluminanceEvent: ",e);
-            return;
-        }
+        String message = event.toJson().toString();
+        logger.debug("send: message = >{}<",message);
         for (Session session : sessions) {
             try {
                 if (session.isOpen()) {
@@ -90,7 +82,7 @@ public class SensorEventEndpoint {
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         send(event);
     }
-    
+
     public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
         send(event);
     }

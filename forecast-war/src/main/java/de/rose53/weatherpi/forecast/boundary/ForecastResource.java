@@ -1,9 +1,14 @@
 package de.rose53.weatherpi.forecast.boundary;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -11,11 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.rose53.weatherpi.forecast.control.ForecastService;
 
@@ -33,32 +33,26 @@ public class ForecastResource {
     @Path("/daily")
     public Response getDaily() {
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String retVal;
-        try {
-            retVal = mapper.writeValueAsString(stream(forecastService.getDaily().getData()).map(d -> new ForecastDailyRespone(d,forecastService.getZoneId()))
-                                                                                           .collect(toList()));
-        } catch (JsonProcessingException e) {
-            return Response.serverError().build();
-        }
-        return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
+        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+
+        ZoneId zoneId = forecastService.getZoneId();
+
+        stream(forecastService.getDaily().getData()).forEach(p -> {
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            p.toJson(objectBuilder, DateTimeFormatter.ISO_LOCAL_DATE_TIME, zoneId);
+            arrayBuilder.add(objectBuilder.build());
+        });
+        return Response.ok(arrayBuilder.build().toString(),MediaType.APPLICATION_JSON).build();
     }
 
     @GET
     @Path("/currently")
     public Response getCurrently() {
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String retVal;
-        try {
-            retVal = mapper.writeValueAsString(forecastService.getCurrently());
-        } catch (JsonProcessingException e) {
-            return Response.serverError().build();
-        }
-        return Response.ok(retVal,MediaType.APPLICATION_JSON).build();
+        ZoneId zoneId = forecastService.getZoneId();
+
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        forecastService.getCurrently().toJson(objectBuilder, DateTimeFormatter.ISO_LOCAL_DATE_TIME, zoneId);
+        return Response.ok(objectBuilder.build().toString(),MediaType.APPLICATION_JSON).build();
     }
 }

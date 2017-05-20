@@ -1,5 +1,6 @@
 package de.rose53.weatherpi.mqtt.control;
 
+import java.io.StringReader;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -7,6 +8,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -14,8 +17,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
@@ -38,8 +39,6 @@ public class MqttService implements MqttCallback {
 
     @Inject
     MqttClient client;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Inject
     Event<TemperatureEvent> temperatureEvent;
@@ -80,7 +79,19 @@ public class MqttService implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         logger.debug("messageArrived: topic = >{}<, message = >{}<",topic,new String(message.getPayload()));
-        SensorEvent event = mapper.readValue(new String(message.getPayload()), SensorEvent.class);
+
+        JsonObject object = Json.createReader(new StringReader(new String(message.getPayload()))).readObject();
+        if (object == null) {
+            logger.error("messageArrived: unable to build JSON object from >{}<",new String(message.getPayload()));
+            return;
+        }
+
+        if (object.isNull("place") || object.isNull("sensor") || object.isNull("type")) {
+            logger.error("messageArrived: missing required field in >{}<",new String(message.getPayload()));
+            return;
+        }
+
+        SensorEvent event = SensorEvent.build(object);
         if (event == null) {
             return;
         }

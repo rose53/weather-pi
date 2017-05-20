@@ -61,15 +61,10 @@
     };
     
     var graphButtonSensorGroup = {
-        temperatureButtonRect : {text : 'TEMP.',     name: "bme280",   sensor: "temperature", x : 0, y : 0, w : 0, h : 0, selected : true },
-        humidityButtonRect    : {text : 'HUMIDITY',  name: "bme280",   sensor: "humidity",  x : 0, y : 0, w : 0, h : 0, selected : false },
-        pressureButtonRect    : {text : 'PRESSURE',  name: "bme280",   sensor: "pressure", x : 0, y : 0, w : 0, h : 0, selected : false },
-        windspeedButtonRect   : {text : 'WINDSPEED', name: "eltako_ws",sensor: "windspeed", x : 0, y : 0, w : 0, h : 0, selected : false }
-    };
-
-    var graphButtonPlaceGroup = {
-        birdhouseButtonRect : {text : 'BIRDHOUSE', place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : true }, 
-        anemometerButtonRect : {text : 'WINDGAUGE', place: 'anemometer', x : 0, y : 0, w : 0, h : 0, selected : false }       
+        temperatureButtonRect : {text : 'TEMP.',     name: "bme280",   sensor: "temperature", place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : true },
+        humidityButtonRect    : {text : 'HUMIDITY',  name: "bme280",   sensor: "humidity",    place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false },
+        pressureButtonRect    : {text : 'PRESSURE',  name: "bme280",   sensor: "pressure",    place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false },
+        windspeedButtonRect   : {text : 'WINDSPEED', name: "eltako_ws",sensor: "windspeed",   place: 'anemometer', x : 0, y : 0, w : 0, h : 0, selected : false }
     };
 
     var forcastButtons = {
@@ -163,9 +158,6 @@
            
             if ((bb = isTouchedButtonGroup(graphButtonRangeGroup)) !== null) {
                 setSelected(graphButtonRangeGroup,bb,canvas); 
-                $element.triggerHandler(getGraphEventData());
-            } else if ((bb = isTouchedButtonGroup(graphButtonPlaceGroup)) !== null) {
-                setSelected(graphButtonPlaceGroup,bb,canvas); 
                 $element.triggerHandler(getGraphEventData());
             } else if ((bb = isTouchedButtonGroup(graphButtonSensorGroup)) !== null) {
                 setSelected(graphButtonSensorGroup,bb,canvas); 
@@ -301,18 +293,13 @@
         } 
 
         var place;        
-        for (var name in graphButtonPlaceGroup) {
-            if (graphButtonPlaceGroup[name].selected){
-                place = graphButtonPlaceGroup[name].place;                
-            }
-        } 
-
         var sensor;
         var sensorName;
         for (var name in graphButtonSensorGroup) {
             if (graphButtonSensorGroup[name].selected){
                 sensor = graphButtonSensorGroup[name].sensor;
                 sensorName = graphButtonSensorGroup[name].name;
+                place = graphButtonSensorGroup[name].place;
             }
         } 
         
@@ -439,7 +426,7 @@
         ctx.closePath();
         
         // image left
-        var leftBarX = x + frame.largeSize + baseButton.space + 2 * baseButton.width + 2 * baseButton.space;
+        var leftBarX = x + frame.largeSize + baseButton.space + baseButton.width + baseButton.space;
         var leftBarY = y + baseButton.space;
         var leftBarH = h - 2 * baseButton.space - frame.smallSize; 
                 
@@ -499,11 +486,7 @@
         graphButtonSensorGroup.temperatureButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.temperatureButtonRect.h = baseButton.height;
 
-        graphButtonPlaceGroup.birdhouseButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.birdhouseButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.birdhouseButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.birdhouseButtonRect.h = baseButton.height;
-
+ 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
 
         buttonPosY = buttonGapY + baseButton.space;
@@ -518,11 +501,7 @@
         graphButtonSensorGroup.pressureButtonRect.w = frame.largeSize;
         graphButtonSensorGroup.pressureButtonRect.h = baseButton.height;
 
-        graphButtonPlaceGroup.anemometerButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.anemometerButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.anemometerButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.anemometerButtonRect.h = baseButton.height;
-
+ 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
@@ -564,7 +543,6 @@
         // draw the button groups
         drawToggleButtonGroup(ctx,graphButtonRangeGroup);
         drawToggleButtonGroup(ctx,graphButtonSensorGroup);
-        drawToggleButtonGroup(ctx,graphButtonPlaceGroup);
         
         ctx.restore();
     }
@@ -623,7 +601,7 @@
             ctx.fillStyle    = colorTable.forecast_max_temp;
             ctx.textAlign    = "center";
             var sunriseTimeStr = daily[0].sunriseTime;
-            var sunsetTimeStr  = daily[0].sunsetTime
+            var sunsetTimeStr  = daily[0].sunsetTime;
             
             ctx.fillText(sunriseTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height / 2, dBoxY + 30);
             ctx.fillText(sunsetTimeStr.substring(11,16),dBoxX + 1.5 * baseButton.height + 1.5 * baseButton.height / 2 , dBoxY + 30);
