@@ -3,11 +3,12 @@
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid         = "xxxxx";
-const char* password     = "xxxxx";
-const char* mqttServer   = "xxxxx"; 
-const char* mqttUser     = "xxxxx";
-const char* mqttPassword = "xxxxx";
+const char* ssid         = "Utgard";
+const char* password     = "franziundrose";
+const char* mqttServer   = "192.168.0.42"; // 192.168.0.42
+const char* mqttUser     = "weatherpi";
+const char* mqttPassword = "weatherpi";
+
 
 const String place         = "ANEMOMETER";
 const String sensordata    = "sensordata";
@@ -15,7 +16,7 @@ const String typeWindspeed = "WINDSPEED";
 
 const unsigned int deepSleepTimeNoConnection = 15 * 60000000; //
 
-const byte             anemometerPin = 2;
+const byte             anemometerPin = 4;
 const unsigned long    measureInterval = 5000;
 volatile unsigned long pulses = 0;
 
@@ -116,9 +117,10 @@ void setup() {
   Serial.println("getting windspeed ...");
   // get actual windspeed
   float actWindspeed = getWindSpeed();
-  unsigned int deepSleepTime = 5 * 60000000;
+  Serial.print("act windspeed: "); Serial.println(actWindspeed);
+  unsigned int deepSleepTime = 20000000;
   if (actWindspeed > 0.0) {
-    deepSleepTime = 1 * 60000000; // if we have some wind, we do not want to sleep so long
+    deepSleepTime = 5000000; // if we have some wind, we do not want to sleep so long
   }
  
 
