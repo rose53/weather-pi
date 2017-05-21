@@ -3,11 +3,11 @@
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid         = "Utgard";
-const char* password     = "franziundrose";
-const char* mqttServer   = "192.168.0.42"; // 192.168.0.42
-const char* mqttUser     = "weatherpi";
-const char* mqttPassword = "weatherpi";
+const char* ssid         = "xxxxxxxxxxxxx";
+const char* password     = "xxxxxxxxxxxxx";
+const char* mqttServer   = "xxxxxxxxxxxxx"; // 192.168.0.42
+const char* mqttUser     = "xxxxxxxxxxxxx";
+const char* mqttPassword = "xxxxxxxxxxxxx";
 
 
 const String place         = "ANEMOMETER";
