@@ -344,7 +344,7 @@
 
         sensorFrameRect.x = FRAME_INSET;
         sensorFrameRect.y = historyFrameRect.y + historyFrameRect.h + baseButton.space;
-        sensorFrameRect.w = 0.47 * windowWidth;
+        sensorFrameRect.w = 0.29 * windowWidth;
         sensorFrameRect.h = windowHeight - historyFrameRect.y - historyFrameRect.h - 2 * baseButton.space;
 
         forecastFrameRect.x = sensorFrameRect.w + baseButton.space + sensorFrameRect.x;
@@ -716,17 +716,19 @@
         buttons.birdhouseButtonRect.x = buttonPosX;
         buttons.birdhouseButtonRect.y = buttonPosY;
         buttons.birdhouseButtonRect.w = frame.largeSize;
-        buttons.birdhouseButtonRect.h = 2 * baseButton.height + baseButton.space;
+        buttons.birdhouseButtonRect.h = 3 * baseButton.height + baseButton.space;
 
         drawButton(ctx,buttons.birdhouseButtonRect);
         
+        drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"TEMP.",lastBirdhouseTemperature,"#FFCC66");
+                
+        buttonPosY = buttonPosY + baseButton.height + baseButton.space;
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"HUMIDITY",lastBirdhouseHumidity,"#FFCC66");
-        drawLabeledInfoButton(ctx,infoButtonPosX - getLabeledInfoButtonWidth() - button.space,buttonPosY,"TEMP.",lastBirdhouseTemperature,"#FFCC66");
 
         buttonPosY = buttonPosY + baseButton.height + baseButton.space;
         drawLabeledInfoButton(ctx,infoButtonPosX,buttonPosY,"PRESSURE",lastBirdhousePressure,"#FFCC66");
 
-        buttonGapY = buttonGapY + 2 * baseButton.height + 2 * baseButton.space;
+        buttonGapY = buttonGapY + 3 * baseButton.height + 3 * baseButton.space;
         
         drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
         
@@ -758,7 +760,7 @@
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
         
-        drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
+        //drawButtonHorizontalGap(ctx,buttonPosX,buttonGapY,frame.largeSize);
 
         ctx.restore(); 
     }

@@ -66,7 +66,7 @@
             sensordataService.getWindspeed("actual","anemometer",1,
                 function(data){
                     if (data.sensorData.length > 0) {
-                        lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(2));
+                        lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(1));
                     }
                 });
 
@@ -180,7 +180,7 @@ var connect = function () {
               }
           } else if ("WINDSPEED" === sensorevent.type) {
               if ("ANEMOMETER" === sensorevent.place) {
-                  lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(2));
+                  lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(1));
               }
           }
       };

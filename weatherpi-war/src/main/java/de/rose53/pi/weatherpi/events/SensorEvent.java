@@ -33,15 +33,9 @@ public abstract class SensorEvent {
     }
 
     public static SensorEvent build(JsonObject json) {
-<<<<<<< HEAD
         ESensorType  type   = ESensorType.fromString(json.getString("type"));
         ESensorPlace place  = ESensorPlace.fromString(json.getString("place"));
         long         time   = !json.containsKey("time") || json.isNull("time")?Instant.now().getEpochSecond():json.getJsonNumber("time").longValue();
-=======
-        ESensorType  type = ESensorType.fromString(json.getString("type"));
-        ESensorPlace place = ESensorPlace.fromString(json.getString("place"));
-        long         time = json.isNull("time")?Instant.now().getEpochSecond():json.getJsonNumber("time").longValue();
->>>>>>> 84d6e1708f137f4a8d866a82373ef14cd6750f37
         String       sensor = json.getString("sensor");
         SensorEvent  retVal = null;
 

@@ -28,13 +28,9 @@
             <groupId>org.jglue.cdi-unit</groupId>
             <artifactId>cdi-unit</artifactId>
         </dependency>
-<<<<<<< HEAD
         <dependency>
-=======
-            <dependency>
->>>>>>> 84d6e1708f137f4a8d866a82373ef14cd6750f37
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
         </dependency>
     </dependencies>
 
