@@ -1,5 +1,7 @@
 package de.rose53.pi.weatherpi.events;
 
+import static de.rose53.pi.weatherpi.common.JsonUtils.has;
+
 import java.time.Instant;
 import java.util.Date;
 
@@ -33,39 +35,43 @@ public abstract class SensorEvent {
     }
 
     public static SensorEvent build(JsonObject json) {
+
+        if (!has(json,"type") || !has(json,"place") || !has(json,"sensor")) {
+            return null;
+        }
         ESensorType  type   = ESensorType.fromString(json.getString("type"));
         ESensorPlace place  = ESensorPlace.fromString(json.getString("place"));
-        long         time   = !json.containsKey("time") || json.isNull("time")?Instant.now().getEpochSecond():json.getJsonNumber("time").longValue();
+        long         time   = !has(json,"time")?Instant.now().getEpochSecond():json.getJsonNumber("time").longValue();
         String       sensor = json.getString("sensor");
         SensorEvent  retVal = null;
 
         switch (type) {
         case HUMIDITY:
-            if (!json.isNull("humidity")) {
+            if (has(json,"humidity")) {
                 double humidity = json.getJsonNumber("humidity").doubleValue();
                 retVal = new HumidityEvent(place, sensor, humidity);
             }
             break;
         case ILLUMINANCE:
-            if (!json.isNull("illuminance")) {
+            if (has(json,"illuminance")) {
                 double illuminance = json.getJsonNumber("illuminance").doubleValue();
                 retVal = new IlluminanceEvent(place, sensor, illuminance);
             }
             break;
         case PRESSURE:
-            if (!json.isNull("pressure")) {
+            if (has(json,"pressure")) {
                 double pressure = json.getJsonNumber("pressure").doubleValue();
                 retVal = new PressureEvent(place, sensor, pressure);
             }
             break;
         case TEMPERATURE:
-            if (!json.isNull("temperature")) {
+            if (has(json,"temperature")) {
                 double temperature = json.getJsonNumber("temperature").doubleValue();
                 retVal = new TemperatureEvent(place, sensor, temperature);
             }
             break;
         case WINDSPEED:
-               if (!json.isNull("windspeed")) {
+               if (has(json,"windspeed")) {
                 double windspeed = json.getJsonNumber("windspeed").doubleValue();
                 retVal = new WindspeedEvent(place, sensor, windspeed);
             }

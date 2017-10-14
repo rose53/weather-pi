@@ -17,6 +17,10 @@ public class SensorEventTest {
 
     private final String EVENT = "{\"place\":\"ANEMOMETER\",\"sensor\":\"ELTAKO_WS\",\"type\":\"WINDSPEED\",\"windspeed\":0.76}";
 
+    private final String EVENT1 = "{\"place\":\"BIRDHOUSE\",\"sensor\":\"BME280\",\"type\":\"PRESSURE\",\"time\":1502381794}";
+
+    private final String EVENT2 = "{\"place\":\"BIRDHOUSE\"}";
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
@@ -39,6 +43,20 @@ public class SensorEventTest {
         assertNotNull(object);
         SensorEvent sensorEvent = SensorEvent.build(object);
         assertNotNull(sensorEvent);
+    }
+
+    @Test
+    public void testBuildEvent1() {
+        JsonObject object = Json.createReader(new StringReader(EVENT1)).readObject();
+        assertNotNull(object);
+        assertNull(SensorEvent.build(object));
+    }
+
+    @Test
+    public void testBuildEvent2() {
+        JsonObject object = Json.createReader(new StringReader(EVENT2)).readObject();
+        assertNotNull(object);
+        assertNull(SensorEvent.build(object));
     }
 
 }
