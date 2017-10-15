@@ -29,7 +29,8 @@ import twitter4j.TwitterException;
 @Startup
 public class TwitterService {
 
-    private static final String BASE_URI = "http://localhost:8080/weatherpi/resources/sensordata/BIRDHOUSE/BME280";
+    private static final String BASE_URI                   = "http://localhost:8080/weatherpi/resources/sensordata/BIRDHOUSE/BME280";
+    private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/weatherpi/resources/pressuretendency";
 
     @Inject
     Logger logger;
@@ -77,6 +78,33 @@ public class TwitterService {
         return sensorData.getJsonObject(0).getJsonNumber("value").doubleValue();
     }
 
+
+    private String getPressureTendency() {
+        Client clientBuilder = ClientBuilder.newClient();
+
+        UriBuilder uriBuilder = UriBuilder.fromUri(BASE_URI_PRESSURE_TENDENCY);
+
+        Response response = clientBuilder.target(uriBuilder)
+                                         .request(MediaType.APPLICATION_JSON_TYPE)
+                                         .get();
+
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getPressureTendency: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
+        } else {
+            object = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+        }
+        response.close();
+
+        if (object == null) {
+            logger.error("getPressureTendency: JSON object is null or does not contain data");
+            return null;
+        }
+
+        return object.getString("meaning");
+    }
+
+
     @Schedule(second="0", minute="0",hour="*/3", persistent=false)
     public void updateTimer(){
 
@@ -119,6 +147,32 @@ public class TwitterService {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
             logger.error("updateTimer:",e);
+        }
+    }
+
+    @Schedule(second="0", minute="0",hour="*/1", persistent=false)
+    public void updatePressureTendency(){
+
+
+
+        String pressureTendency = getPressureTendency();
+
+        StringBuilder status = new StringBuilder();
+
+        status.append("Pressure tendency : ");
+        if (pressureTendency != null) {
+            status.append(pressureTendency);
+        } else{
+            status.append("No actual data available.");
+        }
+
+        logger.debug("updatePressureTendency: status for twitter = >{}<",status);
+        StatusUpdate statusUpdate = new StatusUpdate(status.toString());
+
+        try {
+            twitter.updateStatus(statusUpdate);
+        } catch (TwitterException e) {
+            logger.error("updatePressureTendency:",e);
         }
     }
 }
