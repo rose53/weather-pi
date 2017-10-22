@@ -120,7 +120,7 @@ public class SensorDataService {
         return resultList.isEmpty()?null:resultList.get(0);
     }
 
-    private <T extends SensorEvent> void persistData(T event) {
+    public <T extends SensorEvent> void persistData(T event) {
 
         SensorBean sensor = sensorService.getSensor(event.getSensor(),event.getPlace(),event.getType());
         if (sensor == null) {
@@ -152,11 +152,6 @@ public class SensorDataService {
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: got event");
-        persistData(event);
-    }
-
-    public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
-        logger.debug("onReadWindspeedEvent: got event");
         persistData(event);
     }
 }
