@@ -30,7 +30,11 @@ import twitter4j.TwitterException;
 public class TwitterService {
 
     private static final String BASE_URI                   = "http://localhost:8080/weatherpi/resources/sensordata/BIRDHOUSE/BME280";
+<<<<<<< HEAD
     private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/resources/pressuretendency";
+=======
+    private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/weatherpi/resources/pressuretendency";
+>>>>>>> origin/master
 
     @Inject
     Logger logger;
@@ -150,7 +154,11 @@ public class TwitterService {
         }
     }
 
+<<<<<<< HEAD
     @Schedule(second="0", minute="1",hour="*/1", persistent=false)
+=======
+    @Schedule(second="0", minute="0",hour="*/1", persistent=false)
+>>>>>>> origin/master
     public void updatePressureTendency(){
 
 

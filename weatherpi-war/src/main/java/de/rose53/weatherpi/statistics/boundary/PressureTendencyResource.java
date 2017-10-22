@@ -15,12 +15,15 @@ import org.slf4j.Logger;
 
 import de.rose53.weatherpi.statistics.control.PressureTendencyService;
 
+<<<<<<< HEAD
 /**
  *
  * https://www.metoffice.gov.uk/guide/weather/marine/glossary
  * http://www.islandnet.com/~see/weather/eyes/barometer3.htm
  *
  */
+=======
+>>>>>>> origin/master
 @Path("/pressuretendency")
 public class PressureTendencyResource {
 
