@@ -31,13 +31,16 @@ public class WindspeedFilterService {
         events.add(event);
     }
 
+    public double getLatestWindspeed() {
+        return events.isEmpty()?0.0:Math.round(events.get(events.size() - 1).getValue()*100.0)/100.0;
+    }
 
     @Schedule(second="0", minute="*",hour="*", persistent=false)
     public void filterData(){
         logger.debug("filterData: #events = >{}<",events.size());
         double average = events.stream().mapToDouble(WindspeedEvent::getValue).average().orElse(0.0);
         logger.debug("filterData: average windspeed = >{}<",average);
-        sensorDataService.persistData(new WindspeedEvent(ESensorPlace.ANEMOMETER, "ELTAKO_WS", average));
+        sensorDataService.persistData(new WindspeedEvent(ESensorPlace.ANEMOMETER, "ELTAKO_WS", Math.round(average*100.0)/100.0));
         events.clear();
     }
 }

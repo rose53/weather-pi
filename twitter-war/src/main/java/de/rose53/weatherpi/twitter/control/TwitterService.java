@@ -30,11 +30,8 @@ import twitter4j.TwitterException;
 public class TwitterService {
 
     private static final String BASE_URI                   = "http://localhost:8080/weatherpi/resources/sensordata/BIRDHOUSE/BME280";
-<<<<<<< HEAD
     private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/resources/pressuretendency";
-=======
-    private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/weatherpi/resources/pressuretendency";
->>>>>>> origin/master
+    private static final String BASE_URI_WINDFORCE         = "http://localhost:8080/weatherpi/resources/windspeed";
 
     @Inject
     Logger logger;
@@ -108,7 +105,31 @@ public class TwitterService {
         return object.getString("meaning");
     }
 
+    private Double getWindforce() {
+        Client clientBuilder = ClientBuilder.newClient();
 
+        UriBuilder uriBuilder = UriBuilder.fromUri(BASE_URI_WINDFORCE);
+
+        Response response = clientBuilder.target(uriBuilder)
+                                         .queryParam("unit", "BFT")
+                                         .request(MediaType.APPLICATION_JSON_TYPE)
+                                         .get();
+
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getWindforce: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
+        } else {
+            object = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+        }
+        response.close();
+
+        if (object == null) {
+            logger.error("getWindforce: JSON object is null or does not contain data");
+            return null;
+        }
+
+        return object.getJsonNumber("windspeed").doubleValue();
+    }
     @Schedule(second="0", minute="0",hour="*/3", persistent=false)
     public void updateTimer(){
 
@@ -154,15 +175,11 @@ public class TwitterService {
         }
     }
 
-<<<<<<< HEAD
     @Schedule(second="0", minute="1",hour="*/1", persistent=false)
-=======
-    @Schedule(second="0", minute="0",hour="*/1", persistent=false)
->>>>>>> origin/master
-    public void updatePressureTendency(){
+    public void updatePressureTendencyAndWindforce(){
 
 
-
+        Double windForce        = getWindforce();
         String pressureTendency = getPressureTendency();
 
         StringBuilder status = new StringBuilder();
@@ -174,13 +191,21 @@ public class TwitterService {
             status.append("No actual data available.");
         }
 
-        logger.debug("updatePressureTendency: status for twitter = >{}<",status);
+        status.append('\n')
+              .append("Wind force        : ");
+        if (windForce != null) {
+            status.append(Long.toString(Math.round(windForce))).append(" bft");
+        } else{
+            status.append("No actual data available.");
+        }
+
+        logger.debug("updatePressureTendencyAndWindforce: status for twitter = >{}<",status);
         StatusUpdate statusUpdate = new StatusUpdate(status.toString());
 
         try {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
-            logger.error("updatePressureTendency:",e);
+            logger.error("updatePressureTendencyAndWindforce:",e);
         }
     }
 }
