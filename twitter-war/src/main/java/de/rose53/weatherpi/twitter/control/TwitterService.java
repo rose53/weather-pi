@@ -130,6 +130,7 @@ public class TwitterService {
 
         return object.getJsonNumber("windspeed").doubleValue();
     }
+
     @Schedule(second="0", minute="0",hour="*/3", persistent=false)
     public void updateTimer(){
 
@@ -181,6 +182,9 @@ public class TwitterService {
 
         Double windForce        = getWindforce();
         String pressureTendency = getPressureTendency();
+
+        logger.debug("updatePressureTendencyAndWindforce: pressureTendency = >{}<",pressureTendency);
+        logger.debug("updatePressureTendencyAndWindforce: windForce        = >{}<",windForce);
 
         StringBuilder status = new StringBuilder();
 
