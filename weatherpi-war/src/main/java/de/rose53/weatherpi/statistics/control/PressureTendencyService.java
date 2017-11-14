@@ -23,20 +23,31 @@ public class PressureTendencyService {
     @Inject
     SensorDataService sensorDataService;
 
-    public Double getPressureTendency() {
-
+    public Double getActualPressure() {
         LocalDateTime now         = LocalDateTime.now();
-        LocalDateTime minus3Hours = now.minusHours(3);
 
         DataBean actualData = sensorDataService.getSensorData("BME280", PRESSURE, BIRDHOUSE, now);
+        if (actualData == null) {
+            logger.debug("getActualPressure: no data found");
+            return null;
+        }
+        logger.debug("getActualPressure: actual = {} hPa",actualData.getValue());
+        return actualData.getValue();
+    }
+
+    public Double getPressureTendency() {
+
+        LocalDateTime minus3Hours = LocalDateTime.now().minusHours(3);
+
+        Double actualPressure = getActualPressure();
 
         DataBean minus3HoursData = sensorDataService.getSensorData("BME280", PRESSURE, BIRDHOUSE, minus3Hours);
 
-        if (actualData == null || minus3HoursData == null) {
+        if (actualPressure == null || minus3HoursData == null) {
             logger.debug("getPressureTendency: no data found");
             return null;
         }
-        logger.debug("getPressureTendency: difference = {} hPa",actualData.getValue() - minus3HoursData.getValue());
-        return actualData.getValue() - minus3HoursData.getValue();
+        logger.debug("getPressureTendency: difference = {} hPa",actualPressure - minus3HoursData.getValue());
+        return actualPressure - minus3HoursData.getValue();
     }
 }

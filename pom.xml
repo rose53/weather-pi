@@ -88,6 +88,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>de.rose53</groupId>
+                <artifactId>zambretti</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>de.rose53.pi</groupId>
                 <artifactId>weatherpi-forecast</artifactId>
                 <version>${project.version}</version>
@@ -375,6 +380,7 @@
     </reporting>
 
     <modules>
+        <module>zambretti</module>
         <module>weatherpi-common</module>
         <module>configuration-war</module>
         <module>commons-configuration</module>

@@ -15,12 +15,14 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.common.RestResource;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -44,6 +46,11 @@ public class TwitterService {
 
     @Inject
     JMSContext context;
+
+    @Inject
+    @RestResource(path="/weatherpi/resources/zambretti")
+    WebTarget zambrettiWebTarget;
+
 
     private Double getSensorData(String type) {
         Client clientBuilder = ClientBuilder.newClient();
@@ -131,6 +138,24 @@ public class TwitterService {
         return object.getJsonNumber("windspeed").doubleValue();
     }
 
+    private String getZambrettiForcast() {
+        Response response = zambrettiWebTarget.request(MediaType.APPLICATION_JSON_TYPE).get();
+
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getWindforce: call to >{}< returned status = >{}<",zambrettiWebTarget.getUri(),response.getStatus());
+        } else {
+            object = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+        }
+        response.close();
+
+        if (object == null) {
+            logger.error("getZambrettiForcast: JSON object is null or does not contain data");
+            return null;
+        }
+        return object.getString("windspeed");
+    }
+
     @Schedule(second="0", minute="0",hour="*/3", persistent=false)
     public void updateTimer(){
 
@@ -182,15 +207,24 @@ public class TwitterService {
 
         Double windForce        = getWindforce();
         String pressureTendency = getPressureTendency();
+        String zambrettiForcast = getZambrettiForcast();
 
         logger.debug("updatePressureTendencyAndWindforce: pressureTendency = >{}<",pressureTendency);
         logger.debug("updatePressureTendencyAndWindforce: windForce        = >{}<",windForce);
+        logger.debug("updatePressureTendencyAndWindforce: zambrettiForcast = >{}<",zambrettiForcast);
 
         StringBuilder status = new StringBuilder();
 
         status.append("Pressure tendency : ");
         if (pressureTendency != null) {
             status.append(pressureTendency);
+        } else{
+            status.append("No actual data available.");
+        }
+        status.append('\n').
+               append("Zambretti forcast : ");
+        if (zambrettiForcast != null) {
+            status.append(zambrettiForcast);
         } else{
             status.append("No actual data available.");
         }
