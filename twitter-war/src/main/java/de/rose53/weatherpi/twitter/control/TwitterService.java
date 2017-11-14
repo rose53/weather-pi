@@ -153,7 +153,7 @@ public class TwitterService {
             logger.error("getZambrettiForcast: JSON object is null or does not contain data");
             return null;
         }
-        return object.getString("windspeed");
+        return object.getString("zambretti");
     }
 
     @Schedule(second="0", minute="0",hour="*/3", persistent=false)
