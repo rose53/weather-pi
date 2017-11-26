@@ -1,7 +1,5 @@
 package de.rose53.pi.weatherpi.events;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
