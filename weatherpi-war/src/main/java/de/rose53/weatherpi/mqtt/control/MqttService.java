@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.events.LightningEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
@@ -67,6 +68,9 @@ public class MqttService implements MqttCallback {
 
     @Inject
     Event<WindspeedEvent> windspeedEvent;
+
+    @Inject
+    Event<LightningEvent> lightningEvent;
 
     MqttClient client = null;
 
@@ -159,6 +163,10 @@ public class MqttService implements MqttCallback {
         case WINDSPEED:
             windspeedEvent.fire((WindspeedEvent)event);
             break;
+        case LIGHTNING:
+            lightningEvent.fire((LightningEvent) event);
+            break;
+
         }
     }
 }

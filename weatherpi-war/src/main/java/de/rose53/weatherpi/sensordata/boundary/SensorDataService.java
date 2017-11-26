@@ -18,6 +18,7 @@ import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.events.LightningEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
@@ -151,6 +152,11 @@ public class SensorDataService {
 
     public void onReadHumidityEvent(@Observes HumidityEvent event) {
         logger.debug("onReadHumidityEvent: got event");
+        persistData(event);
+    }
+
+    public void onReadLightningEvent(@Observes LightningEvent event) {
+        logger.debug("onReadLightningEvent: got event");
         persistData(event);
     }
 }
