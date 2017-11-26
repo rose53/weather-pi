@@ -2,6 +2,8 @@ package de.rose53.weatherpi.twitter.control;
 
 import java.io.StringReader;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.annotation.Resource;
 import javax.ejb.Schedule;
@@ -12,6 +14,7 @@ import javax.jms.JMSContext;
 import javax.jms.Topic;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,7 +36,6 @@ public class TwitterService {
 
     private static final String BASE_URI                   = "http://localhost:8080/weatherpi/resources/sensordata/BIRDHOUSE/BME280";
     private static final String BASE_URI_PRESSURE_TENDENCY = "http://localhost:8080/weatherpi/resources/pressuretendency";
-    private static final String BASE_URI_WINDFORCE         = "http://localhost:8080/weatherpi/resources/windspeed";
 
     @Inject
     Logger logger;
@@ -48,9 +50,14 @@ public class TwitterService {
     JMSContext context;
 
     @Inject
+    @RestResource(path="/weatherpi/resources/windspeed")
+    WebTarget windspeedWebTarget;
+
+    @Inject
     @RestResource(path="/weatherpi/resources/zambretti")
     WebTarget zambrettiWebTarget;
 
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private Double getSensorData(String type) {
         Client clientBuilder = ClientBuilder.newClient();
@@ -112,21 +119,19 @@ public class TwitterService {
         return object.getString("meaning");
     }
 
-    private Double getWindforce() {
+    private Windforce getWindforce() {
         Client clientBuilder = ClientBuilder.newClient();
 
-        UriBuilder uriBuilder = UriBuilder.fromUri(BASE_URI_WINDFORCE);
-
-        Response response = clientBuilder.target(uriBuilder)
-                                         .queryParam("unit", "BFT")
-                                         .request(MediaType.APPLICATION_JSON_TYPE)
-                                         .get();
+        Response response = windspeedWebTarget.queryParam("unit", "BFT").request(MediaType.APPLICATION_JSON_TYPE).get();
 
         JsonObject object = null;
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             logger.error("getWindforce: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
         } else {
-            object = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+            String jsonString = response.readEntity(String.class);
+            logger.debug("getWindforce: returned json = >{}<",jsonString);
+
+            object = Json.createReader(new StringReader(jsonString)).readObject();
         }
         response.close();
 
@@ -135,7 +140,15 @@ public class TwitterService {
             return null;
         }
 
-        return object.getJsonNumber("windspeed").doubleValue();
+        JsonNumber windspeedInBft = object.getJsonNumber("windspeed");
+        logger.debug("getWindforce: >{}<",windspeedInBft);
+        long windforce;
+        if (windspeedInBft.isIntegral()) {
+            windforce = windspeedInBft.longValue();
+        } else {
+            windforce = Math.round(windspeedInBft.doubleValue());
+        }
+        return new Windforce(windforce,object.getString("description"));
     }
 
     private String getZambrettiForcast() {
@@ -170,6 +183,10 @@ public class TwitterService {
 
         StringBuilder status = new StringBuilder();
 
+        status.append("Date    : ")
+              .append(LocalDateTime.now().format(formatter))
+              .append('\n');
+
         status.append("Temp.   : ");
         if (temperature != null) {
             status.append(tempFormat.format(temperature)).append("°C").append('\n');
@@ -201,19 +218,24 @@ public class TwitterService {
         }
     }
 
-    @Schedule(second="0", minute="1",hour="*/1", persistent=false)
+    @Schedule(second="0", minute="15",hour="*/1", persistent=false)
     public void updatePressureTendencyAndWindforce(){
 
 
-        Double windForce        = getWindforce();
-        String pressureTendency = getPressureTendency();
-        String zambrettiForcast = getZambrettiForcast();
+        Windforce windForce        = getWindforce();
+        String    pressureTendency = getPressureTendency();
+        String    zambrettiForcast = getZambrettiForcast();
 
         logger.debug("updatePressureTendencyAndWindforce: pressureTendency = >{}<",pressureTendency);
         logger.debug("updatePressureTendencyAndWindforce: windForce        = >{}<",windForce);
         logger.debug("updatePressureTendencyAndWindforce: zambrettiForcast = >{}<",zambrettiForcast);
 
         StringBuilder status = new StringBuilder();
+
+
+        status.append("Date              : ")
+              .append(LocalDateTime.now().format(formatter))
+              .append('\n');
 
         status.append("Pressure tendency : ");
         if (pressureTendency != null) {
@@ -232,7 +254,11 @@ public class TwitterService {
         status.append('\n')
               .append("Wind force        : ");
         if (windForce != null) {
-            status.append(Long.toString(Math.round(windForce))).append(" bft");
+            status.append(Long.toString(windForce.windforce))
+                  .append(" bft ")
+                  .append('(')
+                  .append(windForce.description)
+                  .append(')');
         } else{
             status.append("No actual data available.");
         }
@@ -244,6 +270,18 @@ public class TwitterService {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
             logger.error("updatePressureTendencyAndWindforce:",e);
+        }
+    }
+
+    class Windforce {
+
+        private final long   windforce;
+        private final String description;
+
+        public Windforce(long windforce, String description) {
+            super();
+            this.windforce = windforce;
+            this.description = description;
         }
     }
 }
