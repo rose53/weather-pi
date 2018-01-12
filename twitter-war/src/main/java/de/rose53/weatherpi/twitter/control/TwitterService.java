@@ -1,5 +1,8 @@
 package de.rose53.weatherpi.twitter.control;
 
+import static de.rose53.pi.weatherpi.common.WindspeedUnit.*;
+
+
 import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
@@ -26,6 +29,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.common.RestResource;
+import de.rose53.pi.weatherpi.common.WindchillCalculator;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -42,6 +46,9 @@ public class TwitterService {
 
     @Inject
     Twitter twitter;
+
+    @Inject
+    WindchillCalculator windchillCalculator;
 
     @Resource(mappedName = "java:/jms/topic/DayStatisticTopic")
     private Topic topic;
@@ -122,7 +129,7 @@ public class TwitterService {
     private Windforce getWindforce() {
         Client clientBuilder = ClientBuilder.newClient();
 
-        Response response = windspeedWebTarget.queryParam("unit", "BFT").request(MediaType.APPLICATION_JSON_TYPE).get();
+        Response response = windspeedWebTarget.queryParam("unit", "KMH").request(MediaType.APPLICATION_JSON_TYPE).get();
 
         JsonObject object = null;
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
@@ -140,15 +147,15 @@ public class TwitterService {
             return null;
         }
 
-        JsonNumber windspeedInBft = object.getJsonNumber("windspeed");
-        logger.debug("getWindforce: >{}<",windspeedInBft);
-        long windforce;
-        if (windspeedInBft.isIntegral()) {
-            windforce = windspeedInBft.longValue();
+        JsonNumber windspeed = object.getJsonNumber("windspeed");
+        logger.debug("getWindforce: >{}<",windspeed);
+        double windspeedInkmh;
+        if (windspeed.isIntegral()) {
+            windspeedInkmh = windspeed.longValue();
         } else {
-            windforce = Math.round(windspeedInBft.doubleValue());
+            windspeedInkmh = windspeed.doubleValue();
         }
-        return new Windforce(windforce,object.getString("description"));
+        return new Windforce(windspeedInkmh,Math.round(convert(windspeedInkmh, KMH, BFT)),object.getString("description"));
     }
 
     private String getZambrettiForcast() {
@@ -169,58 +176,17 @@ public class TwitterService {
         return object.getString("zambretti");
     }
 
-    @Schedule(second="0", minute="0",hour="*/3", persistent=false)
+    @Schedule(second="0", minute="0",hour="*/1", persistent=false)
     public void updateTimer(){
 
-        DecimalFormat tempFormat = new DecimalFormat("#.0");
+        DecimalFormat tempFormat     = new DecimalFormat("#.0");
         DecimalFormat humidityFormat = new DecimalFormat("#.0");
         DecimalFormat pressureFormat = new DecimalFormat("#");
 
 
         Double temperature = getSensorData("temperature");
-        Double pressure = getSensorData("pressure");
-        Double humidity = getSensorData("humidity");
-
-        StringBuilder status = new StringBuilder();
-
-        status.append("Date    : ")
-              .append(LocalDateTime.now().format(formatter))
-              .append('\n');
-
-        status.append("Temp.   : ");
-        if (temperature != null) {
-            status.append(tempFormat.format(temperature)).append("°C").append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Humidity: ");
-        if (humidity != null) {
-            status.append(humidityFormat.format(humidity)).append('%').append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Pressure: ");
-        if (pressure != null) {
-            status.append(pressureFormat.format(pressure)).append("hPa").append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        logger.debug("updateTimer: status for twitter = >{}<",status);
-        StatusUpdate statusUpdate = new StatusUpdate(status.toString());
-
-        try {
-            twitter.updateStatus(statusUpdate);
-        } catch (TwitterException e) {
-            logger.error("updateTimer:",e);
-        }
-    }
-
-    @Schedule(second="0", minute="15",hour="*/1", persistent=false)
-    public void updatePressureTendencyAndWindforce(){
-
+        Double pressure    = getSensorData("pressure");
+        Double humidity    = getSensorData("humidity");
 
         Windforce windForce        = getWindforce();
         String    pressureTendency = getPressureTendency();
@@ -232,10 +198,30 @@ public class TwitterService {
 
         StringBuilder status = new StringBuilder();
 
-
         status.append("Date              : ")
               .append(LocalDateTime.now().format(formatter))
               .append('\n');
+
+        status.append("Temp.             : ");
+        if (temperature != null) {
+            status.append(tempFormat.format(temperature)).append("°C").append('\n');
+        } else{
+            status.append("No actual data available.").append('\n');
+        }
+
+        status.append("Humidity          : ");
+        if (humidity != null) {
+            status.append(humidityFormat.format(humidity)).append('%').append('\n');
+        } else{
+            status.append("No actual data available.").append('\n');
+        }
+
+        status.append("Pressure          : ");
+        if (pressure != null) {
+            status.append(pressureFormat.format(pressure)).append("hPa").append('\n');
+        } else{
+            status.append("No actual data available.").append('\n');
+        }
 
         status.append("Pressure tendency : ");
         if (pressureTendency != null) {
@@ -254,34 +240,45 @@ public class TwitterService {
         status.append('\n')
               .append("Wind force        : ");
         if (windForce != null) {
-            status.append(Long.toString(windForce.windforce))
+            status.append(Long.toString(windForce.windforceBft))
                   .append(" bft ")
                   .append('(')
                   .append(windForce.description)
                   .append(')');
+
+            Double windChill = windchillCalculator.calculate(temperature,windForce.windforceKmh);
+            if (windChill != null) {
+                status.append('\n')
+                      .append("Windchill         : ")
+                      .append(tempFormat.format(windChill)).append("°C").append('\n');
+            }
         } else{
             status.append("No actual data available.");
         }
 
-        logger.debug("updatePressureTendencyAndWindforce: status for twitter = >{}<",status);
+        logger.debug("updateTimer: status for twitter = >{}<",status);
         StatusUpdate statusUpdate = new StatusUpdate(status.toString());
 
         try {
             twitter.updateStatus(statusUpdate);
         } catch (TwitterException e) {
-            logger.error("updatePressureTendencyAndWindforce:",e);
+            logger.error("updateTimer:",e);
         }
     }
 
+
+
     class Windforce {
 
-        private final long   windforce;
+        private final double windforceKmh;
+        private final long   windforceBft;
         private final String description;
 
-        public Windforce(long windforce, String description) {
+        public Windforce(double windforceKmh, long windforceBft, String description) {
             super();
-            this.windforce = windforce;
-            this.description = description;
+            this.windforceKmh = windforceKmh;
+            this.windforceBft = windforceBft;
+            this.description  = description;
         }
     }
 }

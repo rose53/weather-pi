@@ -1,4 +1,4 @@
-package de.rose53.weatherpi.statistics.control;
+package de.rose53.pi.weatherpi.common;
 
 import javax.enterprise.context.ApplicationScoped;
 

@@ -1,4 +1,4 @@
-package de.rose53.weatherpi.statistics.control;
+package de.rose53.pi.weatherpi.common;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import de.rose53.pi.weatherpi.common.LoggerExposer;
+import de.rose53.pi.weatherpi.common.WindchillCalculator;
 
 @RunWith(CdiRunner.class)
 @AdditionalClasses(LoggerExposer.class)
