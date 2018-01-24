@@ -16,12 +16,7 @@ import org.slf4j.Logger;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
-import de.rose53.pi.weatherpi.events.HumidityEvent;
-import de.rose53.pi.weatherpi.events.IlluminanceEvent;
-import de.rose53.pi.weatherpi.events.LightningEvent;
-import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
-import de.rose53.pi.weatherpi.events.TemperatureEvent;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 import de.rose53.weatherpi.sensordata.entity.SensorBean;
 
@@ -135,28 +130,10 @@ public class SensorDataService {
         em.persist(data);
     }
 
-    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
-        logger.debug("onReadIlluminanceEvent: got event");
-        persistData(event);
-    }
-
-    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
-        logger.debug("onReadTemperatureEvent: got event");
-        persistData(event);
-    }
-
-    public void onReadPressureEvent(@Observes PressureEvent event) {
-        logger.debug("onReadPressureEvent: got event");
-        persistData(event);
-    }
-
-    public void onReadHumidityEvent(@Observes HumidityEvent event) {
-        logger.debug("onReadHumidityEvent: got event");
-        persistData(event);
-    }
-
-    public void onReadLightningEvent(@Observes LightningEvent event) {
-        logger.debug("onReadLightningEvent: got event");
-        persistData(event);
+    public <T extends SensorEvent> void onReadSensorEvent(@Observes T event) {
+        logger.debug("onReadSensorEvent: got event");
+        if (event.getType() != ESensorType.WINDSPEED) {
+            persistData(event);
+        }
     }
 }

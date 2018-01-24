@@ -21,6 +21,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.events.DustPM10Event;
+import de.rose53.pi.weatherpi.events.DustPM25Event;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
 import de.rose53.pi.weatherpi.events.LightningEvent;
@@ -71,6 +73,12 @@ public class MqttService implements MqttCallback {
 
     @Inject
     Event<LightningEvent> lightningEvent;
+
+    @Inject
+    Event<DustPM10Event> dustPM10Event;
+
+    @Inject
+    Event<DustPM25Event> dustPM25Event;
 
     MqttClient client = null;
 
@@ -166,7 +174,12 @@ public class MqttService implements MqttCallback {
         case LIGHTNING:
             lightningEvent.fire((LightningEvent) event);
             break;
-
+        case DUST_PM10:
+            dustPM10Event.fire((DustPM10Event)event);
+            break;
+        case DUST_PM25:
+            dustPM25Event.fire((DustPM25Event)event);
+            break;
         }
     }
 }

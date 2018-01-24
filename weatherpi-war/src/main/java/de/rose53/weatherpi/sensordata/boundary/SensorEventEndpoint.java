@@ -14,8 +14,11 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.events.DustPM10Event;
+import de.rose53.pi.weatherpi.events.DustPM25Event;
 import de.rose53.pi.weatherpi.events.HumidityEvent;
 import de.rose53.pi.weatherpi.events.IlluminanceEvent;
+import de.rose53.pi.weatherpi.events.LightningEvent;
 import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
 import de.rose53.pi.weatherpi.events.TemperatureEvent;
@@ -86,4 +89,17 @@ public class SensorEventEndpoint {
     public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
         send(event);
     }
+
+    public void onReadLightningEvent(@Observes LightningEvent event) {
+        send(event);
+    }
+
+    public void onReadDustPM10Event(@Observes DustPM10Event event) {
+        send(event);
+    }
+
+    public void onReadDustPM25Event(@Observes DustPM25Event event) {
+        send(event);
+    }
+
 }

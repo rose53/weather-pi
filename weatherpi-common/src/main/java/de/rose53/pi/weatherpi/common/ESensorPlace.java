@@ -4,7 +4,9 @@ public enum ESensorPlace {
     INDOOR,
     OUTDOOR,
     BIRDHOUSE,
-    ANEMOMETER;
+    ANEMOMETER,
+    LIGHTNING,
+    DUSTSENSOR;
 
     public static ESensorPlace fromString(String text) {
         for (ESensorPlace b : ESensorPlace.values()) {

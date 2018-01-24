@@ -176,7 +176,7 @@ public class TwitterService {
         return object.getString("zambretti");
     }
 
-    @Schedule(second="0", minute="0",hour="*/1", persistent=false)
+    @Schedule(second="5", minute="0",hour="*/1", persistent=false)
     public void updateTimer(){
 
         DecimalFormat tempFormat     = new DecimalFormat("#.0");

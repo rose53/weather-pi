@@ -82,6 +82,18 @@ public abstract class SensorEvent {
                 retVal = new LightningEvent(place, sensor, distance);
             }
             break;
+        case DUST_PM10:
+            if (has(json,"pm10")) {
+                double pm10 = json.getJsonNumber("pm10").doubleValue();
+                retVal = new DustPM10Event(place, sensor, pm10);
+            }
+            break;
+        case DUST_PM25:
+            if (has(json,"pm25")) {
+                double pm25 = json.getJsonNumber("pm25").doubleValue();
+                retVal = new DustPM25Event(place, sensor, pm25);
+            }
+            break;
         }
         if (retVal != null) {
             retVal.time = time;
