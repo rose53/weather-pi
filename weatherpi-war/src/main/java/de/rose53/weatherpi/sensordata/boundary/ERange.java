@@ -12,6 +12,12 @@ public enum ERange {
             return now().minusMinutes(5);
         }
     },
+    HOUR {
+        @Override
+        public LocalDateTime getPastTime() {
+            return now().minusHours(1);
+        }
+    },
     DAY {
         @Override
         public LocalDateTime getPastTime() {
