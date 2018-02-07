@@ -44,7 +44,7 @@ public class WindspeedFilterService {
         logger.debug("getLatestWindspeed: events list is empty, we have to ask the database");
         List<DataBean> sensorData = sensorDataService.getSensorData("ELTAKO_WS",WINDSPEED,ANEMOMETER,ACTUAL);
         if (sensorData == null || sensorData.isEmpty()) {
-            logger.debug("getLatestWindspeed: database returne dno value, returning ");
+            logger.debug("getLatestWindspeed: database returned no value, returning ");
             return null;
         }
         return sensorData.get(0).getValue();

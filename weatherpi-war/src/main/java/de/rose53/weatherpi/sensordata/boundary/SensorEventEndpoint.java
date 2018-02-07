@@ -14,15 +14,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 
-import de.rose53.pi.weatherpi.events.DustPM10Event;
-import de.rose53.pi.weatherpi.events.DustPM25Event;
-import de.rose53.pi.weatherpi.events.HumidityEvent;
-import de.rose53.pi.weatherpi.events.IlluminanceEvent;
-import de.rose53.pi.weatherpi.events.LightningEvent;
-import de.rose53.pi.weatherpi.events.PressureEvent;
 import de.rose53.pi.weatherpi.events.SensorEvent;
-import de.rose53.pi.weatherpi.events.TemperatureEvent;
-import de.rose53.pi.weatherpi.events.WindspeedEvent;
 
 @ApplicationScoped
 @ServerEndpoint("/sensorevents")
@@ -43,7 +35,7 @@ public class SensorEventEndpoint {
         sessions.remove(session);
     }
 
-    private synchronized <T extends SensorEvent> void send(T event) {
+    public <T extends SensorEvent> void onReadSensorEvent(@Observes T event) {
         if (sessions.isEmpty()) {
             logger.debug("send: no websocket session active, nothing to do");
             return;
@@ -68,38 +60,4 @@ public class SensorEventEndpoint {
             }
         }
     }
-
-
-    public void onReadIlluminanceEvent(@Observes IlluminanceEvent event) {
-        send(event);
-    }
-
-    public void onReadTemperatureEvent(@Observes TemperatureEvent event) {
-        send(event);
-    }
-
-    public void onReadPressureEvent(@Observes PressureEvent event) {
-        send(event);
-    }
-
-    public void onReadHumidityEvent(@Observes HumidityEvent event) {
-        send(event);
-    }
-
-    public void onReadWindspeedEvent(@Observes WindspeedEvent event) {
-        send(event);
-    }
-
-    public void onReadLightningEvent(@Observes LightningEvent event) {
-        send(event);
-    }
-
-    public void onReadDustPM10Event(@Observes DustPM10Event event) {
-        send(event);
-    }
-
-    public void onReadDustPM25Event(@Observes DustPM25Event event) {
-        send(event);
-    }
-
 }
