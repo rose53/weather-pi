@@ -29,38 +29,46 @@ public class ParticulateMatterService {
     HumidityCompensation compensation;
 
     public Double getLatestPM10(boolean compensate) {
-        logger.debug("getLatestPM10: reading latest pm10 value");
+        logger.debug("getLatestPM10: reading latest pm10 value, compensate = >{}<",compensate);
         List<DataBean> pm10SensorData = sensorDataService.getSensorData("SDS011",DUST_PM10,DUSTSENSOR,HOUR);
         if (pm10SensorData.isEmpty()) {
             logger.debug("getLatestPM10: database returned no value, returning ");
             return null;
         }
         double pm10 = pm10SensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
+        logger.debug("getLatestPM10: pm10 = >{}<",pm10);
         if (compensate) {
-            List<DataBean> humiditySensorData = sensorDataService.getSensorData("SDS011",HUMIDITY,DUSTSENSOR,HOUR);
-            double humidity = humiditySensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
-            if (humidity > 5 && humidity < 100) {
-                pm10 = compensation.compensate(humidity, pm10);
-            }
+            pm10 = compensate(pm10);
+            logger.debug("getLatestPM10: after compensation pm10 = >{}<",pm10);
         }
         return pm10;
     }
 
     public Double getLatestPM25(boolean compensate) {
-        logger.debug("getLatestPM25: reading latest pm25 value");
+        logger.debug("getLatestPM25: reading latest pm25 value, compensate = >{}<",compensate);
         List<DataBean> pm25SensorData = sensorDataService.getSensorData("SDS011",DUST_PM25,DUSTSENSOR,HOUR);
         if (pm25SensorData.isEmpty()) {
             logger.debug("getLatestPM25: database returned no value, returning ");
             return null;
         }
         double pm25 = pm25SensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
+        logger.debug("getLatestPM25: pm25 = >{}<",pm25);
         if (compensate) {
-            List<DataBean> humiditySensorData = sensorDataService.getSensorData("SDS011",HUMIDITY,DUSTSENSOR,HOUR);
-            double humidity = humiditySensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
-            if (humidity > 5 && humidity < 100) {
-                pm25 = compensation.compensate(humidity, pm25);
-            }
+            pm25 = compensate(pm25);
+            logger.debug("getLatestPM25: after compensation pm25 = >{}<",pm25);
         }
         return pm25;
+    }
+
+    private double compensate(double pm) {
+
+        List<DataBean> humiditySensorData = sensorDataService.getSensorData("DHT22",HUMIDITY,DUSTSENSOR,HOUR);
+        double humidity = humiditySensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
+        logger.debug("compensate: humidity = >{}<",humidity);
+        if (humidity > 5.0 && humidity < 100.0) {
+            return compensation.compensate(humidity, pm);
+        } else {
+            return pm;
+        }
     }
 }
