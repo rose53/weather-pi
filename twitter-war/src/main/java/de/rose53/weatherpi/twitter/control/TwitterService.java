@@ -64,6 +64,10 @@ public class TwitterService {
     @RestResource(path="/weatherpi/resources/zambretti")
     WebTarget zambrettiWebTarget;
 
+    @Inject
+    @RestResource(path="/weatherpi/resources/particulatematter")
+    WebTarget particulatematterWebTarget;
+
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private Double getSensorData(String type) {
@@ -176,12 +180,54 @@ public class TwitterService {
         return object.getString("zambretti");
     }
 
+    private Pm getPm() {
+        Client clientBuilder = ClientBuilder.newClient();
+
+        Response response = particulatematterWebTarget.queryParam("compensate", "false").request(MediaType.APPLICATION_JSON_TYPE).get();
+
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getPm: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
+        } else {
+            String jsonString = response.readEntity(String.class);
+            logger.debug("getPm: returned json = >{}<",jsonString);
+
+            object = Json.createReader(new StringReader(jsonString)).readObject();
+        }
+        response.close();
+
+        if (object == null) {
+            logger.error("getPm: JSON object is null or does not contain data");
+            return null;
+        }
+
+        JsonNumber pm10Json = object.getJsonNumber("pm10");
+        logger.debug("getPm: >{}<",pm10Json);
+        double pm10;
+        if (pm10Json.isIntegral()) {
+            pm10 = pm10Json.longValue();
+        } else {
+            pm10 = pm10Json.doubleValue();
+        }
+
+        JsonNumber pm25Json = object.getJsonNumber("pm25");
+        logger.debug("getPm: >{}<",pm25Json);
+        double pm25;
+        if (pm25Json.isIntegral()) {
+            pm25 = pm25Json.longValue();
+        } else {
+            pm25 = pm25Json.doubleValue();
+        }
+        return new Pm(pm10,pm25);
+    }
+
     @Schedule(second="5", minute="0",hour="*/1", persistent=false)
     public void updateTimer(){
 
         DecimalFormat tempFormat     = new DecimalFormat("#.0");
         DecimalFormat humidityFormat = new DecimalFormat("#.0");
         DecimalFormat pressureFormat = new DecimalFormat("#");
+        DecimalFormat pmFormat       = new DecimalFormat("#");
 
 
         Double temperature = getSensorData("temperature");
@@ -191,6 +237,7 @@ public class TwitterService {
         Windforce windForce        = getWindforce();
         String    pressureTendency = getPressureTendency();
         String    zambrettiForcast = getZambrettiForcast();
+        Pm        pm               = getPm();
 
         logger.debug("updatePressureTendencyAndWindforce: pressureTendency = >{}<",pressureTendency);
         logger.debug("updatePressureTendencyAndWindforce: windForce        = >{}<",windForce);
@@ -198,39 +245,36 @@ public class TwitterService {
 
         StringBuilder status = new StringBuilder();
 
-        status.append("Date              : ")
+        status.append("Date      : ")
               .append(LocalDateTime.now().format(formatter))
               .append('\n');
 
-        status.append("Temp.             : ");
+        status.append("Temp.     : ");
         if (temperature != null) {
             status.append(tempFormat.format(temperature)).append("°C").append('\n');
         } else{
             status.append("No actual data available.").append('\n');
         }
 
-        status.append("Humidity          : ");
+        status.append("Humidity  : ");
         if (humidity != null) {
             status.append(humidityFormat.format(humidity)).append('%').append('\n');
         } else{
             status.append("No actual data available.").append('\n');
         }
 
-        status.append("Pressure          : ");
+        status.append("Pressure  : ");
         if (pressure != null) {
-            status.append(pressureFormat.format(pressure)).append("hPa").append('\n');
-        } else{
-            status.append("No actual data available.").append('\n');
-        }
-
-        status.append("Pressure tendency : ");
-        if (pressureTendency != null) {
-            status.append(pressureTendency);
+            status.append(pressureFormat.format(pressure)).append("hPa");
+            if (pressureTendency != null) {
+                status.append(" (").append(pressureTendency).append(')');
+            }
         } else{
             status.append("No actual data available.");
         }
-        status.append('\n').
-               append("Zambretti forcast : ");
+
+        status.append('\n')
+              .append("Zambretti : ");
         if (zambrettiForcast != null) {
             status.append(zambrettiForcast);
         } else{
@@ -238,7 +282,7 @@ public class TwitterService {
         }
 
         status.append('\n')
-              .append("Wind force        : ");
+              .append("Wind force: ");
         if (windForce != null) {
             status.append(Long.toString(windForce.windforceBft))
                   .append(" bft ")
@@ -249,11 +293,19 @@ public class TwitterService {
             Double windChill = windchillCalculator.calculate(temperature,windForce.windforceKmh);
             if (windChill != null) {
                 status.append('\n')
-                      .append("Windchill         : ")
-                      .append(tempFormat.format(windChill)).append("°C").append('\n');
+                      .append("Windchill : ")
+                      .append(tempFormat.format(windChill)).append("°C");
             }
         } else{
             status.append("No actual data available.");
+        }
+
+        if (pm != null) {
+            status.append('\n')
+                  .append("PM10      : ")
+                  .append(pmFormat.format(pm.pm10)).append("µg/m³").append('\n')
+                  .append("PM2.5     : ")
+                  .append(pmFormat.format(pm.pm25)).append("µg/m³").append('\n');
         }
 
         logger.debug("updateTimer: status for twitter = >{}<",status);
@@ -279,6 +331,17 @@ public class TwitterService {
             this.windforceKmh = windforceKmh;
             this.windforceBft = windforceBft;
             this.description  = description;
+        }
+    }
+
+    class Pm {
+        private final double pm10;
+        private final double pm25;
+
+        public Pm(double pm10, double pm25) {
+            super();
+            this.pm10 = pm10;
+            this.pm25 = pm25;
         }
     }
 }
