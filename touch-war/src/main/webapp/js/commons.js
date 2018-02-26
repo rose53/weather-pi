@@ -1,8 +1,7 @@
 
 //=== CONSTANTS ===
-var WEATHERPI_REST_ROOT       = 'resources/';
-var WEATHERPI_REST_SENSORDATA = WEATHERPI_REST_ROOT + 'sensordata';
-var WEATHERPI_REST_FORCAST    = WEATHERPI_REST_ROOT + 'forecast';
+var WEATHERPI_HOST           = location.host;
+//var WEATHERPI_HOST           = "weatherpi.local:8080";
 
 var RangeEnum = {
     ACTUAL : 1,

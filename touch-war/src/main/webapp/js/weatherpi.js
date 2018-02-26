@@ -30,8 +30,6 @@
 
             lcarsControlView.refresh();
 
-
-
             connect();
 
             sensordataService.getPressure("actual","birdhouse",1,
@@ -40,14 +38,6 @@
                         lcarsControlView.updateBirdhousePressure(parseInt(data.sensorData[0].value));
                     }
                 });
-
-            sensordataService.getTemperature("actual","anemometer",1,
-                function(data){
-                    if (data.sensorData.length > 0) {
-                        lcarsControlView.updateAnemometerWindspeed(parseInt(sensorevent.windspeed.toFixed(2)));
-                    }
-                });
-
 
             sensordataService.getTemperature("actual","birdhouse",1,
                 function(data){
@@ -69,7 +59,21 @@
                         lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(1));
                     }
                 });
+/*
+            sensordataService.getTemperature("actual","birdhouse",1,
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateBirdhouseTemperature(data.sensorData[0].value.toFixed(1));
+                    }
+                });
 
+            sensordataService.getHumidity("actual","birdhouse",1,
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateBirdhouseHumidity(parseInt(data.sensorData[0].value));
+                    }
+                });
+*/
             setInterval(function(){ schedule(); }, 5000);
         },
         initAll: function(options) {
@@ -157,8 +161,8 @@ var schedule = function() {
 
 var connect = function () {
 
-      log.debug("connect: using websocket at " + "ws://" + location.host + "/weatherpi/sensorevents");
-      var ws = new WebSocket("ws://" + location.host + "/weatherpi/sensorevents");
+      log.debug("connect: using websocket at " + "ws://" + WEATHERPI_HOST + "/weatherpi/sensorevents");
+      var ws = new WebSocket("ws://" + WEATHERPI_HOST + "/weatherpi/sensorevents");
       ws.onopen = function() {
       };
 
@@ -169,10 +173,14 @@ var connect = function () {
           if ("TEMPERATURE" === sensorevent.type) {
               if ("BIRDHOUSE" === sensorevent.place) {
                   lcarsControlView.updateBirdhouseTemperature(sensorevent.temperature.toFixed(1));
+              } else if ("DUSTSENSOR" === sensorevent.place) {
+                  lcarsControlView.updateDustsensorTemperature(sensorevent.temperature.toFixed(1));
               }
           } else if ("HUMIDITY" === sensorevent.type) {
               if ("BIRDHOUSE" === sensorevent.place) {
                   lcarsControlView.updateBirdhouseHumidity(parseInt(sensorevent.humidity));
+              } else if ("DUSTSENSOR" === sensorevent.place) {
+                  lcarsControlView.updateDustsensorHumidity(sensorevent.humidity);
               }
           } else if ("PRESSURE" === sensorevent.type) {
               if ("BIRDHOUSE" === sensorevent.place) {
@@ -181,6 +189,14 @@ var connect = function () {
           } else if ("WINDSPEED" === sensorevent.type) {
               if ("ANEMOMETER" === sensorevent.place) {
                   lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(1));
+              }
+          } else if ("DUST_PM10" === sensorevent.type) {
+              if ("DUSTSENSOR" === sensorevent.place) {
+                  lcarsControlView.updateDustsensorPm10(parseInt(sensorevent.pm10));
+              }
+          } else if ("DUST_PM25" === sensorevent.type) {
+              if ("DUSTSENSOR" === sensorevent.place) {
+                  lcarsControlView.updateDustsensorPm25(parseInt(sensorevent.pm25));
               }
           }
       };

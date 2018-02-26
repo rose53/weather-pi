@@ -1,9 +1,9 @@
 
-/* global log, WEATHERPI_REST_FORCAST */
+/* global log, WEATHERPI_HOST */
 
 function ForecastService(){
     var self = this;
-    var servicePath = location.protocol + '//' + location.host + '/forecast/' + WEATHERPI_REST_FORCAST + '/';
+    var servicePath = location.protocol + '//' + WEATHERPI_HOST + '/forecast/resources/forecast/';
 
     self.daily = function(cb) {
 

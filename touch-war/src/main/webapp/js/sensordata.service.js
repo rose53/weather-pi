@@ -1,9 +1,9 @@
 
-/* global log, WEATHERPI_REST_SENSORDATA */
+/* global log, WEATHERPI_HOST  */
 
 function SensordataService(){
     var self = this;
-    var servicePath = location.protocol + '//' + location.host + '/weatherpi/' + WEATHERPI_REST_SENSORDATA;
+    var servicePath = location.protocol + '//' + WEATHERPI_HOST + '/weatherpi/resources/sensordata';
 
     self.doRestCall = function(sensor,nameParam, rangeParam, placeParam, samplesParam, cb) {
 
