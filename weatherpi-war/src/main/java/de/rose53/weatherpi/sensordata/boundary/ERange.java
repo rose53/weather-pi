@@ -6,42 +6,59 @@ import java.time.LocalDateTime;
 
 public enum ERange {
 
-    ACTUAL {
+    ACTUAL(5) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusMinutes(5);
         }
     },
-    HOUR {
+    HOUR(30) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusHours(1);
         }
     },
-    DAY {
+    DAY(60) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusDays(1);
         }
     },
-    WEEK {
+    WEEK(24 * 60) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusWeeks(1);
         }
     },
-    MONTH {
+    MONTH(24 * 60) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusMonths(1);
         }
     },
-    YEAR {
+    YEAR(24 * 60) {
         @Override
         public LocalDateTime getPastTime() {
             return now().minusYears(1);
         }
     };
+
+    private final int movingAverageMinutes;
+
+    private ERange(int movingAverageMinutes) {
+        this.movingAverageMinutes = movingAverageMinutes;
+    }
+
+    public int getMovingAverageMinutes() {
+        return movingAverageMinutes;
+    }
+
+    abstract public LocalDateTime getPastTime();
+
+
+    public LocalDateTimeRange getRange(boolean movingAverage) {
+        return !movingAverage?new LocalDateTimeRange(getPastTime(), now()):new LocalDateTimeRange(getPastTime().minusMinutes(movingAverageMinutes), now());
+    }
 
     public static ERange fromString(String text) {
         for (ERange b : ERange.values()) {
@@ -52,5 +69,5 @@ public enum ERange {
         return ACTUAL;
     }
 
-    abstract public LocalDateTime getPastTime();
+
 }

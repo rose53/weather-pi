@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,6 +24,8 @@ import javax.ws.rs.core.Response;
 
 import de.rose53.pi.weatherpi.common.ESensorPlace;
 import de.rose53.pi.weatherpi.common.ESensorType;
+import de.rose53.pi.weatherpi.common.MovingAverage;
+import de.rose53.pi.weatherpi.common.SensorData;
 import de.rose53.weatherpi.sensordata.entity.DataBean;
 
 
@@ -34,6 +37,8 @@ public class SensorDataResource {
     @Inject
     SensorDataService sensorDataService;
 
+    @Inject
+    MovingAverage movingAverage;
 
     @GET
     @Path("/{place}/{name}/{type}/{range}")
@@ -41,24 +46,30 @@ public class SensorDataResource {
                                   @PathParam("name") String name,
                                   @PathParam("type") String type,
                                   @PathParam("range") String range,
-                                  @QueryParam("samples") Integer samples) {
+                                  @QueryParam("samples") Integer samples,
+                                  @QueryParam("movingAverage") @DefaultValue(value = "false") boolean movingAverageFlag) {
 
-        List<DataBean> sensorData = sensorDataService.getSensorData(name,ESensorType.fromString(type),ESensorPlace.fromString(place),ERange.fromString(range));
+        ERange r = ERange.fromString(range);
 
+        List<? extends SensorData> sensorData = sensorDataService.getSensorData(name,ESensorType.fromString(type),ESensorPlace.fromString(place),r.getRange(movingAverageFlag));
+
+        if (movingAverageFlag) {
+            sensorData = movingAverage.calculate(sensorData,r.getMovingAverageMinutes());
+        }
 
         if (samples != null && samples > 0 && sensorData.size() > samples) {
 
-            DataBean[] data =  sensorData.toArray(new DataBean[sensorData.size()]);
+            SensorData[] data =  sensorData.toArray(new SensorData[sensorData.size()]);
 
             // reduce the number of samples
             int window = data.length / samples;
             if ((window & 1) == 0) {
                 window--;
             }
-            List<DataBean> reducedData = new LinkedList<>();
+            List<SensorData> reducedData = new LinkedList<>();
             reducedData.add(data[0]); // add first element
 
-            DataBean[] windowData;
+            SensorData[] windowData;
             for (int i = 1; i + window < data.length; i+= window) {
                 windowData = copyOfRange(data,i,i+window);
                 sort(windowData, (a,b) -> Double.compare(a.getValue(), b.getValue()));

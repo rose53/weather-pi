@@ -20,6 +20,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import de.rose53.pi.weatherpi.common.SensorData;
+
 /**
  * Entity implementation class for Entity: DeviceBean
  *
@@ -36,7 +38,7 @@ import javax.persistence.Transient;
     @NamedQuery(name = DataBean.findByTimeNameTypePlaceH,
                 query= "SELECT d FROM DataBean d WHERE d.time >= :time AND d.sensor.name = :name AND d.sensor.type = :type AND d.sensor.device.place = :place order by d.time DESC ")
 })
-public class DataBean implements Serializable {
+public class DataBean implements Serializable, SensorData {
 
     private static final long serialVersionUID = -6828632135642482038L;
 
@@ -77,6 +79,7 @@ public class DataBean implements Serializable {
         this.time = time;
     }
 
+    @Override
     @Transient
     public LocalDateTime getLocalDateTime() {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(time.getTime()), ZoneId.systemDefault());
@@ -97,5 +100,4 @@ public class DataBean implements Serializable {
     public void setSensor(SensorBean sensor) {
         this.sensor = sensor;
     }
-
 }

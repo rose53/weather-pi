@@ -30,34 +30,26 @@ public class ParticulateMatterService {
 
     public Double getLatestPM10(boolean compensate) {
         logger.debug("getLatestPM10: reading latest pm10 value, compensate = >{}<",compensate);
-        List<DataBean> pm10SensorData = sensorDataService.getSensorData("SDS011",DUST_PM10,DUSTSENSOR,HOUR);
-        if (pm10SensorData.isEmpty()) {
-            logger.debug("getLatestPM10: database returned no value, returning ");
-            return null;
-        }
-        double pm10 = pm10SensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
-        logger.debug("getLatestPM10: pm10 = >{}<",pm10);
-        if (compensate) {
-            pm10 = compensate(pm10);
-            logger.debug("getLatestPM10: after compensation pm10 = >{}<",pm10);
-        }
-        return pm10;
+        return getLatestPM(sensorDataService.getSensorData("SDS011",DUST_PM10,DUSTSENSOR,HOUR),compensate);
     }
 
     public Double getLatestPM25(boolean compensate) {
         logger.debug("getLatestPM25: reading latest pm25 value, compensate = >{}<",compensate);
-        List<DataBean> pm25SensorData = sensorDataService.getSensorData("SDS011",DUST_PM25,DUSTSENSOR,HOUR);
-        if (pm25SensorData.isEmpty()) {
-            logger.debug("getLatestPM25: database returned no value, returning ");
+        return getLatestPM(sensorDataService.getSensorData("SDS011",DUST_PM25,DUSTSENSOR,HOUR),compensate);
+    }
+
+    private Double getLatestPM(List<DataBean> pmSensorData, boolean compensate) {
+        if (pmSensorData.isEmpty()) {
+            logger.debug("getLatestPM: database returned no value, returning ");
             return null;
         }
-        double pm25 = pm25SensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
-        logger.debug("getLatestPM25: pm25 = >{}<",pm25);
+        double pm = pmSensorData.stream().mapToDouble(DataBean::getValue).average().orElse(0.0);
+        logger.debug("getLatestPM: pm = >{}<",pm);
         if (compensate) {
-            pm25 = compensate(pm25);
-            logger.debug("getLatestPM25: after compensation pm25 = >{}<",pm25);
+            pm = compensate(pm);
+            logger.debug("getLatestPM: after compensation pm = >{}<",pm);
         }
-        return pm25;
+        return pm;
     }
 
     private double compensate(double pm) {

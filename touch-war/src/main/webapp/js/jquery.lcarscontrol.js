@@ -1,4 +1,4 @@
-/* global RangeEnum, log, ForecastIconEnum, MoonPhaseIconEnum, moonPhaseImages */
+/* global RangeEnum, log, ForecastIconEnum, MoonPhaseIconEnum, moonPhaseImages, sunriseIconSource, sunsetIconSource, forecastImages */
 
 /**
  *
@@ -46,9 +46,15 @@
     var lastTime                 = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});;
     
     var graphData = {
-        data   : null,
-        sensor : "temperature",
-        range  : RangeEnum.DAY        
+        data    : null,
+        sensor  : "temperature",
+        range   : RangeEnum.DAY        
+    };
+    
+    var graphDataAverage = {
+        data    : null,
+        sensor  : "temperature",
+        range   : RangeEnum.DAY        
     };
     
     var daily = [];
@@ -282,13 +288,24 @@
         },
         
         updateGraphData : function(data, sensor, range) {
-            graphData.data   = data;
+            graphData.data = data;
+            graphData.data.sensorData.sort(function(a,b){
+                return new Date(b.time) - new Date(a.time);
+            });
             graphData.sensor = sensor;
             graphData.range  = range;
             
-            graphData.data.sensorData.sort(function(a,b){
-              return new Date(b.time) - new Date(a.time);
+            refresh(this.canvas);
+        },
+        
+        updateGraphDataAverage : function(data, sensor, range) {
+            graphDataAverage.data = data;
+            graphDataAverage.data.sensorData.sort(function(a,b){
+                return new Date(b.time) - new Date(a.time);
             });
+            graphDataAverage.sensor = sensor;
+            graphDataAverage.range  = range;
+            
             refresh(this.canvas);
         },
         
@@ -1044,29 +1061,40 @@
         ctx.strokeStyle = '#006699';
         ctx.stroke();
         
-        if (graphData.data === null || graphData.data.sensordata === null) {
+        if (   graphData.data === null || graphData.data.sensordata === null 
+            || graphDataAverage.data === null || graphDataAverage.data.sensordata === null) {
             return;
         }
-        var maxValue = graphData.data.maxValue;
-        var minValue = graphData.data.minValue;
         
-        if (graphData.sensor === 'temperature') {
+        drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData,'#FF9933');
+        drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphDataAverage,'#99CCFF');
+  
+        ctx.restore();
+    }
+
+    function drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,gData,color) {
+        ctx.save();
+        
+        var maxValue = gData.data.maxValue;
+        var minValue = gData.data.minValue;
+        
+        if (gData.sensor === 'temperature') {
             maxValue = Math.floor(maxValue + 2);
             minValue = Math.ceil(minValue - 2);
-        } else if (graphData.sensor === 'humidity') {
+        } else if (gData.sensor === 'humidity') {
             maxValue = 100;
             minValue = 0;
-        } else if (graphData.sensor === 'pressure') {
+        } else if (gData.sensor === 'pressure') {
             maxValue = Math.ceil(maxValue);
             minValue = Math.floor(minValue);
-        } else if (graphData.sensor === 'windspeed') {
+        } else if (gData.sensor === 'windspeed') {
             maxValue = Math.ceil(maxValue / 10) * 10;
             minValue = 0;
         } 
           
         // draw y - axis units
         //ctx.beginPath();
-        var pixelPerMS = width / RangeEnum.properties[graphData.range].ms;                
+        var pixelPerMS = width / RangeEnum.properties[gData.range].ms;                
         var pixelPerUnit = height / (maxValue  - minValue);
         log.debug("drawGraphArea: maxValue     " + maxValue); 
         log.debug("drawGraphArea: minValue     " + minValue);
@@ -1089,28 +1117,24 @@
         ctx.restore();
         
         
-         
- 
-        var maxDate = new Date(graphData.data.sensorData[0].time);
+        var maxDate = new Date(gData.data.sensorData[0].time);
         var maxTimeInMS = maxDate.getTime(); 
 
         ctx.beginPath();         
         ctx.lineWidth = 2;
-        ctx.strokeStyle = '#FF9933';
+        ctx.strokeStyle = color;
         
-        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[0].time).getTime()),
-                   yZero - (graphData.data.sensorData[0].value - minValue) * pixelPerUnit);
-        for (var index = 0; index < graphData.data.sensorData.length; ++index) {
-            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(graphData.data.sensorData[index].time).getTime()),
-                       yZero - (graphData.data.sensorData[index].value - minValue) * pixelPerUnit);
+        ctx.moveTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(gData.data.sensorData[0].time).getTime()),
+                   yZero - (gData.data.sensorData[0].value - minValue) * pixelPerUnit);
+        for (var index = 0; index < gData.data.sensorData.length; ++index) {
+            ctx.lineTo(xZeroMS - pixelPerMS *(maxTimeInMS - new Date(gData.data.sensorData[index].time).getTime()),
+                       yZero - (gData.data.sensorData[index].value - minValue) * pixelPerUnit);
         }
  
         ctx.stroke();
         
-        
         ctx.restore();
     }
-    
     function setSelected(buttonGroup, button,canvas) {
         for (var name in buttonGroup) {
             buttonGroup[name].selected = false;

@@ -73,6 +73,25 @@ public class SensorDataService {
     }
 
     /**
+    *
+    * @param name the name of the sensor
+    * @param sensorType the {@linkplain ESensorType }
+    * @param place the {@linkplain ESensorPlace }
+    * @param range the {@linkplain LocalDateTimeRange range}}
+    * @return
+    */
+   public List<DataBean> getSensorData(String name, ESensorType sensorType, ESensorPlace place, LocalDateTimeRange range) {
+
+       return em.createNamedQuery(DataBean.findByTimeNameTypePlace,DataBean.class)
+                .setParameter("pastTime",Timestamp.valueOf(range.getFrom()))
+                .setParameter("actualTime",Timestamp.valueOf(range.getTo()))
+                .setParameter("name", name)
+                .setParameter("type", sensorType)
+                .setParameter("place", place)
+                .getResultList();
+   }
+
+    /**
      *
      * @param name the name of the sensor
      * @param sensorType the {@linkplain ESensorType }
@@ -86,13 +105,7 @@ public class SensorDataService {
             range = ERange.ACTUAL;
         }
 
-        List<DataBean> resultList = em.createNamedQuery(DataBean.findByTimeNameTypePlace,DataBean.class)
-                                      .setParameter("pastTime",Timestamp.valueOf(range.getPastTime()))
-                                      .setParameter("actualTime",Timestamp.valueOf(LocalDateTime.now()))
-                                      .setParameter("name", name)
-                                      .setParameter("type", sensorType)
-                                      .setParameter("place", place)
-                                      .getResultList();
+        List<DataBean> resultList = getSensorData(name,sensorType,place,range.getRange(false));
 
         if (range == ERange.ACTUAL && resultList.size() > 0) {
             return resultList.subList(0, 1);

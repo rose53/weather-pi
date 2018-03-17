@@ -125,7 +125,14 @@ var handleGraphButtonEvent = function(event) {
             if (data.sensorData.length > 0) {
                 lcarsControlView.updateGraphData(data,event.sensor,event.range);
             }
-        });
+        },false);
+    sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
+        lcarsControlView.getMaxGraphData(),
+        function(data){
+            if (data.sensorData.length > 0) {
+                lcarsControlView.updateGraphDataAverage(data,event.sensor,event.range);
+            }
+        },true);
 };
 
 
@@ -150,12 +157,17 @@ var schedule = function() {
         lastGraphData = new Date().getTime();
         var graphParams = lcarsControlView.getGraphDataParams();
         sensordataService.doRestCall(graphParams.sensor,graphParams.name,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
-        lcarsControlView.getMaxGraphData(),
-        function(data){
-            if (data.sensorData.length > 0) {
-                lcarsControlView.updateGraphData(data,graphParams.sensor,graphParams.range);
-            }
-        });
+                                     lcarsControlView.getMaxGraphData(),
+                                     function(data){
+                                        if (data.sensorData.length > 0) {
+                                            lcarsControlView.updateGraphData(data,graphParams.sensor,graphParams.range);
+                                        }}, false);
+        sensordataService.doRestCall(graphParams.sensor,graphParams.name,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
+                                     lcarsControlView.getMaxGraphData(),
+                                     function(data){
+                                        if (data.sensorData.length > 0) {
+                                            lcarsControlView.updateGraphDataAverage(data,graphParams.sensor,graphParams.range);
+                                        }}, true);
     }
 };
 
