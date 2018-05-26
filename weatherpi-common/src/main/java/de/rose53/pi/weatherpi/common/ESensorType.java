@@ -6,6 +6,7 @@ public enum ESensorType {
     PRESSURE,
     ILLUMINANCE,
     WINDSPEED,
+    WINDDIRECTION,
     LIGHTNING,
     DUST_PM10,
     DUST_PM25;

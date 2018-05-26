@@ -76,9 +76,15 @@ public abstract class SensorEvent {
                 retVal = new WindspeedEvent(place, sensor, windspeed);
             }
             break;
+        case WINDDIRECTION:
+            if (has(json,"winddirection")) {
+                double winddirection = json.getJsonNumber("winddirection").doubleValue();
+                retVal = new WinddirectionEvent(place, sensor, winddirection);
+            }
+            break;
         case LIGHTNING:
             if (has(json,"distance")) {
-                double distance = json.getJsonNumber("disctance").doubleValue();
+                double distance = json.getJsonNumber("distance").doubleValue();
                 retVal = new LightningEvent(place, sensor, distance);
             }
             break;
