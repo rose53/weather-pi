@@ -54,8 +54,6 @@ public enum Winddirection {
         if (degree < 0) {
             return null;
         }
-
-        degree = 22.5 * Math.round((degree % 360) / 22.5);
-        return winddirectionMap.get(degree % 360);
+        return winddirectionMap.get((22.5 * Math.round(degree / 22.5)) % 360);
     }
 }
