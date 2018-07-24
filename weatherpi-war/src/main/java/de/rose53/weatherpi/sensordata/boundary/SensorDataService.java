@@ -1,6 +1,8 @@
 package de.rose53.weatherpi.sensordata.boundary;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static de.rose53.pi.weatherpi.common.ESensorType.*;
+
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -145,7 +147,7 @@ public class SensorDataService {
 
     public <T extends SensorEvent> void onReadSensorEvent(@Observes T event) {
         logger.debug("onReadSensorEvent: got event");
-        if (event.getType() != ESensorType.WINDSPEED) {
+        if (event.getType() != WINDSPEED || event.getType() != WINDDIRECTION) {
             persistData(event);
         }
     }

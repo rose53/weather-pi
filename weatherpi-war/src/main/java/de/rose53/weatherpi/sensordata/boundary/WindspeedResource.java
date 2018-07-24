@@ -29,9 +29,7 @@ public class WindspeedResource {
     WindspeedFilterService service;
 
     @GET
-    public Response windspeed(@DefaultValue("ms") @QueryParam("unit") String unitString) {
-
-        WindspeedUnit windspeedUnit = WindspeedUnit.fromString(unitString);
+    public Response windspeed(@DefaultValue("ms") @QueryParam("unit") WindspeedUnit windspeedUnit) {
 
         // windspeed in m/s
         Double windspeed = service.getLatestWindspeed();

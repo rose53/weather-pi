@@ -61,6 +61,10 @@ public class TwitterService {
     WebTarget windspeedWebTarget;
 
     @Inject
+    @RestResource(path="/weatherpi/resources/winddirection")
+    WebTarget winddirectionWebTarget;
+
+    @Inject
     @RestResource(path="/weatherpi/resources/zambretti")
     WebTarget zambrettiWebTarget;
 
@@ -160,6 +164,29 @@ public class TwitterService {
             windspeedInkmh = windspeed.doubleValue();
         }
         return new Windforce(windspeedInkmh,Math.round(convert(windspeedInkmh, KMH, BFT)),object.getString("description"));
+    }
+
+    private String getWinddirection() {
+        Client clientBuilder = ClientBuilder.newClient();
+
+        Response response = winddirectionWebTarget.request(MediaType.APPLICATION_JSON_TYPE).get();
+
+        JsonObject object = null;
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            logger.error("getWinddirection: call to >{}< returned status = >{}<",clientBuilder,response.getStatus());
+        } else {
+            String jsonString = response.readEntity(String.class);
+            logger.debug("getWinddirection: returned json = >{}<",jsonString);
+
+            object = Json.createReader(new StringReader(jsonString)).readObject();
+        }
+        response.close();
+
+        if (object == null) {
+            logger.error("getWinddirection: JSON object is null or does not contain data");
+            return null;
+        }
+        return object.getString("description");
     }
 
     private String getZambrettiForcast() {
@@ -289,6 +316,12 @@ public class TwitterService {
                   .append('(')
                   .append(windForce.description)
                   .append(')');
+
+            if (windForce.windforceKmh > 0) {
+                status.append('\n')
+                      .append("Direction : ")
+                      .append(getWinddirection());
+            }
 
             Double windChill = windchillCalculator.calculate(temperature,windForce.windforceKmh);
             if (windChill != null) {
