@@ -17,6 +17,11 @@ public class WindchillCalculator {
      * @return
      */
     public Double calculate(double airTemperature, double windVelocity) {
+
+        if (airTemperature > 10.0) {
+            return null;
+        }
+
         if (windVelocity < 5) {
             return null;
         }

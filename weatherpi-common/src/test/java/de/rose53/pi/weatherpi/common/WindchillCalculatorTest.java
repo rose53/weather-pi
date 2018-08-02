@@ -25,6 +25,11 @@ public class WindchillCalculatorTest {
     }
 
     @Test
+    public void testCalculateHightTemp() {
+        assertNull(calculator.calculate(11.0, 5.0));
+    }
+
+    @Test
     public void testCalculate() {
         assertEquals(9.8,calculator.calculate(10.0, 5.0),0.05);
         assertEquals(-27.4,calculator.calculate(-15.0, 40.0),0.05);
