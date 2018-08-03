@@ -28,6 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 
+import de.rose53.pi.weatherpi.common.HeatindexCalculator;
 import de.rose53.pi.weatherpi.common.RestResource;
 import de.rose53.pi.weatherpi.common.WindchillCalculator;
 import twitter4j.StatusUpdate;
@@ -49,6 +50,9 @@ public class TwitterService {
 
     @Inject
     WindchillCalculator windchillCalculator;
+
+    @Inject
+    HeatindexCalculator heatindexCalculator;
 
     @Resource(mappedName = "java:/jms/topic/DayStatisticTopic")
     private Topic topic;
@@ -331,6 +335,12 @@ public class TwitterService {
             }
         } else{
             status.append("No actual data available.");
+        }
+        Double heatIndex = heatindexCalculator.calculate(temperature,humidity);
+        if (heatIndex != null) {
+            status.append('\n')
+                  .append("Heatindex : ")
+                  .append(tempFormat.format(heatIndex)).append("°C");
         }
 
         if (pm != null) {
