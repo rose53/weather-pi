@@ -25,6 +25,31 @@
         forecast_min_temp     : '#3366CC'
     };
     
+    var baseButton = {
+        width  : 70,
+        height : 30,
+        space  : 5,
+        labelFont      : "16pt LcarsGTJ3",
+        smallLabelFont : "12pt LcarsGTJ3"
+    };
+    
+        var button = {
+            size : baseButton.height,
+            radius : baseButton.height / 2,
+            labelWidth : baseButton.width - baseButton.height / 2,
+            textWidth : 30,
+            space : baseButton.space,
+            seperatorBoxWidth : baseButton.space,
+            font : baseButton.labelFont
+            //labeledInfoButtonWidth : baseButton.height / 2 + button.labelWidth + button.textWidth 
+        };
+        
+    var frame = {
+        smallSize : 15,
+        thinSize  : 8,
+        largeSize : baseButton.width
+    };
+    
     var lastTouch = {
         x : -1,
         y : -1
@@ -45,18 +70,37 @@
 
     var lastTime                 = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});;
     
+    
+    
+    
     var graphData = {
         data    : null,
         sensor  : "temperature",
-        range   : RangeEnum.DAY        
-    };
+        range   : RangeEnum.DAY,
+        draw    : true
+    };        
     
     var graphDataAverage = {
         data    : null,
         sensor  : "temperature",
-        range   : RangeEnum.DAY        
+        range   : RangeEnum.DAY,
+        draw    : true
     };
     
+    var graphData2 = {
+        data    : null,
+        sensor  : "humidity",
+        range   : RangeEnum.DAY,
+        draw    : true
+    };
+
+    var graphData2Average = {
+        data    : null,
+        sensor  : "humidity",
+        range   : RangeEnum.DAY,
+        draw    : true
+    };
+
     var daily = [];
     var currently;
     
@@ -67,17 +111,25 @@
     };
 
     var graphButtonRangeGroup = {
-        dayButtonRect      : {text : 'DAY',  range: RangeEnum.DAY,   x : 0, y : 0, w : 0, h : 0, selected : true  },
-        weekButtonRect     : {text : 'WEEK', range: RangeEnum.WEEK,  x : 0, y : 0, w : 0, h : 0, selected : false },
-        monthButtonRect    : {text : 'MONTH',range: RangeEnum.MONTH, x : 0, y : 0, w : 0, h : 0, selected : false }      
+        dayButtonRect      : {text : 'DAY',  textSize: 'small', range: RangeEnum.DAY,   x : 0, y : 0, w : frame.largeSize, h : frame.smallSize, selected : true  },
+        weekButtonRect     : {text : 'WEEK', textSize: 'small', range: RangeEnum.WEEK,  x : 0, y : 0, w : frame.largeSize, h : frame.smallSize, selected : false },
+        monthButtonRect    : {text : 'MONTH',textSize: 'small', range: RangeEnum.MONTH, x : 0, y : 0, w : frame.largeSize, h : frame.smallSize, selected : false }      
     };
     
     var graphButtonSensorGroup = {
-        temperatureButtonRect : {text : 'TEMP.',     name: "bme280",   sensor: "temperature", place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : true },
-        humidityButtonRect    : {text : 'HUMIDITY',  name: "bme280",   sensor: "humidity",    place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false },
-        pressureButtonRect    : {text : 'PRESSURE',  name: "bme280",   sensor: "pressure",    place: 'birdhouse', x : 0, y : 0, w : 0, h : 0, selected : false },
-        windspeedButtonRect   : {text : 'WINDSPEED', name: "eltako_ws",sensor: "windspeed",   place: 'anemometer', x : 0, y : 0, w : 0, h : 0, selected : false },
-        pm10ButtonRect        : {text : 'PM10',      name: "sds011",   sensor: "dust_pm10",   place: 'dustsensor', x : 0, y : 0, w : 0, h : 0, selected : false }
+        temperatureButtonRect : {text : 'TEMP.',     textSize: 'large', name: "bme280",   sensor: "temperature", place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'left', selected : true, graph : true, average : true },
+        humidityButtonRect    : {text : 'HUMIDITY',  textSize: 'large', name: "bme280",   sensor: "humidity",    place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'left', selected : false, graph : true, average : true },
+        pressureButtonRect    : {text : 'PRESSURE',  textSize: 'large', name: "bme280",   sensor: "pressure",    place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'left', selected : false, graph : true, average : false },
+        windspeedButtonRect   : {text : 'WINDSPEED', textSize: 'large', name: "eltako_ws",sensor: "windspeed",   place: 'anemometer', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'left', selected : false, graph : true, average : true },
+        pm10ButtonRect        : {text : 'PM10',      textSize: 'large', name: "sds011",   sensor: "dust_pm10",   place: 'dustsensor', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'left', selected : false, graph : false, average : true }
+    };
+
+    var graphButtonSensorGroup2 = {
+        temperatureButtonRect : {text : 'TEMP.',     textSize: 'large', name: "bme280",   sensor: "temperature", place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'right', selected : false, graph : true, average : true },
+        humidityButtonRect    : {text : 'HUMIDITY',  textSize: 'large', name: "bme280",   sensor: "humidity",    place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'right', selected : true, graph : true, average : true },
+        pressureButtonRect    : {text : 'PRESSURE',  textSize: 'large', name: "bme280",   sensor: "pressure",    place: 'birdhouse', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'right', selected : false, graph : true, average : false },
+        windspeedButtonRect   : {text : 'WINDSPEED', textSize: 'large', name: "eltako_ws",sensor: "windspeed",   place: 'anemometer', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'right', selected : false, graph : true, average : true },
+        pm10ButtonRect        : {text : 'PM10',      textSize: 'large', name: "sds011",   sensor: "dust_pm10",   place: 'dustsensor', x : 0, y : 0, w : frame.largeSize, h : baseButton.height, yAxis : 'right', selected : false, graph : false, average : true }
     };
 
     var forcastButtons = {
@@ -105,12 +157,7 @@
         h : 0
     };
 
-    var baseButton = {
-        width  : 70,
-        height : 30,
-        space  : 5,
-        labelFont   : "16pt LcarsGTJ3"
-    };
+
 
     var header = {
             size : 30,
@@ -118,22 +165,7 @@
             space : baseButton.space
         };
 
-    var button = {
-            size : baseButton.height,
-            radius : baseButton.height / 2,
-            labelWidth : baseButton.width - baseButton.height / 2,
-            textWidth : 30,
-            space : baseButton.space,
-            seperatorBoxWidth : baseButton.space,
-            font : baseButton.labelFont
-            //labeledInfoButtonWidth : baseButton.height / 2 + button.labelWidth + button.textWidth 
-        };
-        
-    var frame = {
-        smallSize : 15,
-        thinSize  : 8,
-        largeSize : baseButton.width
-    };
+
 
     // These are the default settings if none are specified.
     var settings = {
@@ -168,13 +200,17 @@
 
             lastTouch.x       = ev.gesture.center.pageX - offset.left;
             lastTouch.y       = ev.gesture.center.pageY - offset.top;
-           
+            var bb = null;
             if ((bb = isTouchedButtonGroup(graphButtonRangeGroup)) !== null) {
                 setSelected(graphButtonRangeGroup,bb,canvas); 
-                $element.triggerHandler(getGraphEventData());
+                $element.triggerHandler(getGraphEventData(graphButtonSensorGroup));
+                $element.triggerHandler(getGraphEventData(graphButtonSensorGroup2));
             } else if ((bb = isTouchedButtonGroup(graphButtonSensorGroup)) !== null) {
                 setSelected(graphButtonSensorGroup,bb,canvas); 
-                $element.triggerHandler(getGraphEventData());
+                $element.triggerHandler(getGraphEventData(graphButtonSensorGroup));
+            } else if ((bb = isTouchedButtonGroup(graphButtonSensorGroup2)) !== null) {
+                setSelected(graphButtonSensorGroup2,bb,canvas); 
+                $element.triggerHandler(getGraphEventData(graphButtonSensorGroup2));
             }
             ev.gesture.preventDefault();
 
@@ -284,29 +320,28 @@
         },
         
         getGraphDataParams : function() {
-            return getGraphEventData();  
+            return getGraphEventData(graphButtonSensorGroup);  
         },
         
-        updateGraphData : function(data, sensor, range) {
-            graphData.data = data;
-            graphData.data.sensorData.sort(function(a,b){
-                return new Date(b.time) - new Date(a.time);
-            });
-            graphData.sensor = sensor;
-            graphData.range  = range;
-            
+        getGraphData2Params : function() {
+            return getGraphEventData(graphButtonSensorGroup2);  
+        },
+               
+        updateGraphData : function(data, sensor, range, draw) {
+            updateGraphData(graphData, data, sensor, range, draw);
+        },
+        
+        updateGraphData2 : function(data, sensor, range, draw) {
+            updateGraphData(graphData2, data, sensor, range, draw);
             refresh(this.canvas);
         },
         
-        updateGraphDataAverage : function(data, sensor, range) {
-            graphDataAverage.data = data;
-            graphDataAverage.data.sensorData.sort(function(a,b){
-                return new Date(b.time) - new Date(a.time);
-            });
-            graphDataAverage.sensor = sensor;
-            graphDataAverage.range  = range;
-            
-            refresh(this.canvas);
+        updateGraphDataAverage : function(data, sensor, range, draw) {
+            updateGraphData(graphDataAverage, data, sensor, range, draw);
+        },
+        
+        updateGraphData2Average : function(data, sensor, range, draw) {
+            updateGraphData(graphData2Average, data, sensor, range, draw);
         },
         
         getMaxGraphData : function() {
@@ -323,6 +358,19 @@
             refresh(this.canvas);
         }
     };
+
+    function updateGraphData(gData, data, sensor, range, draw) {
+        gData.data = data;
+        if (gData.data !== null) {
+            gData.data.sensorData.sort(function(a,b){
+                return new Date(b.time) - new Date(a.time);
+            });
+        }
+        gData.sensor = sensor;
+        gData.range  = range;
+        gData.draw   = draw;
+        refresh(this.canvas);  
+    }
 
     function isTouched(button) {
         
@@ -343,7 +391,7 @@
         return null;
     }
     
-    function getGraphEventData() {
+    function getGraphEventData(buttonGroup) {
         
         var range;
         for (var name in graphButtonRangeGroup) {
@@ -355,20 +403,29 @@
         var place;        
         var sensor;
         var sensorName;
-        for (var name in graphButtonSensorGroup) {
-            if (graphButtonSensorGroup[name].selected){
-                sensor = graphButtonSensorGroup[name].sensor;
-                sensorName = graphButtonSensorGroup[name].name;
-                place = graphButtonSensorGroup[name].place;
+        var graph;
+        var average;
+        var yAxis;
+        for (var name in buttonGroup) {
+            if (buttonGroup[name].selected){
+                sensor = buttonGroup[name].sensor;
+                sensorName = buttonGroup[name].name;
+                place = buttonGroup[name].place;
+                graph = buttonGroup[name].graph;
+                average = buttonGroup[name].average;
+                yAxis = buttonGroup[name].yAxis;
             }
         } 
         
         return {    
-            type   :"graphbuttontouch",
-            name   : sensorName,
-            range  : range,
-            place  : place,
-            sensor : sensor
+            type    : "graphbuttontouch",
+            name    : sensorName,
+            range   : range,
+            place   : place,
+            sensor  : sensor,
+            graph   : graph,
+            average : average,
+            yAxis   : yAxis
         };
     }
     
@@ -486,7 +543,7 @@
         ctx.closePath();
         
         // image left
-        var leftBarX = x + frame.largeSize + baseButton.space + baseButton.width + baseButton.space;
+        var leftBarX = x + frame.largeSize + 3 * baseButton.space;
         var leftBarY = y + baseButton.space;
         var leftBarH = h - 2 * baseButton.space - frame.smallSize; 
                 
@@ -511,7 +568,7 @@
         //drawButtonVerticalGap(ctx,baseButtonPosX - baseButton.space,y + h - frame.smallSize,frame.smallSize);
         
         // image right
-        var rightBarX = x + w ;
+        var rightBarX = x + w - frame.largeSize - baseButton.space;
         
         ctx.beginPath();
         ctx.moveTo(rightBarX - frame.smallSize ,leftBarY);
@@ -532,35 +589,50 @@
         drawGraphArea(ctx,leftBarX + 3 * baseButton.space + frame.smallSize,leftBarY,rightBarX - leftBarX - 6 * baseButton.space - 2* frame.smallSize, leftBarH,graphData);
         /////////
         
+        // draw range buttons
+        
+        var rangeButtonPosX = x + w - frame.largeSize;
+        var rangeButtonPosY = y + h - frame.smallSize;
+        
+        graphButtonRangeGroup.dayButtonRect.x = rangeButtonPosX;
+        graphButtonRangeGroup.dayButtonRect.y = rangeButtonPosY;
+
+        drawButtonVerticalGap(ctx,rangeButtonPosX - baseButton.space,rangeButtonPosY,frame.smallSize); 
+
+        rangeButtonPosX = rangeButtonPosX - frame.largeSize - baseButton.space;
+        
+        graphButtonRangeGroup.weekButtonRect.x = rangeButtonPosX;
+        graphButtonRangeGroup.weekButtonRect.y = rangeButtonPosY;
+        
+        drawButtonVerticalGap(ctx,rangeButtonPosX - baseButton.space,rangeButtonPosY,frame.smallSize); 
+        
+        rangeButtonPosX = rangeButtonPosX - frame.largeSize - baseButton.space;
+        
+        graphButtonRangeGroup.monthButtonRect.x = rangeButtonPosX;
+        graphButtonRangeGroup.monthButtonRect.y = rangeButtonPosY;
+        
+        drawButtonVerticalGap(ctx,rangeButtonPosX - baseButton.space,rangeButtonPosY,frame.smallSize); 
+        
         var buttonGapY = y + baseButton.height;
         var buttonPosX = x;
-        var buttonPosY = y;
+        var button2PosX = x + w - frame.largeSize;
+        var buttonPosY = y;        
 
-        graphButtonRangeGroup.dayButtonRect.x = buttonPosX;
-        graphButtonRangeGroup.dayButtonRect.y = buttonPosY;
-        graphButtonRangeGroup.dayButtonRect.w = frame.largeSize;
-        graphButtonRangeGroup.dayButtonRect.h = baseButton.height;
-        
-        graphButtonSensorGroup.temperatureButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.temperatureButtonRect.x = buttonPosX;
         graphButtonSensorGroup.temperatureButtonRect.y = buttonPosY;
-        graphButtonSensorGroup.temperatureButtonRect.w = frame.largeSize;
-        graphButtonSensorGroup.temperatureButtonRect.h = baseButton.height;
-
+        
+        graphButtonSensorGroup2.temperatureButtonRect.x = button2PosX;
+        graphButtonSensorGroup2.temperatureButtonRect.y = buttonPosY;
  
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
 
         buttonPosY = buttonGapY + baseButton.space;
 
-        graphButtonRangeGroup.weekButtonRect.x = buttonPosX;
-        graphButtonRangeGroup.weekButtonRect.y = buttonPosY;
-        graphButtonRangeGroup.weekButtonRect.w = frame.largeSize;
-        graphButtonRangeGroup.weekButtonRect.h = baseButton.height;
-
-        graphButtonSensorGroup.pressureButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.pressureButtonRect.x = buttonPosX;
         graphButtonSensorGroup.pressureButtonRect.y = buttonPosY;
-        graphButtonSensorGroup.pressureButtonRect.w = frame.largeSize;
-        graphButtonSensorGroup.pressureButtonRect.h = baseButton.height;
-
+        
+        graphButtonSensorGroup2.pressureButtonRect.x = button2PosX;
+        graphButtonSensorGroup2.pressureButtonRect.y = buttonPosY;
  
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -568,31 +640,23 @@
         
         buttonPosY = buttonGapY + baseButton.space;
 
-        graphButtonRangeGroup.monthButtonRect.x = buttonPosX;
-        graphButtonRangeGroup.monthButtonRect.y = buttonPosY;
-        graphButtonRangeGroup.monthButtonRect.w = frame.largeSize;
-        graphButtonRangeGroup.monthButtonRect.h = baseButton.height;
-
-        graphButtonSensorGroup.humidityButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.humidityButtonRect.x = buttonPosX;
         graphButtonSensorGroup.humidityButtonRect.y = buttonPosY;
-        graphButtonSensorGroup.humidityButtonRect.w = frame.largeSize;
-        graphButtonSensorGroup.humidityButtonRect.h = baseButton.height;  
-/*        
-        graphButtonPlaceGroup.anemometerButtonRect.x = buttonPosX + 2 * frame.largeSize + 2 * baseButton.space;
-        graphButtonPlaceGroup.anemometerButtonRect.y = buttonPosY;
-        graphButtonPlaceGroup.anemometerButtonRect.w = frame.largeSize;
-        graphButtonPlaceGroup.anemometerButtonRect.h = baseButton.height;
-*/        
+        
+        graphButtonSensorGroup2.humidityButtonRect.x = button2PosX;
+        graphButtonSensorGroup2.humidityButtonRect.y = buttonPosY;
+
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
         drawButtonHorizontalGap(ctx,x,buttonGapY,frame.largeSize);
         
         buttonPosY = buttonGapY + baseButton.space;
         
-        graphButtonSensorGroup.windspeedButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.windspeedButtonRect.x = buttonPosX;
         graphButtonSensorGroup.windspeedButtonRect.y = buttonPosY;
-        graphButtonSensorGroup.windspeedButtonRect.w = frame.largeSize;
-        graphButtonSensorGroup.windspeedButtonRect.h = baseButton.height; 
+        
+        graphButtonSensorGroup2.windspeedButtonRect.x = button2PosX;
+        graphButtonSensorGroup2.windspeedButtonRect.y = buttonPosY;
 
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -600,10 +664,11 @@
         
         buttonPosY = buttonGapY + baseButton.space;
         
-        graphButtonSensorGroup.pm10ButtonRect.x = buttonPosX + frame.largeSize + baseButton.space;
+        graphButtonSensorGroup.pm10ButtonRect.x = buttonPosX;
         graphButtonSensorGroup.pm10ButtonRect.y = buttonPosY;
-        graphButtonSensorGroup.pm10ButtonRect.w = frame.largeSize;
-        graphButtonSensorGroup.pm10ButtonRect.h = baseButton.height; 
+        
+        graphButtonSensorGroup2.pm10ButtonRect.x = button2PosX;
+        graphButtonSensorGroup2.pm10ButtonRect.y = buttonPosY;
         
         buttonGapY = buttonGapY + baseButton.height + baseButton.space;
 
@@ -614,6 +679,7 @@
         // draw the button groups
         drawToggleButtonGroup(ctx,graphButtonRangeGroup);
         drawToggleButtonGroup(ctx,graphButtonSensorGroup);
+        drawToggleButtonGroup(ctx,graphButtonSensorGroup2);
         
         ctx.restore();
     }
@@ -959,7 +1025,7 @@
         ctx.restore();
     }
     
-    function drawToggleButton(ctx,button) {
+    function drawToggleButton(ctx,button,small) {
         ctx.save();
 
         ctx.beginPath();
@@ -974,18 +1040,26 @@
         ctx.fill();
         ctx.lineWidth = 1;
         ctx.stroke();
-
-        ctx.font         = baseButton.labelFont;
-        ctx.textAlign    = "right";
-        ctx.textBaseline = "top";
         ctx.fillStyle    = colorTable.background;
-        ctx.fillText(button.text,button.x + frame.largeSize - baseButton.space,button.y + baseButton.space);
+        if (!small) {
+            ctx.font         = baseButton.labelFont;
+            ctx.textAlign    = "right";
+            ctx.textBaseline = "middle";
+            ctx.fillText(button.text,button.x  + button.w - baseButton.space ,button.y + button.h / 2);
+        } else {
+            ctx.font         = baseButton.smallLabelFont;
+            ctx.textAlign    = "center";
+            ctx.textBaseline = "middle";   
+            ctx.fillText(button.text,button.x  + button.w /2 ,button.y + button.h / 2);
+        }
+        
+        
         ctx.restore();
     }
     
     function drawToggleButtonGroup(ctx,buttonGroup) {
         for (var name in buttonGroup) {
-            drawToggleButton(ctx,buttonGroup[name]);
+            drawToggleButton(ctx,buttonGroup[name],buttonGroup[name].textSize === 'small');
         } 
     }
     
@@ -1061,22 +1135,56 @@
         ctx.strokeStyle = '#006699';
         ctx.stroke();
         
-        if (   graphData.data === null || graphData.data.sensordata === null 
-            || graphDataAverage.data === null || graphDataAverage.data.sensordata === null) {
+        if (   ((graphData.data === null || graphData.data.sensordata === null) && graphData.draw)
+            || ((graphDataAverage.data === null || graphDataAverage.data.sensordata === null) && graphDataAverage.draw)
+            || ((graphData2.data === null || graphData2.data.sensordata === null) && graphData2.draw)
+            || ((graphData2Average.data === null || graphData2Average.data.sensordata === null) && graphData2Average.draw)) {
             return;
         }
         
-        drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData,'#FF9933');
-        drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphDataAverage,'#99CCFF');
+        var maxValue;
+        var minValue;
+        if (graphData.draw && graphDataAverage.draw) {
+            maxValue = Math.max(graphData.data.maxValue,graphDataAverage.data.maxValue);
+            minValue = Math.min(graphData.data.minValue,graphDataAverage.data.minValue);            
+        } else if (graphData.draw && !graphDataAverage.draw) {
+            maxValue = graphData.data.maxValue;
+            minValue = graphData.data.minValue;
+        } else if (!graphData.draw && graphDataAverage.draw) {
+            maxValue = graphDataAverage.data.maxValue;
+            minValue = graphDataAverage.data.minValue;
+        }
+        
+        
+        if (graphData.draw) {
+            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData,maxValue,minValue,true,'#FF9933');
+        }
+        if (graphDataAverage.draw) {
+            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphDataAverage,maxValue,minValue,true,'#99CCFF');
+        }
   
+        if (graphData2.draw && graphData2Average.draw) {
+            maxValue = Math.max(graphData2.data.maxValue,graphData2Average.data.maxValue);
+            minValue = Math.min(graphData2.data.minValue,graphData2Average.data.minValue);            
+        } else if (graphData2.draw && !graphData2Average.draw) {
+            maxValue = graphData2.data.maxValue;
+            minValue = graphData2.data.minValue;
+        } else if (!graphData2.draw && graphData2Average.draw) {
+            maxValue = graphData2Average.data.maxValue;
+            minValue = graphData2Average.data.minValue;
+        }
+        
+        if (graphData2.draw) {
+            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData2,maxValue,minValue,false,'#664466');
+        }
+        if (graphData2Average.draw) {
+            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData2Average,maxValue,minValue,false,'#cc99cc');
+        }
         ctx.restore();
     }
 
-    function drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,gData,color) {
+    function drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,gData,maxValue,minValue,left,color) {
         ctx.save();
-        
-        var maxValue = gData.data.maxValue;
-        var minValue = gData.data.minValue;
         
         if (gData.sensor === 'temperature') {
             maxValue = Math.floor(maxValue + 2);
@@ -1090,7 +1198,10 @@
         } else if (gData.sensor === 'windspeed') {
             maxValue = Math.ceil(maxValue / 10) * 10;
             minValue = 0;
-        } 
+        } else if (gData.sensor === 'dust_pm10') {
+            maxValue = Math.ceil(maxValue / 50) * 50;
+            minValue = 0;
+        }
           
         // draw y - axis units
         //ctx.beginPath();
@@ -1106,13 +1217,23 @@
         ctx.fillStyle    = colorTable.forecast_max_temp;
         ctx.textAlign    = "center";
 
-        ctx.fillText(minValue,xMinMS - baseButton.space,  yZero);
-        ctx.fillText(maxValue,xMinMS - baseButton.space,  yMax);
+        
         
         var i = 1;
-        for (var yPos = yZero - step; yPos > yMax; yPos -= step) {
-           ctx.fillText((minValue + step * i / pixelPerUnit).toFixed(1),xMinMS - baseButton.space,  yPos); 
-           i++;
+        if (left) {
+            ctx.fillText(minValue,xMinMS - baseButton.space,  yZero);
+            ctx.fillText(maxValue,xMinMS - baseButton.space,  yMax);
+            for (var yPos = yZero - step; yPos > yMax; yPos -= step) {
+               ctx.fillText((minValue + step * i / pixelPerUnit).toFixed(1),xMinMS - baseButton.space,  yPos); 
+               i++;
+            }
+        } else {
+            ctx.fillText(minValue,xZeroMS + baseButton.space,  yZero);
+            ctx.fillText(maxValue,xZeroMS + baseButton.space,  yMax);
+            for (var yPos = yZero - step; yPos > yMax; yPos -= step) {
+               ctx.fillText((minValue + step * i / pixelPerUnit).toFixed(1),xZeroMS + baseButton.space,  yPos); 
+               i++;
+            }
         }
         ctx.restore();
         
@@ -1140,7 +1261,7 @@
             buttonGroup[name].selected = false;
         }
         button.selected = true;
-        drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup);        
+        drawToggleButtonGroup(canvas.getContext('2d'),graphButtonRangeGroup,true);        
     };
         
     $.fn.jLCARSControlView = function(options) {

@@ -118,21 +118,48 @@ var handleGraphButtonEvent = function(event) {
     log.debug("handleRangeButtonEvent: " + event.sensor);
     log.debug("                        " + RangeEnum.properties[event.range].name);
     log.debug("                        " + event.place);
+    log.debug("                        " + event.graph);
+    log.debug("                        " + event.average);
+    log.debug("                        " + event.yAxis);
     var lcarsControlView = $("#controlcanvas").data("jLCARSControlView");
-    sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
-        lcarsControlView.getMaxGraphData(),
-        function(data){
-            if (data.sensorData.length > 0) {
-                lcarsControlView.updateGraphData(data,event.sensor,event.range);
-            }
-        },false);
-    sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
-        lcarsControlView.getMaxGraphData(),
-        function(data){
-            if (data.sensorData.length > 0) {
-                lcarsControlView.updateGraphDataAverage(data,event.sensor,event.range);
-            }
-        },true);
+    if (event.graph) {
+        sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
+            lcarsControlView.getMaxGraphData(),
+            function(data){
+                if (data.sensorData.length > 0) {
+                    if (event.yAxis === 'left') {
+                        lcarsControlView.updateGraphData(data,event.sensor,event.range,event.graph);
+                    } else if (event.yAxis === 'right') {
+                        lcarsControlView.updateGraphData2(data,event.sensor,event.range,event.graph);
+                    } 
+                }},false);
+    } else {
+        if (event.yAxis === 'left') {
+            lcarsControlView.updateGraphData(null,event.sensor,event.range,false);
+        } else if (event.yAxis === 'right') {
+            lcarsControlView.updateGraphData2(null,event.sensor,event.range,false);
+        } 
+        
+    }
+    if (event.average) {    
+        sensordataService.doRestCall(event.sensor,event.name,RangeEnum.properties[event.range].queryvalue,event.place,
+            lcarsControlView.getMaxGraphData(),
+            function(data){
+                if (data.sensorData.length > 0) {
+                    if (event.yAxis === 'left') {
+                        lcarsControlView.updateGraphDataAverage(data,event.sensor,event.range,event.average);
+                    } else if (event.yAxis === 'right') {
+                        lcarsControlView.updateGraphData2Average(data,event.sensor,event.range,event.average);
+                    }
+                }},true);
+    } else {
+        if (event.yAxis === 'left') {
+            lcarsControlView.updateGraphDataAverage(null,event.sensor,event.range,false);
+        } else if (event.yAxis === 'right') {
+            lcarsControlView.updateGraphData2Average(null,event.sensor,event.range,false);
+        } 
+        
+    }
 };
 
 
@@ -160,14 +187,27 @@ var schedule = function() {
                                      lcarsControlView.getMaxGraphData(),
                                      function(data){
                                         if (data.sensorData.length > 0) {
-                                            lcarsControlView.updateGraphData(data,graphParams.sensor,graphParams.range);
+                                            lcarsControlView.updateGraphData(data,graphParams.sensor,graphParams.range,graphParams.graph);
                                         }}, false);
         sensordataService.doRestCall(graphParams.sensor,graphParams.name,RangeEnum.properties[graphParams.range].queryvalue,graphParams.place,
                                      lcarsControlView.getMaxGraphData(),
                                      function(data){
                                         if (data.sensorData.length > 0) {
-                                            lcarsControlView.updateGraphDataAverage(data,graphParams.sensor,graphParams.range);
+                                            lcarsControlView.updateGraphDataAverage(data,graphParams.sensor,graphParams.range,graphParams.average);
                                         }}, true);
+        var graphParams2 = lcarsControlView.getGraphData2Params();
+        sensordataService.doRestCall(graphParams2.sensor,graphParams2.name,RangeEnum.properties[graphParams2.range].queryvalue,graphParams2.place,
+                                     lcarsControlView.getMaxGraphData(),
+                                     function(data){
+                                        if (data.sensorData.length > 0) {
+                                            lcarsControlView.updateGraphData2(data,graphParams2.sensor,graphParams2.range,graphParams2.graph);
+                                        }}, false);
+        sensordataService.doRestCall(graphParams2.sensor,graphParams2.name,RangeEnum.properties[graphParams2.range].queryvalue,graphParams2.place,
+                                     lcarsControlView.getMaxGraphData(),
+                                     function(data){
+                                        if (data.sensorData.length > 0) {
+                                            lcarsControlView.updateGraphData2Average(data,graphParams2.sensor,graphParams2.range,graphParams2.average);
+                                        }}, true);                                    
     }
 };
 
