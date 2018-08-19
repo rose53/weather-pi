@@ -39,14 +39,14 @@
                     }
                 });
 
-            sensordataService.getTemperature("actual","birdhouse",1,
+            sensordataService.getTemperature("actual","bme280","birdhouse",1,
                 function(data){
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateBirdhouseTemperature(data.sensorData[0].value.toFixed(1));
                     }
                 });
 
-            sensordataService.getHumidity("actual","birdhouse",1,
+            sensordataService.getHumidity("actual","bme280","birdhouse",1,
                 function(data){
                     if (data.sensorData.length > 0) {
                         lcarsControlView.updateBirdhouseHumidity(parseInt(data.sensorData[0].value));
@@ -59,21 +59,34 @@
                         lcarsControlView.updateAnemometerWindspeed(data.sensorData[0].value.toFixed(1));
                     }
                 });
-/*
-            sensordataService.getTemperature("actual","birdhouse",1,
+
+            sensordataService.getTemperature("actual","dht22","dustsensor",1,
                 function(data){
                     if (data.sensorData.length > 0) {
-                        lcarsControlView.updateBirdhouseTemperature(data.sensorData[0].value.toFixed(1));
+                        lcarsControlView.updateDustsensorTemperature(data.sensorData[0].value.toFixed(1));
+                    }
+                });
+            sensordataService.getHumidity("actual","dht22","dustsensor",1,
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateDustsensorHumidity(parseInt(data.sensorData[0].value));
+                    }
+                });
+                
+            sensordataService.getDustPM10("actual","dustsensor",1,
+                function(data){
+                    if (data.sensorData.length > 0) {
+                        lcarsControlView.updateDustsensorPm10(parseInt(data.sensorData[0].value));
                     }
                 });
 
-            sensordataService.getHumidity("actual","birdhouse",1,
+            sensordataService.getDustPM25("actual","dustsensor",1,
                 function(data){
                     if (data.sensorData.length > 0) {
-                        lcarsControlView.updateBirdhouseHumidity(parseInt(data.sensorData[0].value));
+                        lcarsControlView.updateDustsensorPm25(parseInt(data.sensorData[0].value));
                     }
                 });
-*/
+
             setInterval(function(){ schedule(); }, 5000);
         },
         initAll: function(options) {
@@ -241,6 +254,10 @@ var connect = function () {
           } else if ("WINDSPEED" === sensorevent.type) {
               if ("ANEMOMETER" === sensorevent.place) {
                   lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(1));
+              }
+          } else if ("WINDDIRECTION" === sensorevent.type) {
+              if ("ANEMOMETER" === sensorevent.place) {
+                  //lcarsControlView.updateAnemometerWindspeed(sensorevent.windspeed.toFixed(1));
               }
           } else if ("DUST_PM10" === sensorevent.type) {
               if ("DUSTSENSOR" === sensorevent.place) {

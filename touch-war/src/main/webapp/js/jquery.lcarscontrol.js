@@ -1160,7 +1160,7 @@
             drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphData,maxValue,minValue,true,'#FF9933');
         }
         if (graphDataAverage.draw) {
-            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphDataAverage,maxValue,minValue,true,'#99CCFF');
+            drawGraph(ctx,width,height,xMinMS,xZeroMS,yZero,yMax,step,graphDataAverage,maxValue,minValue,true,'#FFFF99');
         }
   
         if (graphData2.draw && graphData2Average.draw) {
@@ -1196,7 +1196,7 @@
             maxValue = Math.ceil(maxValue);
             minValue = Math.floor(minValue);
         } else if (gData.sensor === 'windspeed') {
-            maxValue = Math.ceil(maxValue / 10) * 10;
+            maxValue = Math.ceil(maxValue / 5) * 5;
             minValue = 0;
         } else if (gData.sensor === 'dust_pm10') {
             maxValue = Math.ceil(maxValue / 50) * 50;
