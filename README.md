@@ -12,17 +12,22 @@ Forecast data is retrieved from [ForecastIO](http://forecast.io) and actual data
 ## Sensors
 The list of actually implemented sensors.
 
-### Birdhouse:
+### Birdhouse
 *   [TSL2591: Light Sensor](https://www.adafruit.com/product/1980)
 *   [MCP9808: Temperature](https://www.adafruit.com/product/1782)
 *   [DHT22: Temperature and Humidity](https://www.adafruit.com/product/393)
 *   [BME280: Temperature, Humidity and Pressure](https://www.adafruit.com/product/2652)
 
 ### Anemometer
-*   [Eltako : Windspeed](https://www.amazon.de/Eltako-Windsensor-WS/dp/B0018LBFG8)
+*   [Eltako: Windspeed](https://www.amazon.de/Eltako-Windsensor-WS/dp/B0018LBFG8)
+*   [MISOL: Winddirection](https://www.amazon.de/MISOL-direction-Ersatzteil-Wetterstation-Windrichtung/dp/B00QDMBU80)
+
+### Dustsensor
+*   [SDS011: Air Quality Sensor](https://eckstein-shop.de/Nova-Fitness-SDS011-Laser-PM25-PM10-Dust-Feinstaub-Sensor-Modul-Luft-Qualitaet-Detector-Built-in-Fan)
+*   [DHT22: Temperature and Humidity](https://www.adafruit.com/product/393)
 
 ## MQTT
-The [Birdhouse](#birdhouse) and the [Anemometer](#anemometer) are publishing their sensor data via MQTT to a local installed
+The [Birdhouse](#birdhouse) the [Anemometer](#anemometer) ans the [Dustsensor](#dustsensor) are publishing their sensor data via MQTT to a local installed
 [Mosquitto broker](http://www.eclipse.org/mosquitto/). [Here](http://www.mymakerprojects.com/index.php/setup-mosquitto-mqtt-server-on-the-raspberry-pi/) are
 some instructions for the installation of the Mosquitto MQTT Server on the RaspberryPi.
 The published messages are JSON encoded, this makes it easy to convert them to Java or JavaScript objects.
@@ -36,7 +41,7 @@ The published messages are JSON encoded, this makes it easy to convert them to J
     "time": 1502381794
 }
 ```
-The time parameter is optional, if no present, the actual time will be used.
+The time parameter is optional, if not present, the actual time will be used.
 
 ## Database
 The sensor data is written to a [MySQL](http://www.mysql.com/) database for later processing of the data.
@@ -51,6 +56,9 @@ The user interface is touch enabled and optimized for the sreen resolution of th
 Live data is published via WebSockets and forecast data is used from [ForecastIO](#forecastio). It is also possible to display
 historical data for the temperature, humidity, pressure and the wind speed. There are three ranges, back one day, one week ore one month.
 The display is updated continuously.
+
+## Apple HomeKit Integration
+A [Node-RED](https://nodered.org/) flow is used to read the data from the WebSocket and publish it in [Apple HomeKit](https://www.apple.com/de/ios/home/).
 
 ## Twitter
 Actual weather data is pushed via the [Twitter REST API](https://dev.twitter.com/rest/public). This is done using the
